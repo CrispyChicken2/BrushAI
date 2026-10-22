@@ -17,7 +17,8 @@ from PIL import Image
 def load_image(path: str | Path, size: int | tuple[int, int] | None = None) -> torch.Tensor:
     """Load an image file as a ``(3, H, W)`` float32 tensor in [0, 1].
 
-    Alpha is dropped and grayscale is expanded to RGB; 16-bit grayscale is scaled by 1/65535 and clipped.
+    Alpha is dropped and grayscale is expanded to RGB; 16-bit grayscale is scaled by 1/65535
+    and clipped.
 
     Args:
         path: image file.
