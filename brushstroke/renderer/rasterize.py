@@ -63,11 +63,19 @@ def default_brush_index(
 ) -> torch.Tensor:
     """Deterministic random brush variant per stroke: long tensor ``(B, N)`` in ``[0, K)`` (CPU).
 
-    The draw is prefix-stable in ``N``: the first ``k`` columns do not depend on ``N``, so rendering
-    the first ``k`` strokes alone uses the same brushes as the full painting.
+    The single rule shared by the renderer and :class:`brushstroke.strokes.StrokeSequence`:
+    painting ``b`` is drawn from its own generator seeded with ``seed * 1_000_003 + b``. Hence
+    row ``b`` depends on ``(seed, b)`` only: not on the batch size ``B``, and it is prefix-stable
+    in ``N`` (the first ``k`` entries do not depend on ``N``), so rendering the first ``k`` strokes
+    alone, or one painting of a batch alone, uses the same brushes.
     """
-    gen = torch.Generator().manual_seed(seed)
-    return torch.randint(0, num_brushes, (num_strokes, batch), generator=gen).T.contiguous()
+    rows = []
+    for b in range(batch):
+        gen = torch.Generator().manual_seed(seed * 1_000_003 + b)
+        rows.append(torch.randint(0, num_brushes, (num_strokes,), generator=gen))
+    if not rows:
+        return torch.zeros(0, num_strokes, dtype=torch.long)
+    return torch.stack(rows)
 
 
 def brush_masks(brush: torch.Tensor | BrushBank) -> torch.Tensor:
