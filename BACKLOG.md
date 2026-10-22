@@ -7,7 +7,6 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 009 [T-009] Investigate optimization-baseline quality gap (LPIPS 0.44 vs 0.25), sweeps (M1)
 - [ ] 007 [T-007] Three polished reproducible demo GIFs (M1)
 - [ ] 008 [T-008] M1 gate review: fresh-clone reproduction (M1)
 - [ ] M2 Paint Transformer reimplementation + reproduction (à ticketiser après la gate M1)
@@ -17,9 +16,10 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 006 [T-006] Animation replay with partial reveal + ffmpeg export (M1)
+- [~] 009 [T-009] Investigate optimization-baseline quality gap, sweeps (M1)
 
 ## Fait
+- [x] 006 [T-006] Animation replay with partial reveal + ffmpeg export (bdee6a7)
 - [x] 005 [T-005] Baseline (a): optimization-only decomposition, SNP style (be98181)
 - [x] 004 [T-004] Stroke sequence data model and serialization (c4ef639)
 - [x] 003 [T-003] Differentiable batched textured stroke renderer (a49ae28)
