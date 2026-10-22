@@ -1,0 +1,33 @@
+# Stroke-by-stroke animation. Loaded into brushstroke.animation.config.AnimationConfig.
+# timeline
+fps: 30
+duration: 10.0           # seconds of painting
+hold: 1.5                # seconds of the finished painting
+overlap: 3.0             # average strokes in flight (reveal time = overlap x time slot)
+min_reveal_frames: 2.0   # each stroke is revealed over at least this many frames (0 = off)
+easing: uniform          # uniform | decelerate (later strokes get more time)
+decel_ratio: 3.0
+stroke_ease: smoothstep  # linear | smoothstep (progress curve inside a stroke)
+# partial reveal
+reveal_edge: 0.15        # soft front width, fraction of the stroke length
+direction: random        # forward | reverse | random (seeded per stroke)
+seed: 0
+# rendering
+height: 0                # output size; 0 = the sequence canvas size
+width: 0
+device: auto
+chunk_size: 32
+canvas_enabled: true
+canvas_strength: 0.06    # canvas texture shading depth
+canvas_seed: 0
+weave_period: 6.0
+low_freq_amount: 0.2
+low_freq_scale: 48.0
+# export
+formats: [mp4]           # mp4 | webm | gif
+ffmpeg: ffmpeg
+mp4_crf: 18
+webm_crf: 32
+gif_width: 480
+gif_fps: 15
+gif_dither: bayer        # none | bayer | sierra2_4a | floyd_steinberg
