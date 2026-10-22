@@ -30,6 +30,7 @@ class OptimConfig:
     levels: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 6, 8, 12, 16, 20])
     strokes_per_patch: list[int] = field(default_factory=lambda: [1, 1, 1, 1, 1, 2, 2, 2, 2])
     iters: int = 100  # optimization steps per level
+    iters_per_level: list[int] = field(default_factory=list)  # overrides `iters` (one per level)
     optimizer: str = "adam"  # adam | rmsprop (as in SNP)
     lr: float = 0.02  # on the unconstrained (logit) parameters
     lr_final_frac: float = 0.1  # lr decays (cosine) to lr * lr_final_frac within each level
@@ -44,10 +45,14 @@ class OptimConfig:
         default_factory=lambda: [0.4, 1.0]
     )  # thickness / length ~ U(lo, hi)
     init_opacity: float = 0.9
+    init_mode: str = "error"  # error: positions from the residual, colours from the target | random
+    init_size_mode: str = "patch"  # patch: length ~ 1/g | density: ~ 1/(g sqrt(strokes per patch))
     # re-initialize dead strokes from the current residual every `resample_every` steps (0 = off)
     resample_every: int = 0
     dead_opacity: float = 0.05  # a stroke is dead if its opacity is below this ...
     dead_area: float = 1e-4  # ... or its box area (w * h, canvas fractions) is below this
+    final_pass_iters: int = 0  # joint fine-tuning of all strokes after the last level (0 = off)
+    final_pass_lr_factor: float = 0.3  # lr of the final pass relative to `lr`
     checkpoint_bytes: float = 6e9  # use gradient checkpointing above this estimated activation size
 
 
