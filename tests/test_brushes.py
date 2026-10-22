@@ -43,6 +43,8 @@ def test_flat_interior_and_exterior() -> None:
     m = make_brush("flat", SIZE, 0)[0]
     h, w = SIZE
     assert torch.all(m[3 : h - 3, 3 : w - 3] == 1.0)
+    assert m[0, 0] == 0.0  # outside the inset rectangle
+    assert m[1, 1] == 0.25  # corner pixel gets the exact area coverage
     for border in (m[0], m[-1], m[:, 0], m[:, -1]):
         assert torch.all(border == 0.0)
     assert torch.all((m == 0.0) | (m == 1.0) | ((m > 0) & (m < 1)))  # sanity
@@ -191,17 +193,15 @@ def test_canvas_has_weave_frequency_peak(low_freq_amount: float) -> None:
         192, 192, 0, weave_period=float(period), low_freq_amount=low_freq_amount
     )
     spec, radius = _radial_power(t[0])
-    # Plain weave: energy at the cell alternation (1 / (2 period)) and thread period (1 / period).
-    weave = ((radius > 0.4 / period) & (radius < 0.6 / period)) | (
-        (radius > 0.9 / period) & (radius < 1.1 / period)
-    )
+    # Plain weave: the energy sits at the thread frequency 1 / period (about half of the power).
+    weave = (radius > 0.9 / period) & (radius < 1.1 / period)
     background = (radius > 0.2 / period) & (radius < 0.35 / period)  # between low-freq and weave
     assert spec[weave].mean() > 10.0 * spec[background].mean()
     if low_freq_amount == 0.0:
         spec[0, 0] = 0
         py, px = divmod(int(spec.argmax()), spec.shape[1])
         pr = float(radius[py, px])
-        assert min(abs(pr - 1 / period), abs(pr - 0.5 / period)) < 0.1 / period
+        assert abs(pr - 1 / period) < 0.1 / period
 
 
 def test_canvas_validation() -> None:

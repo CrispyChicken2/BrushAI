@@ -21,6 +21,7 @@ from brushstroke.utils.io import save_image
 
 PAD = 4
 BACKGROUND = 0.15
+SHADE_PREVIEW_STRENGTH = 0.25  # deliberately exaggerated (config canvas.strength is 0.06)
 
 
 def _grid(rows: list[list[torch.Tensor]]) -> torch.Tensor:
@@ -53,7 +54,9 @@ def main(argv: list[str]) -> Path:
         low_freq_amount=cfg.canvas.low_freq_amount,
         low_freq_scale=cfg.canvas.low_freq_scale,
     )
-    shaded = apply_canvas(torch.full((3, *tex.shape[1:]), 0.6), tex, strength=0.25)
+    shaded = apply_canvas(
+        torch.full((3, *tex.shape[1:]), 0.6), tex, strength=SHADE_PREVIEW_STRENGTH
+    )
     sheet = _grid(rows + [[tex]])
     path = out_dir / "brush_contact_sheet.png"
     save_image(sheet, path)
