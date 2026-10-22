@@ -4,7 +4,8 @@ Neural stroke-based painting: turn a text prompt or an image into a painting mad
 of brush strokes, replayed as a stroke-by-stroke animation. The research focus is semantic-aware stroke
 allocation, painterly stroke ordering and an "anytime quality" metric.
 
-**Status: M1 in progress** (see [docs/plan/M1.md](docs/plan/M1.md)).
+**Status: M1 in progress** (see [docs/plan/M1.md](docs/plan/M1.md)). Documentation index: [docs/README.md](docs/README.md).
+Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
 ## Setup
 
@@ -34,7 +35,8 @@ For a CPU-only machine (as in CI), install torch first from the CPU index:
 then the install command above.
 
 Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<name>`); pytest uses
-`pythonpath = ["."]`.
+`pythonpath = ["."]`. The commands below use the venv interpreter explicitly (`.venv\Scripts\python` on Windows,
+`.venv/bin/python` on Linux); activating the venv and calling `python` works the same way.
 
 ### Troubleshooting
 
@@ -43,15 +45,72 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
   `[global]` / `trusted-host = download.pytorch.org pypi.org files.pythonhosted.org` (one host per line).
 - Windows path limit: create the venv under a short path; torch has very deep paths and the install breaks otherwise.
 
-## Checks
+## Layout
 
 ```
-python -m ruff check .
-python -m ruff format --check .
-python -m mypy brushstroke
-python -m pytest -q                         # all tests (GPU tests auto-skip without CUDA)
-python -m pytest -q -m "not gpu and not slow"   # what CI runs
+brushstroke/          Python package
+  renderer/           differentiable stroke renderer (M1)
+  stroke_model/       stroke predictor (M2)
+  contribution/       semantic allocation and painterly ordering (M4)
+  animation/          stroke-by-stroke replay and export (M1)
+  generation/         text/image front-ends (M5)
+  eval/               metrics and evaluation harness (M3)
+  utils/              config (YAML + dot-overrides), seeding, device/VRAM helpers, image I/O
+configs/              YAML run configurations (every hyperparameter lives here)
+scripts/              entry points, one per experiment
+tests/                pytest suite
+docs/                 plan/ (milestones), design/ (component notes), media/ (optimized demo GIFs)
+report/               technical report
 ```
+
+## Configuration
+
+Run settings are typed dataclasses loaded from YAML in `configs/`, with `key.sub=value` overrides from the
+command line. The YAML values override the dataclass defaults; unknown keys and wrong types raise an error.
+
+```python
+from dataclasses import dataclass, field
+
+from brushstroke.utils.config import dump_config, load_config
+
+
+@dataclass
+class OptimCfg:
+    lr: float = 0.01
+
+
+@dataclass
+class RunCfg:
+    seed: int = 0
+    deterministic: bool = False
+    device: str = "auto"
+    output_dir: str = "outputs/default"
+    optim: OptimCfg = field(default_factory=OptimCfg)
+
+
+cfg = load_config(RunCfg, "configs/default.yaml", overrides=["optim.lr=0.05"])
+dump_config(cfg, cfg.output_dir)  # writes outputs/default/config.resolved.yaml
+```
+
+Seeding for reproducible runs: `brushstroke.utils.seed.seed_everything(seed, deterministic=...)` (call it before any
+CUDA work). Peak GPU memory is measured with `brushstroke.utils.device.reset_peak_vram()` and `peak_vram_mb()`.
+
+## Checks
+
+Run from the repo root, with the venv interpreter:
+
+```
+.venv\Scripts\python -m ruff check .
+.venv\Scripts\python -m ruff format --check .
+.venv\Scripts\python -m mypy brushstroke
+.venv\Scripts\python -m pytest -q                              # all tests (GPU tests auto-skip without CUDA)
+.venv\Scripts\python -m pytest -q -m "not gpu and not slow"    # what CI runs
+```
+
+On Linux, replace `.venv\Scripts\python` with `.venv/bin/python`.
+
+CI (`.github/workflows/ci.yml`) runs on Ubuntu with Python 3.11 and CPU torch: ruff check, ruff format check,
+mypy and `pytest -m "not gpu and not slow"`.
 
 ## License
 
