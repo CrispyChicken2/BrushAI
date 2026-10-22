@@ -19,7 +19,7 @@ jobs:
             requirements-dev.txt
             constraints.txt
       - name: Install CPU torch (same version as requirements.txt, no CUDA index needed)
-        run: pip install -c constraints.txt torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        run: pip install -c constraints.txt torch==2.11.0+cpu torchvision==0.26.0+cpu --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
       - name: Install remaining dependencies
         run: pip install -c constraints.txt -r requirements.txt -r requirements-dev.txt
       - run: ruff check .

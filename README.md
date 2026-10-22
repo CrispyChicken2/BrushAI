@@ -30,7 +30,7 @@ python3.11 -m venv .venv
 `constraints.txt` pins the full transitive closure (reproducible installs); `requirements.txt` lists the direct
 dependencies and already contains `--extra-index-url https://download.pytorch.org/whl/cu128`.
 For a CPU-only machine (as in CI), install torch first from the CPU index:
-`pip install -c constraints.txt torch torchvision --index-url https://download.pytorch.org/whl/cpu`,
+`pip install -c constraints.txt torch==2.11.0+cpu torchvision==0.26.0+cpu --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple`,
 then the install command above.
 
 Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<name>`); pytest uses
