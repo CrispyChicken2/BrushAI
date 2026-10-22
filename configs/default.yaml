@@ -1,5 +1,20 @@
-# Default run configuration (M1 scaffold; real sections arrive with later tickets).
+# Default run configuration. Loaded into brushstroke.config.RunConfig.
 seed: 0
 deterministic: false
 device: auto
 output_dir: outputs/default
+
+brush:
+  kind: oil          # flat | oil | round
+  bank_size: 8       # number of variants (seeds seed .. seed + bank_size - 1)
+  mask_height: 64    # pixels along the local y axis (thickness)
+  mask_width: 128    # pixels along the local x axis (main stroke axis)
+  seed: 0
+
+canvas:
+  enabled: true
+  seed: 0
+  weave_period: 6.0      # thread width in pixels
+  strength: 0.06         # shading depth used by apply_canvas
+  low_freq_amount: 0.2   # low-frequency noise amplitude relative to the weave
+  low_freq_scale: 48.0   # Gaussian std (pixels) of the low-frequency noise
