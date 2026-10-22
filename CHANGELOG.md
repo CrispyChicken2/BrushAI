@@ -2,6 +2,20 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-003] Differentiable batched textured stroke renderer
+
+- `brushstroke/renderer/params.py`: stroke layout `(B, N, 9)` = x, y, w, h, theta, r, g, b, a (Paint Transformer's
+  `param2stroke` layout plus opacity), clamping, sigmoid re-parameterization and its inverse, `canonicalize` (strokes
+  become at least as long as thick in pixels, so the brush texture follows the long side).
+- `brushstroke/renderer/rasterize.py`: affine warp of the brush masks with `affine_grid` + `grid_sample`, same matrix as
+  Paint Transformer; `sampler: gather` option for a deterministic CUDA backward.
+- `brushstroke/renderer/compositing.py`: over operator, naive sequential reference and closed-form parallel version.
+- `brushstroke/renderer/pipeline.py`: `render`, `render_progressive` (one pass, canvases at chosen stroke counts),
+  chunking and optional checkpointing (`render:` config section, typed `RenderConfig`).
+- `scripts/bench_renderer.py` and the benchmark table in `docs/design/renderer.md` (512², 1024 strokes forward+backward:
+  0.76 s, 0.65 GB peak with checkpointing; about 11 GB without).
+- Tests: geometry, compositing equivalence, progressive rendering, gradcheck in float64 over all 9 parameters, determinism.
+
 ## [T-002] Procedural textured brush masks and canvas texture
 
 - `brushstroke/renderer/brushes.py`: `make_brush` with kinds `flat` (antialiased rectangle, ablation baseline), `oil`

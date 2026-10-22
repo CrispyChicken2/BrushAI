@@ -49,7 +49,7 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
 
 ```
 brushstroke/          Python package
-  renderer/           brush masks and canvas texture (T-002); differentiable stroke renderer (M1, T-003)
+  renderer/           brush masks and canvas texture (T-002); differentiable batched stroke renderer (T-003)
   stroke_model/       stroke predictor (M2)
   contribution/       semantic allocation and painterly ordering (M4)
   animation/          stroke-by-stroke replay and export (M1)
@@ -83,6 +83,27 @@ Brushes and canvas: `brush.kind` is `flat`, `oil` or `round` (procedural masks, 
 ```
 .venv\Scripts\python -m scripts.preview_brushes output_dir=outputs/brush_preview
 ```
+
+Rendering strokes: a stroke set is a tensor `(B, N, 9)` (`x, y, w, h, theta, r, g, b, a`, documented in
+[docs/design/renderer.md](docs/design/renderer.md)). `render` composites the N strokes in order onto a white (or given)
+canvas and returns `(B, 3, H, W)`; `render_progressive` returns the canvas after several stroke counts in one pass.
+
+```python
+import torch
+
+from brushstroke.config import RunConfig
+from brushstroke.renderer import BrushBank, render
+from brushstroke.utils.config import load_config
+
+cfg = load_config(RunConfig, "configs/default.yaml")
+bank = BrushBank.from_config(cfg.brush)
+params = torch.rand(2, 32, 9)  # (B, N, 9); w and h should be kept away from 0
+image = render(params, bank, 256, 256, cfg=cfg.render)  # (2, 3, 256, 256)
+```
+
+Rendering settings are in the `render:` section (`chunk_size`, `use_checkpoint`, `sampler`, `dtype`). The
+benchmark (time and peak VRAM) is `.venv\Scripts\python -m scripts.bench_renderer`, which writes
+`outputs/bench_renderer.md`.
 
 Seeding for reproducible runs: `brushstroke.utils.seed.seed_everything(seed, deterministic=...)` (call it before any
 CUDA work). Peak GPU memory is measured with `brushstroke.utils.device.reset_peak_vram()` and `peak_vram_mb()`.
