@@ -7,7 +7,6 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 002 [T-002] Procedural textured brush masks and canvas texture (M1)
 - [ ] 003 [T-003] Differentiable batched textured stroke renderer (M1)
 - [ ] 004 [T-004] Stroke sequence data model and serialization (M1)
 - [ ] 005 [T-005] Baseline (a): optimization-only decomposition, SNP style (M1)
@@ -21,8 +20,9 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 001 [T-001] Project scaffold, pinned environment, config system, CI, M1 plan (M1)
+- [~] 002 [T-002] Procedural textured brush masks and canvas texture (M1)
 
 ## Fait
+- [x] 001 [T-001] Project scaffold, pinned environment, config system, CI, M1 plan (e3b6324)
 
 ## Bloqué
