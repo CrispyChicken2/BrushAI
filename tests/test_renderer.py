@@ -275,10 +275,14 @@ def test_progressive_equals_rendering_prefixes() -> None:
         assert torch.allclose(prog[:, i], ref, atol=1e-6), k
 
 
-def test_default_brush_index_prefix_stable() -> None:
+def test_default_brush_index_prefix_stable_and_batch_independent() -> None:
     a = default_brush_index(3, 10, 4, 0)
     b = default_brush_index(3, 25, 4, 0)
     assert torch.equal(a, b[:, :10])
+    # painting b depends on (seed, b) only, not on the batch size
+    assert torch.equal(default_brush_index(5, 10, 4, 0)[:3], a)
+    assert torch.equal(default_brush_index(1, 10, 4, 0)[0], a[0])
+    assert not torch.equal(a[0], a[1])
     assert not torch.equal(default_brush_index(3, 10, 4, 1), a)
 
 

@@ -10,7 +10,7 @@ import pytest
 import torch
 import torch.nn.functional as F
 
-from brushstroke.renderer import BrushBank, RenderConfig, render_progressive
+from brushstroke.renderer import BrushBank, RenderConfig, render, render_progressive
 from brushstroke.strokes import SCHEMA_VERSION, BrushSpec, StrokeSequence
 
 SPEC = BrushSpec(kind="oil", bank_size=4, mask_height=32, mask_width=64, seed=3)
@@ -246,3 +246,68 @@ def test_render_at_double_resolution_matches_downsampled() -> None:
     err = (down - one).abs()
     assert float(err.mean()) < 6e-3
     assert float(torch.quantile(err.flatten(), 0.99)) < 8e-2
+
+
+# ------------------------------------------------------------------ producer / sequence consistency
+
+
+@pytest.mark.parametrize("batch", [1, 2, 3])
+@pytest.mark.parametrize("index_seed", [0, 3])
+def test_sequence_from_producer_params_renders_like_the_producer(
+    batch: int, index_seed: int
+) -> None:
+    """A producer renders a batch with renderer defaults; wrapping painting b matches it."""
+    spec = BrushSpec(
+        kind="oil", bank_size=4, mask_height=32, mask_width=64, seed=3, index_seed=index_seed
+    )
+    g = torch.Generator().manual_seed(11)
+    params = torch.rand(batch, 25, 9, generator=g)
+    params[..., 2:4] = 0.05 + 0.3 * params[..., 2:4]
+    bank = BrushBank.build(
+        spec.kind, spec.bank_size, (spec.mask_height, spec.mask_width), spec.seed
+    )
+    cfg = RenderConfig(brush_seed=index_seed, chunk_size=8)
+    produced = render(params, bank, 40, 56, canvas=[1.0, 1.0, 1.0], cfg=cfg)
+    for b in range(batch):
+        seq = StrokeSequence.from_batch(params, b, spec, canvas_size=(40, 56))
+        assert torch.equal(seq.render(cfg=RenderConfig(chunk_size=8)), produced[b]), (batch, b)
+    # painting 0 also works through the plain constructor (documented default draw)
+    plain = StrokeSequence(params[0], canvas_size=(40, 56), brush=spec)
+    assert torch.equal(plain.render(cfg=RenderConfig(chunk_size=8)), produced[0])
+
+
+def test_from_batch_explicit_brush_index_and_validation() -> None:
+    params = torch.rand(2, 6, 9)
+    idx = torch.tensor([3, 2, 1, 0, 3, 2])
+    seq = StrokeSequence.from_batch(params, 1, SPEC, brush_index=idx)
+    assert seq.brush_index is not None and torch.equal(seq.brush_index, idx)
+    with pytest.raises(ValueError):
+        StrokeSequence.from_batch(params[0], 0, SPEC)
+
+
+def test_render_progressive_wrapper_matches_prefix_renders() -> None:
+    seq = make_seq(14)
+    cps = [3, 0, 14, 7]
+    prog = seq.render_progressive(cps)
+    assert prog.shape == (4, 3, 48, 64)
+    for i, k in enumerate(cps):
+        assert torch.allclose(prog[i], seq[:k].render(), atol=1e-6)
+    with pytest.raises(ValueError):
+        seq.render_progressive([1], height=8)
+    with pytest.raises(ValueError):
+        seq.render_progressive([15])
+
+
+def test_meta_non_string_keys_become_strings() -> None:
+    assert StrokeSequence(torch.rand(1, 9), meta={1: "x"}).meta == {"1": "x"}
+
+
+def test_brush_spec_without_index_seed_loads_with_default(tmp_path: Path) -> None:
+    path = make_seq(3).save(tmp_path / "s.npz")
+    with np.load(path) as data:
+        arrays = {k: data[k] for k in data.files}
+    header = json.loads(bytes(arrays["header"].tobytes()).decode())
+    del header["brush"]["index_seed"]
+    arrays["header"] = np.frombuffer(json.dumps(header).encode(), dtype=np.uint8)
+    np.savez(tmp_path / "old.npz", **arrays)
+    assert StrokeSequence.load(tmp_path / "old.npz").brush.index_seed == 0
