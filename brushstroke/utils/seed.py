@@ -16,7 +16,9 @@ def seed_everything(seed: int, deterministic: bool = False) -> None:
         seed: non-negative integer seed.
         deterministic: if True, additionally force deterministic kernels
             (``torch.use_deterministic_algorithms(True)``, cuDNN deterministic, benchmark off);
-            ops without a deterministic implementation then raise. If False, these flags are
+            ops without a deterministic implementation then raise.
+            Call it before any CUDA work: ``CUBLAS_WORKSPACE_CONFIG`` is only read at the first
+            cuBLAS call (otherwise set it in the entry script). If False, these flags are
             reset to their permissive defaults.
     """
     if seed < 0:
@@ -25,6 +27,7 @@ def seed_everything(seed: int, deterministic: bool = False) -> None:
     np.random.seed(seed)  # noqa: NPY002 (global legacy RNG, seeded on purpose)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+    # Only affects child processes: hash randomization of this process is fixed at startup.
     os.environ["PYTHONHASHSEED"] = str(seed)
     if deterministic:
         # Required by cuBLAS for deterministic matmuls on CUDA >= 10.2.

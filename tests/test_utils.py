@@ -157,6 +157,16 @@ def test_load_image_resize_and_modes(tmp_path: Path) -> None:
     assert load_image(tmp_path / "gray.png", size=(10, 30)).shape == (3, 10, 30)
 
 
+def test_load_image_16bit_grayscale(tmp_path: Path) -> None:
+    from PIL import Image
+
+    arr = np.array([[0, 32768, 65535]], dtype=np.uint16)
+    Image.fromarray(arr).save(tmp_path / "g16.png")
+    out = load_image(tmp_path / "g16.png")
+    assert out.shape == (3, 1, 3)
+    assert torch.allclose(out[0, 0], torch.tensor([0.0, 32768 / 65535, 1.0]), atol=1e-6)
+
+
 def test_save_image_clamps_and_validates(tmp_path: Path) -> None:
     save_image(torch.full((3, 4, 4), 2.0), tmp_path / "w.png")
     assert torch.all(load_image(tmp_path / "w.png") == 1.0)
