@@ -1,0 +1,6 @@
+# Development dependencies, direct only. Install with `-c constraints.txt` for the full pinned closure.
+pytest==9.1.1
+ruff==0.17.1
+mypy==2.4.0
+types-PyYAML==6.0.12.20260906
+types-tqdm==4.70.0.20260906

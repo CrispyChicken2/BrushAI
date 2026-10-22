@@ -1,0 +1,5 @@
+# Default run configuration (M1 scaffold; real sections arrive with later tickets).
+seed: 0
+deterministic: false
+device: auto
+output_dir: outputs/default
