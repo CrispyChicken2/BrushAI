@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 
 from brushstroke.renderer.brushes import BrushConfig
 from brushstroke.renderer.canvas import CanvasConfig
+from brushstroke.renderer.pipeline import RenderConfig
 
 
 @dataclass
@@ -18,3 +19,4 @@ class RunConfig:
     output_dir: str = "outputs/default"
     brush: BrushConfig = field(default_factory=BrushConfig)
     canvas: CanvasConfig = field(default_factory=CanvasConfig)
+    render: RenderConfig = field(default_factory=RenderConfig)
