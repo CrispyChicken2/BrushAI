@@ -52,7 +52,7 @@ brushstroke/          Python package
   renderer/           brush masks and canvas texture (T-002); differentiable batched stroke renderer (T-003)
   stroke_model/       stroke predictor (M2)
   contribution/       semantic allocation and painterly ordering (M4)
-  animation/          stroke-by-stroke replay and export (M1)
+  animation/          stroke-by-stroke replay with partial reveal, ffmpeg export (T-006)
   generation/         text/image front-ends (M5)
   eval/               metrics and evaluation harness (M3)
   baselines/optim/    baseline (a): optimization-only stroke decomposition (T-005)
@@ -148,6 +148,22 @@ The output directory gets `final.png`, `target.png`, `progress/level_XX.png` (ca
 `sequence.npz` (the stroke sequence), `metrics.json` and `loss_curve.json`. On a 512 x 512 image with 1794 strokes (RTX 5070,
 about 2.5 minutes, 6.7 GB peak VRAM) the baseline reaches L1 0.036 and LPIPS-VGG 0.44. The M1 target (LPIPS below 0.25
 within 2000 strokes) is **not met**; the design note has the tuning runs.
+
+## Animating a painting
+
+`scripts/animate.py` replays a stroke sequence stroke by stroke: each stroke is revealed along its length on a
+canvas-textured background, with no brush visible (see [docs/design/animation.md](docs/design/animation.md)). Export
+needs **ffmpeg** on the PATH (Windows: `winget install Gyan.FFmpeg`; Linux: `apt install ffmpeg`; macOS: `brew install ffmpeg`),
+or set its full path with `ffmpeg=...`. Settings are in `configs/animation.yaml`.
+
+```
+.venv\Scripts\python -m scripts.animate --sequence outputs/optim_run/sequence.npz --out outputs/anim
+.venv\Scripts\python -m scripts.animate --sequence outputs/optim_run/sequence.npz --out outputs/anim formats=[mp4,webm,gif] duration=8 gif_width=360
+```
+
+Each format is written as `<out>/<sequence name>.<format>` (MP4, WebM or GIF), with `config.resolved.yaml` and `timings.json`
+(render and encode time, peak VRAM). The video has `round(fps * duration) + round(fps * hold)` frames; the last frame is the
+finished painting.
 
 ## Checks
 

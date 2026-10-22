@@ -2,6 +2,17 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-006] Stroke-by-stroke animation with partial reveal and ffmpeg export
+
+- `brushstroke/animation/`: deterministic timeline (overlap, minimum reveal frames, uniform or decelerating slots, seeded
+  stroke directions), partial reveal of each stroke along its main axis computed from the renderer's own affine grid
+  (`reveal_front` / `rasterize_flat(reveal=...)` in `renderer/rasterize.py`; a finished stroke is bit-identical to the
+  normal render), and an incremental frame renderer (finished prefix + strokes in flight).
+- Canvas texture (T-002) applied to every frame.
+- Export through ffmpeg: MP4 (H.264), WebM (VP9), GIF (two-pass palette). Clear error when ffmpeg is missing.
+- `configs/animation.yaml` and `scripts/animate.py`; design note `docs/design/animation.md` with the timing measurements
+  (1000 strokes, 512 x 512, 10 s at 30 fps: 2.5 s for MP4 + WebM, 89 MB peak VRAM).
+
 ## [T-005] Baseline (a): optimization-only stroke decomposition
 
 - `brushstroke/baselines/optim/`: progressive coarse-to-fine optimization of strokes (grids 1 x 1 to 20 x 20, new strokes
