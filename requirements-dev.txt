@@ -4,3 +4,4 @@ ruff==0.17.1
 mypy==2.4.0
 types-PyYAML==6.0.12.20260906
 types-tqdm==4.70.0.20260906
+matplotlib==3.11.2  # figures of the experiments (scripts/exp_optim_sweep.py --figures)
