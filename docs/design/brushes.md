@@ -58,6 +58,6 @@ brush scans, and watercolor/marker-pen styles of Stylized Neural Painting are no
 - Huang, Heng, Zhou. *Learning to Paint with Model-based Deep Reinforcement Learning*. ICCV 2019 (quadratic
   Bezier strokes, untextured; for contrast).
 
-Note: the reference repositories could not be browsed from this environment; the orientation convention is
-stated from the papers' descriptions (single brush image, affine warp) and is fixed by this note and the
+Note: the reference repositories were not consulted (no network browsing in this workflow); the convention is
+based on the papers' descriptions (single brush image, affine warp) and is fixed by this note and the
 orientation test, not verified against their code.
