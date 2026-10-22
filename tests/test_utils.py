@@ -64,16 +64,13 @@ def test_dump_config_requires_dataclass_instance(tmp_path: Path) -> None:
 
 
 def test_default_yaml_loads() -> None:
-    @dataclass
-    class DefaultCfg:
-        seed: int = -1
-        deterministic: bool = True
-        device: str = "x"
-        output_dir: str = "x"
+    from brushstroke.config import RunConfig
 
-    cfg = load_config(DefaultCfg, Path(__file__).parents[1] / "configs" / "default.yaml")
+    cfg = load_config(RunConfig, Path(__file__).parents[1] / "configs" / "default.yaml")
     assert cfg.seed == 0
     assert cfg.device == "auto"
+    assert cfg.brush.kind == "oil"
+    assert cfg.canvas.weave_period == 6.0
 
 
 def _draw() -> tuple[float, float, list[float]]:
