@@ -18,3 +18,11 @@ canvas:
   strength: 0.06         # shading depth used by apply_canvas
   low_freq_amount: 0.2   # low-frequency noise amplitude relative to the weave
   low_freq_scale: 48.0   # Gaussian std (pixels) of the low-frequency noise
+
+render:
+  chunk_size: 64         # strokes composited at once (memory ~ chunk_size * H * W)
+  use_checkpoint: false  # recompute chunk activations in backward (less memory, slower)
+  brush_seed: 0          # seed of the per-stroke brush variant choice
+  dtype: auto            # compositing dtype: auto (= params dtype) | float32 | float64 | bfloat16
+  sampler: grid_sample   # grid_sample | gather (gather: deterministic CUDA backward)
+  min_size: 0.001        # smallest w / h used by the parameter helpers
