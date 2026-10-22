@@ -16,7 +16,7 @@ Windows (PowerShell):
 ```powershell
 py -3.11 -m venv .venv
 .venv\Scripts\python -m pip install -U pip
-.venv\Scripts\python -m pip install -r requirements.txt -r requirements-dev.txt
+.venv\Scripts\python -m pip install -c constraints.txt -r requirements.txt -r requirements-dev.txt
 ```
 
 Linux:
@@ -24,16 +24,24 @@ Linux:
 ```bash
 python3.11 -m venv .venv
 .venv/bin/python -m pip install -U pip
-.venv/bin/python -m pip install -r requirements.txt -r requirements-dev.txt
+.venv/bin/python -m pip install -c constraints.txt -r requirements.txt -r requirements-dev.txt
 ```
 
-`requirements.txt` already contains `--extra-index-url https://download.pytorch.org/whl/cu128`.
+`constraints.txt` pins the full transitive closure (reproducible installs); `requirements.txt` lists the direct
+dependencies and already contains `--extra-index-url https://download.pytorch.org/whl/cu128`.
 For a CPU-only machine (as in CI), install torch first from the CPU index:
-`pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cpu`,
-then the two requirements files.
+`pip install -c constraints.txt torch torchvision --index-url https://download.pytorch.org/whl/cpu`,
+then the install command above.
 
 Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<name>`); pytest uses
 `pythonpath = ["."]`.
+
+### Troubleshooting
+
+- `CERTIFICATE_VERIFY_FAILED` from pip (TLS interception on some machines): add a `pip.ini` **inside the venv** (machine-specific,
+  never committed) with
+  `[global]` / `trusted-host = download.pytorch.org pypi.org files.pythonhosted.org` (one host per line).
+- Windows path limit: create the venv under a short path; torch has very deep paths and the install breaks otherwise.
 
 ## Checks
 

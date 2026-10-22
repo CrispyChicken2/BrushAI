@@ -1,4 +1,4 @@
-# Development dependencies. Exact pins.
+# Development dependencies, direct only. Install with `-c constraints.txt` for the full pinned closure.
 pytest==9.1.1
 ruff==0.17.1
 mypy==2.4.0

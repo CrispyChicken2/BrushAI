@@ -1,0 +1,37 @@
+# Full transitive pin set (generated from `pip freeze` of the reference venv, Windows + torch cu128).
+# Use with: pip install -c constraints.txt -r requirements.txt -r requirements-dev.txt
+# torch/torchvision are pinned without the local build tag (+cu128 / +cpu) so the same file serves
+# the CUDA install (RTX 5070) and the CPU install (CI).
+# Constraints only restrict versions: entries not needed on a platform are ignored there.
+torch==2.11.0
+torchvision==0.26.0
+numpy==2.4.6
+pillow==12.3.0
+PyYAML==6.0.3
+omegaconf==2.4.0
+lpips==0.1.4
+scipy==1.17.1
+tqdm==4.70.1
+filelock==3.32.3
+fsspec==2026.7.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+mpmath==1.3.0
+networkx==3.6.1
+sympy==1.14.0
+typing_extensions==4.16.0
+setuptools==81.0.0
+pytest==9.1.1
+iniconfig==2.3.1
+packaging==26.3
+pluggy==1.7.0
+Pygments==2.21.0
+colorama==0.4.6; sys_platform == "win32"
+ruff==0.17.1
+mypy==2.4.0
+mypy_extensions==1.1.0
+pathspec==1.1.1
+librt==0.16.0
+ast-serialize==0.13.1
+types-PyYAML==6.0.12.20260906
+types-tqdm==4.70.0.20260906

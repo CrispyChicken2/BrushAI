@@ -1,4 +1,4 @@
-# Runtime dependencies (M1). Exact pins.
+# Runtime dependencies (M1), direct only. Install with `-c constraints.txt` for the full pinned closure.
 # torch/torchvision come from the CUDA 12.8 index: required for the RTX 5070 (Blackwell, sm_120).
 # `==2.11.0` also matches the local build `2.11.0+cu128`, which pip prefers from this index.
 --extra-index-url https://download.pytorch.org/whl/cu128
