@@ -1,0 +1,29 @@
+# environments and caches
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# generated outputs and data
+outputs/
+runs/
+data/raw/
+
+# model weights
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+
+# media (only optimized demo GIFs under docs/media/ are committed)
+*.mp4
+*.webm
+*.gif
+!docs/media/*.gif
+
+# agent coordination
+.handoff/
+tasks/
