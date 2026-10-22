@@ -107,12 +107,40 @@ def stroke_affine(params: torch.Tensor, height: int, width: int) -> torch.Tensor
     return torch.stack([a00, a01, a02, a10, a11, a12], dim=-1).view(-1, 2, 3)
 
 
+def reveal_front(
+    grid_x: torch.Tensor, progress: torch.Tensor, edge: float, reverse: torch.Tensor | None = None
+) -> torch.Tensor:
+    """Soft reveal front along the main axis in stroke-local coordinates.
+
+    Args:
+        grid_x: ``(M, H, W)`` local x of every output pixel in brush coordinates, in [-1, 1]
+            inside the stroke box (the x channel of the affine grid, see :func:`stroke_affine`).
+        progress: ``(M,)`` reveal progress in [0, 1].
+        edge: width of the soft edge as a fraction of the stroke length (> 0).
+        reverse: optional ``(M,)`` bool; if True the stroke is revealed from ``x = +1`` to ``-1``.
+
+    Returns:
+        ``(M, H, W)`` in [0, 1]: ``clamp((p (1 + edge) - t) / edge, 0, 1)`` with ``t = (x + 1) / 2``
+        clamped to [0, 1]. Monotonically non-decreasing in ``progress`` (0 at p = 0, exactly 1
+        everywhere at p = 1).
+    """
+    t = ((grid_x + 1.0) * 0.5).clamp(0.0, 1.0)
+    if reverse is not None:
+        t = torch.where(reverse.view(-1, 1, 1), 1.0 - t, t)
+    p = progress.view(-1, 1, 1)
+    front = ((p * (1.0 + edge) - t) / edge).clamp(0.0, 1.0)
+    return torch.where(p >= 1.0, torch.ones_like(front), front)  # exactly 1 at the end
+
+
 def rasterize_flat(
     params: torch.Tensor,
     masks: torch.Tensor,
     height: int,
     width: int,
     sampler: str = "grid_sample",
+    reveal: torch.Tensor | None = None,
+    reveal_edge: float = 0.15,
+    reveal_reverse: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Brush coverage times opacity for a flat list of strokes.
 
@@ -122,6 +150,10 @@ def rasterize_flat(
         sampler: ``"grid_sample"`` (fast; its CUDA backward is not allowed under deterministic
             mode, although it was bitwise reproducible in our tests) or ``"gather"``
             (:func:`sample_bilinear_gather`, deterministic backward).
+        reveal: optional ``(M,)`` progress in [0, 1] for the stroke-by-stroke animation: the alpha
+            is multiplied by :func:`reveal_front` computed from the same affine grid (no second
+            copy of the geometry). ``None`` or progress 1 gives the plain stroke.
+        reveal_edge, reveal_reverse: see :func:`reveal_front`.
 
     Returns:
         ``(M, 1, H, W)``.
@@ -139,7 +171,10 @@ def rasterize_flat(
         )
     else:
         raise ValueError(f"unknown sampler {sampler!r}; expected one of {SAMPLERS}")
-    return cover * params[:, A].view(-1, 1, 1, 1)
+    alpha = cover * params[:, A].view(-1, 1, 1, 1)
+    if reveal is not None:
+        alpha = alpha * reveal_front(grid[..., 0], reveal, reveal_edge, reveal_reverse)[:, None]
+    return alpha
 
 
 def render_alphas(
