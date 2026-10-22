@@ -1,8 +1,9 @@
 # Procedural brush masks and canvas texture (T-002)
 
 Code: `brushstroke/renderer/brushes.py`, `brushstroke/renderer/canvas.py`. Config sections `brush:` and
-`canvas:` in `configs/default.yaml` (typed in `brushstroke/config.py`). Preview:
-`python -m scripts.preview_brushes` writes `outputs/brush_preview/brush_contact_sheet.png` (not committed).
+`canvas:` in `configs/default.yaml` (typed in `brushstroke/config.py`). Preview: `python -m scripts.preview_brushes
+output_dir=outputs/brush_preview` writes `outputs/brush_preview/brush_contact_sheet.png` (and `canvas_shaded.png`); without
+the `output_dir` override it writes to `outputs/default/` (the default `output_dir`). Outputs are not committed.
 
 ## Why procedural
 Brush images from other projects are under various licenses (or none). Generating the masks from a seed

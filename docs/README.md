@@ -3,7 +3,8 @@
 | Document | Content |
 |----------|---------|
 | [plan/M1.md](plan/M1.md) | Milestone M1 (renderer, optimization-only decomposition, animation export): tickets, VRAM estimate, success criteria |
-| [design/](design/README.md) | Short design notes for non-trivial components (what, why, references, measured cost). None yet. |
+| [design/brushes.md](design/brushes.md) | Procedural brush masks and canvas texture (T-002): what each kind models, orientation convention, references |
+| [design/](design/README.md) | Index of the design notes (folder README) |
 | [media/](media/README.md) | Optimized demo GIFs referenced from the README (each <= 4 MB). None yet. |
 
 Other entry points: [README.md](../README.md) (setup, layout, configuration, checks), [CHANGELOG.md](../CHANGELOG.md)

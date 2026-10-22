@@ -2,6 +2,18 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-002] Procedural textured brush masks and canvas texture
+
+- `brushstroke/renderer/brushes.py`: `make_brush` with kinds `flat` (antialiased rectangle, ablation baseline), `oil`
+  (bristle streaks along the main axis, ragged soft sides, tapered and dry ends) and `round` (soft dab with mild texture);
+  `BrushBank` (K seeded variants as one `(K, 1, h, w)` tensor, memoized per config).
+- `brushstroke/renderer/canvas.py`: `make_canvas_texture` (woven-canvas field with irregular threads and low-frequency
+  noise) and `apply_canvas` (shading, used by the animation in T-006).
+- Config: `brush:` and `canvas:` sections in `configs/default.yaml`, typed as `brushstroke.config.RunConfig`.
+- `scripts/preview_brushes.py`: contact sheet of the brush banks and the canvas (written to `outputs/`).
+- Design note `docs/design/brushes.md`: conventions (main stroke axis = local x; renderers must canonicalize to `w >= h`),
+  references (Stylized Neural Painting, Paint Transformer, Learning to Paint).
+
 ## [T-001] Project scaffold, pinned environment, config system, CI, M1 plan
 
 - Package layout `brushstroke/` (renderer, stroke_model, contribution, animation, generation, eval, utils) with typed package.

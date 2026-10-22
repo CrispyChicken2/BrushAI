@@ -49,7 +49,7 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
 
 ```
 brushstroke/          Python package
-  renderer/           differentiable stroke renderer (M1)
+  renderer/           brush masks and canvas texture (T-002); differentiable stroke renderer (M1, T-003)
   stroke_model/       stroke predictor (M2)
   contribution/       semantic allocation and painterly ordering (M4)
   animation/          stroke-by-stroke replay and export (M1)
@@ -66,30 +66,22 @@ report/               technical report
 ## Configuration
 
 Run settings are typed dataclasses loaded from YAML in `configs/`, with `key.sub=value` overrides from the
-command line. The YAML values override the dataclass defaults; unknown keys and wrong types raise an error.
+command line. The root schema is `brushstroke.config.RunConfig` (sections `brush:` and `canvas:` so far; the
+YAML values override the dataclass defaults, and unknown keys or wrong types raise an error).
 
 ```python
-from dataclasses import dataclass, field
-
+from brushstroke.config import RunConfig
 from brushstroke.utils.config import dump_config, load_config
 
-
-@dataclass
-class OptimCfg:
-    lr: float = 0.01
-
-
-@dataclass
-class RunCfg:
-    seed: int = 0
-    deterministic: bool = False
-    device: str = "auto"
-    output_dir: str = "outputs/default"
-    optim: OptimCfg = field(default_factory=OptimCfg)
-
-
-cfg = load_config(RunCfg, "configs/default.yaml", overrides=["optim.lr=0.05"])
+cfg = load_config(RunConfig, "configs/default.yaml", overrides=["brush.kind=round"])
 dump_config(cfg, cfg.output_dir)  # writes outputs/default/config.resolved.yaml
+```
+
+Brushes and canvas: `brush.kind` is `flat`, `oil` or `round` (procedural masks, see
+[docs/design/brushes.md](docs/design/brushes.md)). Preview them as a contact sheet (written to `outputs/`, not committed):
+
+```
+.venv\Scripts\python -m scripts.preview_brushes output_dir=outputs/brush_preview
 ```
 
 Seeding for reproducible runs: `brushstroke.utils.seed.seed_everything(seed, deterministic=...)` (call it before any
