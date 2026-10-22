@@ -15,8 +15,8 @@ Conventions
   ``scale_level`` and ``patch_id`` (``-1`` = unknown) and ``source`` (producer name, ``""`` =
   unset).
 * ``meta`` is a free-form JSON-serializable dict (config hash, seed, producer version, timings...).
-  It is normalized through a JSON round trip at construction, so tuples become lists and
-  save/load is exactly the identity.
+  It is normalized through a JSON round trip at construction, so tuples become lists, dict keys
+  become strings (``{1: 'x'}`` -> ``{'1': 'x'}``) and save/load is exactly the identity.
 * On disk: a single ``.npz`` holding the float32/int arrays plus a UTF-8 JSON ``header``.
   ``schema_version`` (see ``docs/design/stroke_sequence.md``) is checked on load.
 """
@@ -26,18 +26,20 @@ from __future__ import annotations
 import json
 from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
 
-from brushstroke.renderer.brushes import get_brush_bank
+from brushstroke.renderer.brushes import BrushBank, get_brush_bank
 from brushstroke.renderer.params import NUM_PARAMS
-from brushstroke.renderer.pipeline import RenderConfig, render
+from brushstroke.renderer.pipeline import RenderConfig, render, render_progressive
 from brushstroke.renderer.rasterize import default_brush_index
 
 SCHEMA_VERSION = 1
+_BANK_CACHE_SIZE = 8
 HEADER_KEY = "header"
 UNSET = -1
 
@@ -47,13 +49,25 @@ _MIGRATIONS: dict[int, Callable[[dict[str, Any], dict[str, np.ndarray]], None]] 
 
 @dataclass(frozen=True)
 class BrushSpec:
-    """Which brush bank the strokes were made for (the masks are regenerated from this spec)."""
+    """Which brush bank the strokes were made for (the masks are regenerated from this spec).
+
+    ``index_seed`` must equal the ``RenderConfig.brush_seed`` the producer rendered with if it
+    relied on the renderer's default brush draw (see :meth:`StrokeSequence.from_batch`).
+    """
 
     kind: str = "oil"
     bank_size: int = 8
     mask_height: int = 64
     mask_width: int = 128
-    seed: int = 0
+    seed: int = 0  # seed of the brush masks
+    index_seed: int = 0  # seed of the default per-stroke variant draw (RenderConfig.brush_seed)
+
+
+@lru_cache(maxsize=_BANK_CACHE_SIZE)
+def _device_bank(spec: BrushSpec, device: str) -> BrushBank:
+    """Brush bank of ``spec`` on ``device`` (cached: prefix renders reuse it)."""
+    bank = get_brush_bank(spec.kind, spec.bank_size, (spec.mask_height, spec.mask_width), spec.seed)
+    return bank.to(device)
 
 
 def _canonical_meta(meta: dict[str, Any]) -> dict[str, Any]:
@@ -74,8 +88,10 @@ class StrokeSequence:
         params: ``(N, 9)`` stroke parameters (converted to float32).
         canvas_size: default render size ``(H, W)`` in pixels.
         brush: :class:`BrushSpec` of the bank the strokes use.
-        brush_index: ``(N,)`` long tensor, bank variant of each stroke. ``None`` = the seeded
-            default draw of the renderer (prefix-stable).
+        brush_index: ``(N,)`` long tensor, bank variant of each stroke. ``None`` = painting 0 of
+            ``default_brush_index(1, N, bank_size, brush.index_seed)``, i.e. exactly what the
+            renderer draws for a single painting rendered with ``brush_seed=index_seed``. For
+            painting ``b > 0`` of a batch use :meth:`from_batch`.
         background: initial canvas colour ``(r, g, b)`` in [0, 1].
         background_ref: optional free-text reference to a background image (name/path/hash);
             informational only, the renderer uses ``background``.
@@ -113,7 +129,9 @@ class StrokeSequence:
         if len(self.background) != 3:
             raise ValueError(f"background must be an (r, g, b) triple, got {self.background}")
         if self.brush_index is None:
-            self.brush_index = default_brush_index(1, n, self.brush.bank_size, self.brush.seed)[0]
+            self.brush_index = default_brush_index(
+                1, n, self.brush.bank_size, self.brush.index_seed
+            )[0]
         self.brush_index = self._tag(self.brush_index, torch.int64, "brush_index", device)
         if n and not (
             int(self.brush_index.min()) >= 0 and int(self.brush_index.max()) < self.brush.bank_size
@@ -147,6 +165,27 @@ class StrokeSequence:
     def empty(cls, canvas_size: tuple[int, int] = (512, 512), **kwargs: Any) -> StrokeSequence:
         """A sequence with no stroke (kwargs as the constructor, except ``params``)."""
         return cls(params=torch.zeros(0, NUM_PARAMS), canvas_size=canvas_size, **kwargs)
+
+    @classmethod
+    def from_batch(
+        cls, params: torch.Tensor, b: int = 0, brush: BrushSpec | None = None, **kwargs: Any
+    ) -> StrokeSequence:
+        """Sequence of painting ``b`` of a producer's batch ``(B, N, 9)``.
+
+        Uses the brush variants the renderer draws by default for that painting:
+        ``default_brush_index(B, N, bank_size, brush.index_seed)[b]`` (independent of ``B``). So
+        ``from_batch(p, b, spec).render()`` equals the producer's
+        ``render(p, ..., cfg=RenderConfig(brush_seed=spec.index_seed))[b]``. If the producer passed
+        an explicit ``brush_index`` to the renderer, give ``brush_index=`` here (kwargs are
+        forwarded to the constructor).
+        """
+        if params.ndim != 3:
+            raise ValueError(f"expected params of shape (B, N, 9), got {tuple(params.shape)}")
+        spec = brush or BrushSpec()
+        if "brush_index" not in kwargs:
+            bsz, n = params.shape[:2]
+            kwargs["brush_index"] = default_brush_index(bsz, n, spec.bank_size, spec.index_seed)[b]
+        return cls(params=params[b], brush=spec, **kwargs)
 
     @classmethod
     def concat(cls, parts: Sequence[StrokeSequence]) -> StrokeSequence:
@@ -265,16 +304,41 @@ class StrokeSequence:
         if (height is None) != (width is None):
             raise ValueError("give both height and width, or neither")
         h, w = (height, width) if height is not None and width is not None else self.canvas_size
-        spec = self.brush
-        bank = get_brush_bank(
-            spec.kind, spec.bank_size, (spec.mask_height, spec.mask_width), spec.seed
-        )
         assert self.brush_index is not None
         out = render(
             self.params[None],
-            bank.to(self.params.device),
+            _device_bank(self.brush, str(self.params.device)),
             h,
             w,
+            canvas=self.background if canvas is None else canvas,
+            cfg=cfg,
+            brush_index=self.brush_index[None],
+        )
+        return out[0]
+
+    def render_progressive(
+        self,
+        checkpoints: Sequence[int],
+        height: int | None = None,
+        width: int | None = None,
+        cfg: RenderConfig | None = None,
+        canvas: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """Canvases after the first ``k`` strokes for each ``k`` in ``checkpoints``, in one pass.
+
+        Returns ``(len(checkpoints), 3, H, W)``; entry ``i`` is ``self[:checkpoints[i]].render()``.
+        Arguments as :meth:`render`; checkpoints lie in ``[0, N]``.
+        """
+        if (height is None) != (width is None):
+            raise ValueError("give both height and width, or neither")
+        h, w = (height, width) if height is not None and width is not None else self.canvas_size
+        assert self.brush_index is not None
+        out = render_progressive(
+            self.params[None],
+            _device_bank(self.brush, str(self.params.device)),
+            h,
+            w,
+            checkpoints,
             canvas=self.background if canvas is None else canvas,
             cfg=cfg,
             brush_index=self.brush_index[None],
