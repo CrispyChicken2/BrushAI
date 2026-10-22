@@ -2,6 +2,17 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-005] Baseline (a): optimization-only stroke decomposition
+
+- `brushstroke/baselines/optim/`: progressive coarse-to-fine optimization of strokes (grids 1 x 1 to 20 x 20, new strokes
+  initialized from the residual error and optimized jointly per level, earlier levels frozen by default), through the
+  T-003 renderer. Output: a `StrokeSequence` with `scale_level` and `patch_id` tags and timings in `meta`.
+- Losses, each behind a weight: pixel L1, LPIPS-VGG, debiased log-domain Sinkhorn OT on pooled intensities.
+- `configs/baseline_optim.yaml` and `scripts/paint_optim.py` (writes the sequence, PNGs, metrics and loss curves).
+- Result on a 512 x 512 public-domain image (1794 strokes): L1 0.036, PSNR 26.1 dB, LPIPS-VGG 0.44, 149 s, 6.7 GB peak.
+  The M1 target (LPIPS < 0.25 within 2000 strokes) is not met; the design note reports the tuning runs.
+- Design note `docs/design/optim_baseline.md`, with the differences from Stylized Neural Painting.
+
 ## [T-004] Stroke sequence data model and serialization
 
 - `brushstroke/strokes.py`: `StrokeSequence` (ordered strokes `(N, 9)` in the renderer convention, per-stroke tags

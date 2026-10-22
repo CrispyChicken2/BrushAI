@@ -55,6 +55,7 @@ brushstroke/          Python package
   animation/          stroke-by-stroke replay and export (M1)
   generation/         text/image front-ends (M5)
   eval/               metrics and evaluation harness (M3)
+  baselines/optim/    baseline (a): optimization-only stroke decomposition (T-005)
   strokes.py          StrokeSequence: ordered strokes + metadata, save/load (T-004)
   utils/              config (YAML + dot-overrides), seeding, device/VRAM helpers, image I/O
 configs/              YAML run configurations (every hyperparameter lives here)
@@ -130,6 +131,23 @@ Selection uses slices, lists or boolean masks (`seq[:k]`, `seq[[0, 3]]`); a sing
 
 Seeding for reproducible runs: `brushstroke.utils.seed.seed_everything(seed, deterministic=...)` (call it before any
 CUDA work). Peak GPU memory is measured with `brushstroke.utils.device.reset_peak_vram()` and `peak_vram_mb()`.
+
+## Painting an image (baseline a)
+
+`scripts/paint_optim.py` decomposes an image into strokes by progressive optimization (Stylized Neural Painting style,
+see [docs/design/optim_baseline.md](docs/design/optim_baseline.md)). Settings are in `configs/baseline_optim.yaml`; any
+key can be overridden on the command line. The input image is not in the repository: use a public-domain or
+self-made image, for example in `data/raw/` (gitignored).
+
+```
+.venv\Scripts\python -m scripts.paint_optim --input data/raw/mona_lisa.jpg --out outputs/optim_run
+.venv\Scripts\python -m scripts.paint_optim --input data/raw/mona_lisa.jpg --out outputs/optim_fast optim.iters=20 loss.lpips=0
+```
+
+The output directory gets `final.png`, `target.png`, `progress/level_XX.png` (canvas after each level),
+`sequence.npz` (the stroke sequence), `metrics.json` and `loss_curve.json`. On a 512 x 512 image with 1794 strokes (RTX 5070,
+about 2.5 minutes, 6.7 GB peak VRAM) the baseline reaches L1 0.036 and LPIPS-VGG 0.44. The M1 target (LPIPS below 0.25
+within 2000 strokes) is **not met**; the design note has the tuning runs.
 
 ## Checks
 
