@@ -8,6 +8,7 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 
 ## À faire
 - [ ] 006 [T-006] Animation replay with partial reveal + ffmpeg export (M1)
+- [ ] 009 [T-009] Investigate optimization-baseline quality gap (LPIPS 0.44 vs 0.25), sweeps (M1)
 - [ ] 007 [T-007] Three polished reproducible demo GIFs (M1)
 - [ ] 008 [T-008] M1 gate review: fresh-clone reproduction (M1)
 - [ ] M2 Paint Transformer reimplementation + reproduction (à ticketiser après la gate M1)
