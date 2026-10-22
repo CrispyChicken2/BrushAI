@@ -55,6 +55,7 @@ brushstroke/          Python package
   animation/          stroke-by-stroke replay and export (M1)
   generation/         text/image front-ends (M5)
   eval/               metrics and evaluation harness (M3)
+  strokes.py          StrokeSequence: ordered strokes + metadata, save/load (T-004)
   utils/              config (YAML + dot-overrides), seeding, device/VRAM helpers, image I/O
 configs/              YAML run configurations (every hyperparameter lives here)
 scripts/              entry points, one per experiment
@@ -104,6 +105,26 @@ image = render(params, bank, 256, 256, cfg=cfg.render)  # (2, 3, 256, 256)
 Rendering settings are in the `render:` section (`chunk_size`, `use_checkpoint`, `sampler`, `dtype`). The
 benchmark (time and peak VRAM) is `.venv\Scripts\python -m scripts.bench_renderer`, which writes
 `outputs/bench_renderer.md`.
+
+Stroke sequences: a painting as an ordered list of strokes with its metadata is `brushstroke.strokes.StrokeSequence`
+(schema, `.npz` format and versioning in [docs/design/stroke_sequence.md](docs/design/stroke_sequence.md)). It is the
+format every producer should emit and every consumer should read. A producer's batch painting `b` is wrapped with
+`from_batch`, which keeps the brush variants the renderer used, so the sequence re-renders identically.
+
+```python
+import torch
+
+from brushstroke.strokes import BrushSpec, StrokeSequence
+
+params = torch.rand(2, 20, 9)  # batch of 2 paintings from a producer, 20 strokes each
+seq = StrokeSequence.from_batch(params, 1, BrushSpec(kind="oil", index_seed=0), canvas_size=(256, 256))
+image = seq.render()  # (3, 256, 256)
+seq.save("outputs/painting.npz")
+same = StrokeSequence.load("outputs/painting.npz")
+```
+
+Selection uses slices, lists or boolean masks (`seq[:k]`, `seq[[0, 3]]`); a single stroke by a bare integer
+(`seq[0]`) is not supported yet, use `seq[[0]]`.
 
 Seeding for reproducible runs: `brushstroke.utils.seed.seed_everything(seed, deterministic=...)` (call it before any
 CUDA work). Peak GPU memory is measured with `brushstroke.utils.device.reset_peak_vram()` and `peak_vram_mb()`.

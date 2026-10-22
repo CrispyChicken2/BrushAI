@@ -2,6 +2,20 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-004] Stroke sequence data model and serialization
+
+- `brushstroke/strokes.py`: `StrokeSequence` (ordered strokes `(N, 9)` in the renderer convention, per-stroke tags
+  `brush_index`, `scale_level`, `patch_id`, `source`, metadata, background, schema version) and `BrushSpec` (which brush
+  bank the strokes were made for).
+- Operations: slicing / selection, `reorder` (validated permutation), `concat`, `to(device)`, `render` and
+  `render_progressive` (re-rendering at any resolution), `equals`.
+- `from_batch`: the producer path. It keeps the brush variants the renderer drew, so a sequence re-renders bitwise like
+  the producer's batch. The renderer's default brush draw is now one rule shared by both (seeded per painting, so
+  independent of the batch size); this changed the default draw for batches and non-zero seeds (`docs/design/renderer.md`).
+- Single-file `.npz` save/load with an embedded JSON header; a newer schema version is rejected, older ones go through
+  registered migrations (none yet).
+- Design note `docs/design/stroke_sequence.md`.
+
 ## [T-003] Differentiable batched textured stroke renderer
 
 - `brushstroke/renderer/params.py`: stroke layout `(B, N, 9)` = x, y, w, h, theta, r, g, b, a (Paint Transformer's
