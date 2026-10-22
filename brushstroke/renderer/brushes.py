@@ -3,11 +3,18 @@
 A brush mask is a ``(1, h, w)`` float32 tensor with values in ``[0, 1]`` (1 = fully opaque paint).
 Convention (shared with the renderer, T-003): the **main stroke axis is the local x axis** (the
 width direction ``w``); the local y axis (``h``) is the brush thickness. A stroke is rendered by
-warping the mask with an affine transform (scale, rotation, translation), as in Paint Transformer
-(Liu et al., ICCV 2021), which warps a single brush texture image. Stylized Neural Painting
-(Zou et al., CVPR 2021) likewise renders textured brush images (oil-paint / marker-pen /
-watercolor), whereas Learning to Paint (Huang et al., ICCV 2019) uses untextured quadratic
-Bezier strokes.
+warping the mask with an affine transform (scale, rotation, translation), as the references do
+with brush images. Paint Transformer (Liu et al., ICCV 2021; ``inference/inference.py``,
+``param2stroke``) loads a vertical and a horizontal brush image and picks the vertical one when
+the stroke is taller than wide (``h > w``). Stylized Neural Painting (Zou et al., CVPR 2021;
+``renderer.py``, ``_draw_oilpaintbrush``) has large/small x vertical/horizontal images with the
+same ``h > w`` rule. In both, the texture direction follows the longer side of the stroke box.
+Learning to Paint (Huang et al., ICCV 2019) uses untextured quadratic Bezier strokes.
+
+Compatibility rule (for the T-003 renderer): since we have a single mask with bristles along x,
+the renderer must canonicalize every stroke to ``w >= h`` (swap ``w`` and ``h`` and add 90
+degrees to the rotation when ``h > w``). This is equivalent to the references'
+vertical/horizontal selection.
 
 Everything is generated procedurally on CPU from a seed (no third-party brush images, hence no
 licensing issue) and is bitwise deterministic for a given ``(kind, size, seed)``.
@@ -15,7 +22,7 @@ licensing issue) and is bitwise deterministic for a given ``(kind, size, seed)``
 Kinds:
     ``flat``  antialiased rectangle (ablation baseline; ignores the seed).
     ``oil``   bristle streaks along x, ragged soft lateral edges, tapered and dry (broken) ends.
-    ``round`` soft elliptical dab with a mild isotropic texture.
+    ``round`` soft elliptical dab with a mild isotropic texture (amplitude 0.08).
 """
 
 from __future__ import annotations
@@ -91,8 +98,8 @@ def _flat(h: int, w: int) -> torch.Tensor:
     inset = 1.5
     dx = torch.minimum(xs - inset, (w - inset) - xs)  # signed distance to the x edges (inside > 0)
     dy = torch.minimum(ys - inset, (h - inset) - ys)
-    dist = torch.minimum(dx[None, :], dy[:, None])
-    return (dist + 0.5).clamp(0.0, 1.0)[None]
+    # Product of the 1-D coverages = exact box-filter area coverage (corner pixel = 0.25).
+    return ((dx + 0.5).clamp(0.0, 1.0)[None, :] * (dy + 0.5).clamp(0.0, 1.0)[:, None])[None]
 
 
 def _oil(h: int, w: int, gen: torch.Generator) -> torch.Tensor:
@@ -118,7 +125,7 @@ def _round(h: int, w: int, gen: torch.Generator) -> torch.Tensor:
     r = torch.sqrt(u * u + v * v)
     cover = 1.0 - _smoothstep(0.55, 1.0, r)
     tex = _normalized_noise(h, w, sigma_y=max(1.0, h / 32.0), sigma_x=max(1.0, w / 32.0), gen=gen)
-    return (cover * (0.95 + 0.15 * tex)).clamp(0.0, 1.0)[None]
+    return (cover * (0.97 + 0.08 * tex)).clamp(0.0, 1.0)[None]
 
 
 def make_brush(kind: str, size: tuple[int, int], seed: int) -> torch.Tensor:
