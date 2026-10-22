@@ -175,3 +175,14 @@ def test_resize_short_side() -> None:
     out = resize_short_side(torch.rand(3, 100, 200), 50)
     assert out.shape == (3, 50, 100)
     assert out.min() >= 0.0 and out.max() <= 1.0
+
+
+def test_center_crop_resize() -> None:
+    from brushstroke.utils.io import center_crop_resize
+
+    img = torch.zeros(3, 100, 60)
+    img[:, 20:80, :] = 1.0  # a band the crop to a square must keep
+    out = center_crop_resize(img, (32, 32))
+    assert out.shape == (3, 32, 32) and out.min() >= 0.0 and out.max() <= 1.0
+    wide = center_crop_resize(torch.rand(3, 60, 100), (30, 60))
+    assert wide.shape == (3, 30, 60)

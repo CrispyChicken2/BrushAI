@@ -63,3 +63,13 @@ def resize_short_side(img: torch.Tensor, short: int) -> torch.Tensor:
 def _check_image(img: torch.Tensor) -> None:
     if img.ndim != 3 or img.shape[0] != 3:
         raise ValueError(f"expected an image of shape (3, H, W), got {tuple(img.shape)}")
+
+
+def center_crop_resize(img: torch.Tensor, size: tuple[int, int]) -> torch.Tensor:
+    """Center-crop ``(3, H, W)`` to the aspect ratio of ``size = (h, w)``, then resize to it."""
+    _check_image(img)
+    h, w = size
+    ih, iw = img.shape[-2:]
+    crop_h, crop_w = (ih, round(ih * w / h)) if iw / ih > w / h else (round(iw * h / w), iw)
+    top, left = (ih - crop_h) // 2, (iw - crop_w) // 2
+    return resize_image(img[:, top : top + crop_h, left : left + crop_w], size)

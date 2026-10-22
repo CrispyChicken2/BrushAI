@@ -117,7 +117,9 @@ import torch
 from brushstroke.strokes import BrushSpec, StrokeSequence
 
 params = torch.rand(2, 20, 9)  # batch of 2 paintings from a producer, 20 strokes each
-seq = StrokeSequence.from_batch(params, 1, BrushSpec(kind="oil", index_seed=0), canvas_size=(256, 256))
+seq = StrokeSequence.from_batch(
+    params, 1, BrushSpec(kind="oil", index_seed=0), canvas_size=(256, 256)
+)
 image = seq.render()  # (3, 256, 256)
 seq.save("outputs/painting.npz")
 same = StrokeSequence.load("outputs/painting.npz")
