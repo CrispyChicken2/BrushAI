@@ -1,0 +1,51 @@
+# Baseline (a): optimization-only progressive stroke decomposition. Loaded into
+# brushstroke.baselines.optim.config.PaintOptimConfig.
+seed: 0
+deterministic: false
+device: auto
+output_dir: outputs/optim
+
+brush:
+  kind: oil          # flat | oil | round
+  bank_size: 8
+  mask_height: 64
+  mask_width: 128
+  seed: 0
+
+render:
+  chunk_size: 64
+  use_checkpoint: false   # chosen per level from the memory estimate when optim.checkpoint_bytes is exceeded
+  brush_seed: 0
+  dtype: auto
+  sampler: grid_sample
+  min_size: 0.001
+
+loss:
+  l1: 1.0
+  lpips: 0.1         # LPIPS-VGG weight (0 = off); 0.1 lowers final LPIPS from ~0.58 to ~0.44
+  ot: 0.0            # Sinkhorn OT weight (0 = off; SNP uses 0.1)
+  ot_size: 24
+  ot_eps: 0.02
+  ot_iters: 30
+
+optim:
+  height: 512
+  width: 512
+  levels: [1, 2, 3, 4, 6, 8, 12, 16, 20]           # progressive m x m grids
+  strokes_per_patch: [1, 1, 1, 1, 1, 2, 2, 2, 2]  # new strokes per patch, per level (total 1794)
+  iters: 100                                # steps per level
+  optimizer: adam                           # rmsprop (as SNP) | adam
+  lr: 0.02                                  # on logit-space parameters
+  lr_final_frac: 0.1
+  finetune_all: false                       # also optimize earlier levels' strokes
+  finetune_lr_factor: 0.3
+  background: [1.0, 1.0, 1.0]
+  init_error_power: 2.0
+  init_blur_frac: 0.25
+  init_size_scale: 1.0
+  init_aspect: [0.4, 1.0]
+  init_opacity: 0.9
+  resample_every: 0                         # >0: re-initialize dead strokes every k steps
+  dead_opacity: 0.05
+  dead_area: 0.0001
+  checkpoint_bytes: 6.0e9
