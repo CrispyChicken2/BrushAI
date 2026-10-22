@@ -17,7 +17,7 @@ from PIL import Image
 def load_image(path: str | Path, size: int | tuple[int, int] | None = None) -> torch.Tensor:
     """Load an image file as a ``(3, H, W)`` float32 tensor in [0, 1].
 
-    Alpha is dropped and grayscale is expanded to RGB; 16-bit grayscale is scaled by 1/65535.
+    Alpha is dropped and grayscale is expanded to RGB; 16-bit grayscale is scaled by 1/65535 and clipped.
 
     Args:
         path: image file.
@@ -27,7 +27,7 @@ def load_image(path: str | Path, size: int | tuple[int, int] | None = None) -> t
         if im.mode.startswith("I;16") or im.mode == "I":
             # 16-bit grayscale: convert("RGB") would clip to 8 bits, so rescale explicitly.
             gray = np.asarray(im, dtype=np.float32) / 65535.0
-            arr = np.repeat(gray[..., None], 3, axis=2)
+            arr = np.repeat(np.clip(gray, 0.0, 1.0)[..., None], 3, axis=2)
         else:
             arr = np.asarray(im.convert("RGB"), dtype=np.float32) / 255.0
     img = torch.from_numpy(arr).permute(2, 0, 1).contiguous()
