@@ -15,20 +15,35 @@ them. Parameters are normalized (renderer convention, `renderer.md`), so the sam
 |-------|--------------|---------|
 | `params` | float32 `(N, 9)` | `x, y, w, h, theta, r, g, b, a` (see `renderer.md`); float64 input is converted |
 | `canvas_size` | `(H, W)` ints | default render size |
-| `brush` | `BrushSpec(kind, bank_size, mask_height, mask_width, seed)` | brush bank the strokes were made for (masks are regenerated from the spec) |
-| `brush_index` | int64 `(N,)` | bank variant of each stroke; default = the renderer's seeded, prefix-stable draw |
+| `brush` | `BrushSpec(kind, bank_size, mask_height, mask_width, seed, index_seed)` | brush bank the strokes were made for (masks are regenerated from the spec); `seed` = masks, `index_seed` = seed of the default variant draw (= `RenderConfig.brush_seed` of the producer) |
+| `brush_index` | int64 `(N,)` | bank variant of each stroke; default = painting 0 of the renderer's default draw with `brush.index_seed` (see below) |
 | `background` | `(r, g, b)` floats | initial canvas colour |
 | `background_ref` | `str | None` | informational reference (name / path / hash) to a background image; not used for rendering |
 | `scale_level` | int32 `(N,)` | producer's coarse-to-fine level, `-1` = unset |
 | `patch_id` | int32 `(N,)` | patch the stroke was predicted for, `-1` = unset |
 | `source` | list of N `str` | producer name per stroke, `""` = unset |
-| `meta` | JSON dict | config hash, seed, producer version, timings, ... (normalized by a JSON round trip: tuples become lists) |
+| `meta` | JSON dict | config hash, seed, producer version, timings, ... (normalized by a JSON round trip: tuples become lists and dict keys become strings) |
 | `schema_version` | int | `SCHEMA_VERSION = 1` |
 
 Operations: `len`, `seq[:k]` / `seq[[i, j]]` / `seq[bool_mask]` (`select`; keeps all tags and meta), `reorder(perm)`
 (validated permutation; params and every tag permuted), `StrokeSequence.concat(parts)` (same canvas/brush/background
 required; meta and `background_ref` from the first part), `to(device)`, `render(height=None, width=None, cfg=None,
-canvas=None)` -> `(3, H, W)`, `equals(other)`, `save` / `load`, `empty`.
+canvas=None)` -> `(3, H, W)`, `render_progressive(checkpoints, ...)` -> `(len(checkpoints), 3, H, W)`, `from_batch`, `equals(other)`, `save` / `load`, `empty`.
+
+## Producers: keeping render == what was optimized
+The brush variant of each stroke is part of the painting. The renderer, when not given `brush_index`, draws it with
+`default_brush_index(B, N, K, seed)`: painting `b` comes from its own generator seeded `seed * 1_000_003 + b`
+(independent of the batch size B, prefix-stable in N). A producer that renders a batch with the renderer defaults
+(`RenderConfig.brush_seed = s`) must wrap painting `b` with
+
+```python
+StrokeSequence.from_batch(params, b, BrushSpec(..., index_seed=s), canvas_size=(H, W))
+```
+
+which fills `brush_index` with exactly the draw the renderer used (tested bitwise for B = 1, 2, 3 and `s` = 0, 3).
+The plain constructor's default (`brush_index=None`) is painting 0 with `index_seed`. A producer that passed explicit
+`brush_index` to the renderer just passes the same tensor to the sequence. Since `render()` always uses the stored
+`brush_index`, a saved sequence re-renders identically whatever the seed conventions of the renderer later become.
 
 ## File format
 One `.npz` (`np.savez`, no pickle): arrays `params` (float32), `brush_index` (int64), `scale_level`, `patch_id` (int32)

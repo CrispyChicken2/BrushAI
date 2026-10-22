@@ -44,7 +44,9 @@ note for M2: PT binarizes (`alpha > 0`) and erodes the brush alpha and uses two 
 procedural masks (a `pt_brush` option can be added for the reproduction).
 
 The brush variant of each stroke is `brush_index` (B, N) or, by default, a seeded random draw from the bank
-(`brush_seed`), prefix-stable in N so that rendering the first k strokes uses the same brushes.
+(`brush_seed`). **One rule** (`default_brush_index`, shared with `StrokeSequence`): painting `b` is drawn from
+its own generator seeded `seed * 1_000_003 + b`, so row `b` depends on `(seed, b)` only (not on the batch size B)
+and is prefix-stable in N: rendering the first k strokes, or painting `b` alone, uses the same brushes.
 
 Samplers (`render.sampler`): `grid_sample` (default, fast) and `gather` (a floor/gather bilinear sampler, identical
 values, 1e-5) whose backward has no atomic adds. `grid_sample`'s CUDA backward raises under
