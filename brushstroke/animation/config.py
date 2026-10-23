@@ -15,9 +15,8 @@ class AnimationConfig:
     hold: float = 1.5  # seconds the finished painting stays on screen
     overlap: float = 3.0  # average number of strokes in flight (reveal time = overlap x time slot)
     min_reveal_frames: float = 2.0  # a stroke is revealed over at least this many frames (0 = off)
-    easing: str = (
-        "uniform"  # time slots per stroke: uniform | decelerate (later strokes get more time)
-    )
+    easing: str = "uniform"  # time slots per stroke: uniform | decelerate | by_level
+    level_time_power: float = 0.5  # by_level: time of a level ~ strokes_in_level ** power
     decel_ratio: float = (
         3.0  # decelerate: the last stroke gets this many times the first one's slot
     )
