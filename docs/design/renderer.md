@@ -121,3 +121,8 @@ is 0.65 GB and 0.76 s.
   vertical/horizontal brush choice).
 - Porter, Duff. *Compositing Digital Images*. SIGGRAPH 1984 (the over operator).
 - Chen et al., *Training Deep Nets with Sublinear Memory Cost* (2016) / `torch.utils.checkpoint` (activation checkpointing).
+
+## Paint Transformer compatible mode (T-011)
+`render.mode: pt` renders the strokes exactly like the official Paint Transformer code (two brush images chosen by `h > w`, binarized then eroded alpha, dilated `gray * colour` foreground, black canvas, opacity replaced by a
+0/1 decision). It is bit-identical to the official `param2stroke` in the inference variant (max abs diff 0.0) and within 1.8e-7 in the training variant. The default mode described above is unchanged.
+See [paint_transformer.md](paint_transformer.md) section 11 and `brushstroke/renderer/pt.py`.
