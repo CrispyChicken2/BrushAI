@@ -1,0 +1,4 @@
+# Paint Transformer losses with the weights of the paper (lambda_r = 8, BCE 1, pixel 1, L1 1, W 10)
+# and the lambda_r-weighted BCE as confidence term of the matching cost.
+preset: paper_weights
+matcher: auto

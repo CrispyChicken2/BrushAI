@@ -123,3 +123,18 @@ def read_official_brushes(variant: str) -> torch.Tensor:
         arr = np.array(Image.open(folder / name).convert("L"))[None]
         out.append(torch.from_numpy(arr).unsqueeze(0).float() / 255.0)
     return torch.cat(out, dim=0)
+
+
+def official_network() -> Any:
+    """Module ``inference/network.py`` of the official repository (``Painter``)."""
+    folder = OFFICIAL / "inference"
+    with _paths(folder):
+        spec = importlib.util.spec_from_file_location("pt_official_network", folder / "network.py")
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    return module
+
+
+def have_weights() -> bool:
+    return (OFFICIAL / "model.pth").exists()
