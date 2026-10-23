@@ -117,7 +117,7 @@ def results_markdown(rows: list[dict[str, object]]) -> str:
         f"Revised M1 target (docs/experiments/optim_sweep.md): LPIPS-VGG <= {TARGETS['lpips_vgg']}, held-out LPIPS-Alex <= "
         f"{TARGETS['lpips_alex']}, <= 2000 strokes, <= 10 min per 512 px image.",
         "",
-        "| demo | input | strokes | L1 | PSNR (dB) | SSIM | LPIPS-VGG | LPIPS-Alex | runtime (s) | peak VRAM (GB) | seed | GIF (MB) | sequence sha256 | target met |",
+        "| demo | input | strokes | L1 | PSNR (dB) | SSIM | LPIPS-VGG | LPIPS-Alex | runtime (min) | peak VRAM (GB) | seed | GIF (MB) | sequence sha256 | target met |",
         "|------|-------|---------|----|-----------|------|-----------|------------|-------------|----------------|------|----------|-----------------|------------|",
     ]
     for r in rows:
@@ -129,7 +129,7 @@ def results_markdown(rows: list[dict[str, object]]) -> str:
         )
         lines.append(
             f"| {r['name']} | {r['image_id']} | {m['num_strokes']:.0f} | {m['l1']:.4f} | {m['psnr']:.2f} | {m['ssim']:.3f} | "
-            f"{m['lpips_vgg']:.3f} | {m['lpips_alex']:.3f} | {m['runtime_seconds']:.0f} | {m['peak_vram_mb'] / 1024:.1f} | "
+            f"{m['lpips_vgg']:.3f} | {m['lpips_alex']:.3f} | {m['runtime_seconds'] / 60:.1f} | {m['peak_vram_mb'] / 1024:.1f} | "
             f"{r['seed']} | {r['gif_mb']:.2f} | `{str(r['sequence_sha256'])[:12]}` | {'yes' if met else 'NO'} |"
         )
     lines += [
