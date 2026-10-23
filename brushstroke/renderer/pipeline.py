@@ -20,6 +20,12 @@ from brushstroke.renderer.compositing import composite_parallel
 from brushstroke.renderer.params import B as BLUE
 from brushstroke.renderer.params import R as RED
 from brushstroke.renderer.params import check_params
+from brushstroke.renderer.pt import (
+    PT_MODES,
+    cached_pt_brushes,
+    ours_to_pt,
+    render_pt_progressive,
+)
 from brushstroke.renderer.rasterize import brush_masks, default_brush_index, render_alphas
 
 _DTYPES: dict[str, torch.dtype | None] = {
@@ -40,6 +46,15 @@ class RenderConfig:
     dtype: str = "auto"  # compositing dtype: auto (= params dtype), float32, float64, bfloat16
     sampler: str = "grid_sample"  # grid_sample | gather (gather: deterministic CUDA backward)
     min_size: float = 1e-3  # smallest w / h used by the parameter helpers
+    mode: str = (
+        "default"  # default: our procedural brushes | pt: Paint Transformer compatible (T-011)
+    )
+    pt_alpha: str = (
+        "pt_infer"  # pt mode: pt_infer | pt_train (alpha/brush pipeline of the official code)
+    )
+    pt_brush_dir: str = (
+        "data/raw/pt_brush"  # pt mode: official brush PNGs (scripts/fetch_pt_brushes.py)
+    )
 
 
 def make_canvas(
@@ -82,6 +97,35 @@ def _composite_chunk(
     return out.to(canvas.dtype)
 
 
+def _render_pt_mode(
+    params: torch.Tensor,
+    height: int,
+    width: int,
+    checkpoints: Sequence[int],
+    canvas: torch.Tensor | Sequence[float] | None,
+    cfg: RenderConfig,
+) -> torch.Tensor:
+    """Paint Transformer compatible rendering of our ``(B, N, 9)`` strokes (opacity = 0/1 decision,
+    black canvas)."""
+    if cfg.pt_alpha not in PT_MODES:
+        raise ValueError(f"render.pt_alpha must be one of {PT_MODES}, got {cfg.pt_alpha!r}")
+    p8, decisions = ours_to_pt(params)
+    variant = "train" if cfg.pt_alpha == "pt_train" else "inference"
+    brushes = cached_pt_brushes(variant, cfg.pt_brush_dir, str(params.device))
+    start = None if canvas is None else make_canvas(canvas, params.shape[0], height, width, params)
+    return render_pt_progressive(
+        p8,
+        height,
+        width,
+        brushes,
+        checkpoints,
+        cfg.pt_alpha,
+        decisions,
+        start,
+        min(cfg.chunk_size, 16),
+    )
+
+
 def render_progressive(
     params: torch.Tensor,
     brush: torch.Tensor | BrushBank,
@@ -111,6 +155,10 @@ def render_progressive(
     check_params(params)
     cfg = cfg or RenderConfig()
     b, n, _ = params.shape
+    if cfg.mode == "pt":
+        return _render_pt_mode(params, height, width, checkpoints, canvas, cfg)
+    if cfg.mode != "default":
+        raise ValueError(f"render.mode must be 'default' or 'pt', got {cfg.mode!r}")
     if cfg.chunk_size < 1:
         raise ValueError(f"chunk_size must be >= 1, got {cfg.chunk_size}")
     if any(not 0 <= k <= n for k in checkpoints):

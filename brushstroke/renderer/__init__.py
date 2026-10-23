@@ -11,6 +11,14 @@ from brushstroke.renderer.params import (
     unconstrained_from_params,
 )
 from brushstroke.renderer.pipeline import RenderConfig, make_canvas, render, render_progressive
+from brushstroke.renderer.pt import (
+    load_pt_brushes,
+    ours_to_pt,
+    patch_to_canvas,
+    pt_param2stroke,
+    pt_to_ours,
+    render_pt,
+)
 from brushstroke.renderer.rasterize import render_alphas
 
 __all__ = [
@@ -27,7 +35,13 @@ __all__ = [
     "composite_sequential",
     "make_brush",
     "make_canvas",
+    "load_pt_brushes",
     "make_canvas_texture",
+    "ours_to_pt",
+    "patch_to_canvas",
+    "pt_param2stroke",
+    "pt_to_ours",
+    "render_pt",
     "params_from_unconstrained",
     "render",
     "render_alphas",
