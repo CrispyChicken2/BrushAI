@@ -5,7 +5,8 @@ duration: 10.0           # seconds of painting
 hold: 1.5                # seconds of the finished painting
 overlap: 3.0             # average strokes in flight (reveal time = overlap x time slot)
 min_reveal_frames: 2.0   # each stroke is revealed over at least this many frames (0 = off)
-easing: uniform          # uniform | decelerate (later strokes get more time)
+easing: uniform          # uniform | decelerate (later strokes get more time) | by_level
+level_time_power: 0.5    # by_level: time of a coarse-to-fine level ~ strokes_in_level ** power
 decel_ratio: 3.0
 stroke_ease: smoothstep  # linear | smoothstep (progress curve inside a stroke)
 # partial reveal

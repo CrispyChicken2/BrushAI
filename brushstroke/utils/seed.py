@@ -9,7 +9,9 @@ import numpy as np
 import torch
 
 
-def seed_everything(seed: int, deterministic: bool = False) -> None:
+def seed_everything(
+    seed: int, deterministic: bool = False, cudnn_deterministic: bool = False
+) -> None:
     """Seed python, numpy and torch (CPU + all CUDA devices).
 
     Args:
@@ -20,6 +22,10 @@ def seed_everything(seed: int, deterministic: bool = False) -> None:
             Call it before any CUDA work: ``CUBLAS_WORKSPACE_CONFIG`` is only read at the first
             cuBLAS call (otherwise set it in the entry script). If False, these flags are
             reset to their permissive defaults.
+        cudnn_deterministic: only force deterministic cuDNN kernels (convolution backward, e.g. the
+            LPIPS/VGG term of the baseline loss) without ``use_deterministic_algorithms``. On the
+            optimization baseline this alone makes GPU runs bitwise reproducible at full speed
+            (T-007); the full flag is ~3x slower and refuses ``grid_sample``'s CUDA backward.
     """
     if seed < 0:
         raise ValueError(f"seed must be non-negative, got {seed}")
@@ -33,5 +39,5 @@ def seed_everything(seed: int, deterministic: bool = False) -> None:
         # Required by cuBLAS for deterministic matmuls on CUDA >= 10.2.
         os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
     torch.use_deterministic_algorithms(deterministic)
-    torch.backends.cudnn.deterministic = deterministic
+    torch.backends.cudnn.deterministic = deterministic or cudnn_deterministic
     torch.backends.cudnn.benchmark = False

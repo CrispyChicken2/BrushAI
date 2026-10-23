@@ -186,3 +186,13 @@ def test_center_crop_resize() -> None:
     assert out.shape == (3, 32, 32) and out.min() >= 0.0 and out.max() <= 1.0
     wide = center_crop_resize(torch.rand(3, 60, 100), (30, 60))
     assert wide.shape == (3, 30, 60)
+
+
+def test_seed_everything_cudnn_deterministic_only() -> None:
+    try:
+        seed_everything(0, deterministic=False, cudnn_deterministic=True)
+        assert torch.backends.cudnn.deterministic
+        assert not torch.are_deterministic_algorithms_enabled()  # the slow global flag stays off
+    finally:
+        seed_everything(0)
+    assert not torch.backends.cudnn.deterministic

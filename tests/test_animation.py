@@ -402,3 +402,36 @@ def test_missing_ffmpeg_gives_clear_error(monkeypatch: pytest.MonkeyPatch, tmp_p
 def test_animation_yaml_matches_defaults() -> None:
     path = Path(__file__).parents[1] / "configs" / "animation.yaml"
     assert load_config(AnimationConfig, path) == AnimationConfig()
+
+
+def test_by_level_easing_gives_coarse_levels_more_time_per_stroke() -> None:
+    levels = np.concatenate([np.full(1, 0), np.full(4, 1), np.full(100, 2)])
+    cfg = cfg_for(
+        fps=30,
+        duration=6.0,
+        easing="by_level",
+        level_time_power=0.5,
+        min_reveal_frames=0.0,
+        overlap=1.0,
+    )
+    tl = build_timeline(len(levels), cfg, levels)
+    assert (np.diff(tl.start) >= 0).all() and (
+        tl.start + tl.duration <= tl.paint_seconds + 1e-9
+    ).all()
+    assert tl.duration[0] > 5 * tl.duration[-1]  # the single coarse stroke is revealed more slowly
+    # time per level ~ count ** power: the 100-stroke level gets ~10 / (1 + 2 + 10) of the time
+    per_level = [float(tl.duration[levels == lv].sum()) for lv in (0, 1, 2)]
+    assert per_level[2] / sum(per_level) == pytest.approx(10 / 13, rel=0.05)
+    uniform = build_timeline(len(levels), dataclasses.replace(cfg, easing="uniform"))
+    assert tl.duration[0] > uniform.duration[0]
+    with pytest.raises(ValueError):
+        build_timeline(len(levels), cfg)  # levels are required
+    with pytest.raises(ValueError):
+        build_timeline(len(levels), cfg, levels[:-1])
+    # the frame renderer reads the tags of the sequence
+    seq = make_seq(12)
+    seq = dataclasses.replace(
+        seq, scale_level=torch.tensor([0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2], dtype=torch.int32)
+    )
+    renderer = FrameRenderer(seq, cfg_for(easing="by_level"))
+    assert renderer.timeline.duration[0] > renderer.timeline.duration[-1]

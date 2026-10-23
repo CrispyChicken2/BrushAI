@@ -43,7 +43,8 @@ class FrameRenderer:
         self.cfg = cfg
         self.device = get_device(cfg.device)
         self.height, self.width = output_size(seq, cfg)
-        self.timeline = timeline or build_timeline(len(seq), cfg)
+        levels = seq.scale_level.cpu().numpy() if seq.scale_level is not None else None
+        self.timeline = timeline or build_timeline(len(seq), cfg, levels)
         self.n = len(seq)
         spec = seq.brush
         bank = get_brush_bank(

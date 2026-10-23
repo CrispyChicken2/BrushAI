@@ -15,7 +15,7 @@ import numpy as np
 from brushstroke.animation.config import AnimationConfig
 
 DIRECTIONS = ("forward", "reverse", "random")
-EASINGS = ("uniform", "decelerate")
+EASINGS = ("uniform", "decelerate", "by_level")
 STROKE_EASES = ("linear", "smoothstep")
 
 
@@ -69,11 +69,17 @@ def num_frames(cfg: AnimationConfig) -> int:
     return round(cfg.fps * cfg.duration) + round(cfg.fps * cfg.hold)
 
 
-def build_timeline(num_strokes: int, cfg: AnimationConfig) -> Timeline:
+def build_timeline(
+    num_strokes: int, cfg: AnimationConfig, levels: np.ndarray | None = None
+) -> Timeline:
     """Assign every stroke a start time, a reveal duration and a direction (deterministic).
 
     Each stroke gets a time slot (equal for ``easing="uniform"``; growing linearly up to
     ``decel_ratio`` times for ``"decelerate"``, i.e. fast background strokes and slower details).
+    With ``easing="by_level"`` the time of a whole coarse-to-fine level (``levels``: ``(N,)`` int
+    tags, e.g. ``scale_level``) is proportional to ``count ** level_time_power``: power 1 is the
+    uniform pacing, 0 gives every level the same time, so the few coarse strokes that lay down the
+    big masses are painted slowly enough to be seen.
     Its reveal lasts ``overlap x slot`` but at least ``min_reveal_frames`` frames (so that it does
     not pop in), and the starts are spread over the remaining time so that every stroke ends by the
     end of the painting phase (the last one exactly then when it has the longest reveal).
@@ -96,7 +102,14 @@ def build_timeline(num_strokes: int, cfg: AnimationConfig) -> Timeline:
             empty, empty, empty.astype(bool), cfg.fps, paint_frames, hold_frames, cfg.stroke_ease
         )
 
-    if cfg.easing == "decelerate" and n > 1:
+    if cfg.easing == "by_level":
+        if levels is None or len(levels) != n:
+            raise ValueError("easing 'by_level' needs one level tag per stroke")
+        counts = {lv: int((levels == lv).sum()) for lv in np.unique(levels)}
+        weights = np.array(
+            [counts[lv] ** (cfg.level_time_power - 1.0) for lv in levels], dtype=float
+        )
+    elif cfg.easing == "decelerate" and n > 1:
         weights = np.linspace(1.0, cfg.decel_ratio, n)
     else:
         weights = np.ones(n)

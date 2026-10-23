@@ -21,6 +21,19 @@ NASA work (US federal government, public domain).
 
 Images are center-cropped to a square and resized to 512 x 512 before painting (`brushstroke.utils.io.center_crop_resize`).
 
+## Demo inputs (T-007, M1 demo GIFs)
+
+The three M1 demos reuse images of the table above (same manifest, same checksums; no second downloader). They are downloaded to
+`data/raw/demo/` (gitignored) by `python -m scripts.fetch_demo_inputs [--insecure]` (also run by `scripts/make_m1_demos.py`), which verifies
+the SHA-256 of every file against `configs/experiments/images.yaml`. The demo GIFs in `docs/media/` are derivative works (paintings
+generated from these public-domain images); the inputs themselves are never committed.
+
+| demo | role | image id | work | author | date | source page | license | SHA-256 |
+|------|------|----------|------|--------|------|-------------|---------|---------|
+| `m1_portrait` | portrait / figure | `pearl_earring` | Girl with a Pearl Earring | Johannes Vermeer | c. 1665 | <https://commons.wikimedia.org/wiki/File:Meisje_met_de_parel.jpg> | Public domain (author died in 1675) | `e9b3dca43a5c0eda5e6cd0aca4f24f1f24c9b2d0dd25695158dc5d48d5b39408` |
+| `m1_landscape` | landscape | `starry_night` | The Starry Night | Vincent van Gogh | 1889 | <https://commons.wikimedia.org/wiki/File:Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg> | Public domain (author died in 1890) | `70ddc5f0b95875823ddf261ad749b0faaaa5405b5cfcfdd803628c28da847137` |
+| `m1_photo` | photo with a clear subject | `earth_apollo17` | The Earth seen from Apollo 17 ("Blue Marble") | NASA / Apollo 17 crew | 1972-12-07 | <https://commons.wikimedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg> | Public domain (NASA work) | `16eaa54446f761a80ee8de604107b66432a1e6b489aa99d4777dc92765fae80a` |
+
 ## Models / weights (not redistributed)
 - VGG16 (ImageNet) backbone of LPIPS-VGG and AlexNet (ImageNet) of LPIPS-Alex: downloaded by `torchvision` into the torch
   hub cache on first use. LPIPS linear heads: shipped with the `lpips` package (BSD-2-Clause, Zhang et al.).

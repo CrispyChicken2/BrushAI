@@ -62,7 +62,8 @@ class PaintOptimConfig:
     """Root config of ``scripts/paint_optim.py``."""
 
     seed: int = 0
-    deterministic: bool = False
+    deterministic: bool = False  # full deterministic algorithms (slow, no grid_sample backward)
+    cudnn_deterministic: bool = False  # deterministic cuDNN only: bitwise-reproducible GPU runs
     device: str = "auto"
     output_dir: str = "outputs/optim"
     brush: BrushConfig = field(default_factory=BrushConfig)

@@ -2,6 +2,7 @@
 # brushstroke.baselines.optim.config.PaintOptimConfig.
 seed: 0
 deterministic: false
+cudnn_deterministic: false   # true: bitwise-reproducible GPU runs at full speed (used by the demos)
 device: auto
 output_dir: outputs/optim
 
