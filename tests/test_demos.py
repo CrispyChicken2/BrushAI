@@ -119,6 +119,7 @@ def test_sequence_hash_and_results_markdown(tmp_path: Path) -> None:
     lines = [ln for ln in text.splitlines() if ln.startswith("| m1_")]
     assert lines[0].endswith("| yes |") and lines[1].endswith("| NO |")
     assert "0.300" in lines[0] and "0.450" in lines[1]
+    assert " 9.3 " in lines[0]  # runtime 560 s is shown in minutes
     assert "[m1_a](m1_a_compare.jpg)" in text and "`abcdef012345`" in text
 
 

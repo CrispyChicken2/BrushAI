@@ -4,7 +4,7 @@ Neural stroke-based painting: turn a text prompt or an image into a painting mad
 of brush strokes, replayed as a stroke-by-stroke animation. The research focus is semantic-aware stroke
 allocation, painterly stroke ordering and an "anytime quality" metric.
 
-**Status: M1 in progress** (see [docs/plan/M1.md](docs/plan/M1.md)). Documentation index: [docs/README.md](docs/README.md).
+**Status: M1 complete** (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criteria audit: [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
 ## M1 demos
@@ -25,7 +25,9 @@ painting and a 2 s hold; the GIFs are 480 px wide, about 1.2 MB each). Settings 
 The target is the revised one adopted for the demos (LPIPS-VGG ≤ 0.35 and LPIPS-Alex ≤ 0.40 at ≤ 2000 strokes and ≤ 10 min
 per 512 px image). The landscape misses it: its swirling high-frequency brushwork is hard to reproduce with about 2000 strokes.
 Full table with runtime, VRAM, SSIM and hashes: [docs/media/m1_results.md](docs/media/m1_results.md). Regenerate everything with
-`.venv\Scripts\python -m scripts.make_m1_demos` (about 29 minutes on an RTX 5070).
+`.venv\Scripts\python -m scripts.make_m1_demos` (about 29 minutes on an RTX 5070; it downloads and verifies the three inputs itself;
+behind a TLS-intercepting proxy add `--insecure`, and see the weights note in the troubleshooting section). A rerun from a fresh clone
+reproduces the committed GIFs byte for byte on the same GPU.
 
 ## Setup
 
@@ -64,6 +66,12 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
   never committed) with
   `[global]` / `trusted-host = download.pytorch.org pypi.org files.pythonhosted.org` (one host per line).
 - Windows path limit: create the venv under a short path; torch has very deep paths and the install breaks otherwise.
+- First use of LPIPS (the default baseline loss, the metrics of the demos and several tests) downloads the torchvision ImageNet weights of
+  VGG16 (528 MB) and AlexNet (233 MB) into the torch hub cache (`~/.cache/torch/hub/checkpoints`) from `download.pytorch.org`; behind a
+  TLS-intercepting proxy this download fails with the same certificate error. Pre-download them once (for example with the
+  `lpips.LPIPS(net="vgg")` and `net="alex"` constructors with certificate checks relaxed for that one command) or run on a machine with
+  direct access. Tests that need them are marked `slow`; the CI subset does not.
+- Painting needs an input image: run `python -m scripts.fetch_data` first (add `--insecure` behind such a proxy); it fills `data/raw/`.
 
 ## Layout
 
@@ -74,7 +82,7 @@ brushstroke/          Python package
   contribution/       semantic allocation and painterly ordering (M4)
   animation/          stroke-by-stroke replay with partial reveal, ffmpeg export (T-006)
   generation/         text/image front-ends (M5)
-  eval/               metrics and evaluation harness (M3)
+  eval/               image metrics: L1, PSNR, SSIM, LPIPS-VGG / LPIPS-Alex (T-007); evaluation harness (M3)
   baselines/optim/    baseline (a): optimization-only stroke decomposition (T-005)
   strokes.py          StrokeSequence: ordered strokes + metadata, save/load (T-004)
   utils/              config (YAML + dot-overrides), seeding, device/VRAM helpers, image I/O
@@ -223,5 +231,16 @@ mypy and `pytest -m "not gpu and not slow"`.
 
 ## License
 
-Code: MIT (see [LICENSE](LICENSE)). Pretrained models and datasets used by the project have their own
-licenses; they will be listed here as they are introduced.
+Code: MIT (see [LICENSE](LICENSE)). Third-party components are not redistributed in this repository; their licenses are:
+
+| component | used for | license |
+|-----------|----------|---------|
+| PyTorch 2.11, torchvision 0.26 | tensors, rendering, VGG/AlexNet code | BSD-3-Clause |
+| NumPy, SciPy, OmegaConf, LPIPS (code and linear heads) | arrays, config, perceptual metric | BSD (3-Clause; LPIPS 2-Clause) |
+| Pillow, PyYAML, tqdm, matplotlib | image I/O, YAML, progress, figures | MIT-CMU, MIT, MPL-2.0/MIT, PSF-based |
+| pytest, ruff, mypy | development | MIT |
+| ffmpeg (external executable, not bundled) | MP4/WebM/GIF export | LGPL/GPL depending on the build you install |
+| VGG16 and AlexNet ImageNet weights | LPIPS backbones, downloaded at run time into the torch cache | torchvision pretrained weights (trained on ImageNet; subject to the ImageNet terms of use) |
+| evaluation and demo images | experiments and demos | public domain / NASA, per image in [docs/data_sources.md](docs/data_sources.md) |
+
+The demo GIFs in `docs/media/` are paintings generated from the public-domain inputs above. Model weights and datasets are never committed.
