@@ -284,3 +284,42 @@ Time for 64 patches x 8 strokes with ~7 valid on the RTX 5070: scipy 2.37 ms (in
 - At initialization the predicted `w, h` are about 0.03 (sub-pixel): the pixel term has **exactly zero gradient** until the other terms grow the strokes (also in the official code); the gradient test therefore checks all four terms after 120 optimization steps (norms for the official preset: pixel 3.97, gt 0.38, w 4.38, decision 62.0).
 - Because the Wasserstein term is invariant to the sign of `h` and to a half-turn of `theta`, the network can keep negative heights (observed on an overfitting run: predicted `h` about -0.4 versus ground truth +0.4) at zero Wasserstein cost; the parameter L1 term pulls it back only slowly. The pixel loss does not care either (the PT renderer uses `h > w` to pick the brush).
   Overfitting 4 patches with a 1-layer network: total loss 66.25 -> 1.13 in 700 steps (pixel 0.61, L1 0.14, W 0.30, BCE 0.077); the residual is dominated by the pixel term (strokes cannot reproduce the gradient-textured targets exactly) and this symmetry. A constant learning rate of 1e-3 without clipping was unstable on the full-size network.
+
+## 13. Training pipeline (T-013)
+
+**Code:** `brushstroke/stroke_model/train.py` (`TrainConfig`, `train`, `profile_step`), `scripts/train_pt.py`, `configs/stroke_model/pt.yaml`; tests `tests/test_pt_train.py`.
+`python -m scripts.train_pt --config configs/stroke_model/pt.yaml [key=value ...]` (e.g. `schedule.max_steps=500 resume=auto precision=bf16 loss.preset=paper_weights`); `--profile` times the phases of a step.
+
+**Recipe (all in YAML, defaults = the official `train.sh`).** Adam lr 1e-4, betas (0.5, 0.999), batch 64, 220 epochs x 256 steps = **56,320 steps = 3,604,480 samples**, lr x1 until epoch 204 then x0.3 every 5 epochs
+(3e-5 for epochs 205-209, 9e-6, 2.7e-6, 8.1e-7 at epoch 220; tested at the epoch boundaries). Official init (`N(0, 0.02)`), data synthesized on the GPU at each step (T-011), no augmentation, no gradient clipping
+(`optim.grad_clip` available, off). `schedule.max_steps` truncates a run without changing the lr curve.
+
+**Validation.** `val.batches` (8 x 64 = 512) fixed held-out synthetic patches generated from `val.seed` only (independent of the training seed and stream; tested), evaluated in eval mode at step 0, every `val.every` steps and at the end.
+Logged: the four weighted loss terms, their total, and `count_error` = mean |#strokes with logit > 0 - #valid GT strokes| per patch. Files in `output_dir` (never committed): `train.csv` (mean over the last `log_every` steps, lr, step ms, peak VRAM),
+`val.csv`, `latest.pt`, `summary.json`, `config.resolved.yaml`; `tensorboard: true` also writes event files (optional package, not installed here).
+
+**Checkpoint and exact resume.** `latest.pt` (atomic write every `checkpoint_every` steps and at the end) holds model, optimizer, scheduler, the step, the config and **all RNG states** (python, numpy, torch CPU/CUDA, and the generator that drives the synthetic data). `resume: auto|path`
+restores them; CSV rows after the restored step are dropped. **Test: 6 steps straight == 3 steps + resume + 3 steps, bitwise** (model weights, Adam moments and step, scheduler, validation rows) on a CPU tiny config with dropout active.
+On GPU the same holds up to non-deterministic kernels (`deterministic: true` forces deterministic cuDNN); not asserted bitwise.
+
+**Step-time profile** (RTX 5070, batch 64, fp32, ms per step, warm; `train_pt --profile` and `pt_reference_study trainspeed`):
+| phase | official code | ours, scipy matcher | ours, GPU matcher (`auto`) | ours, GPU matcher + bf16 |
+|---|---|---|---|---|
+| data synthesis | 59.7 | 5.0 | 5.4 | 4.9 |
+| network forward (+ stroke rendering in the official forward) | 48.8 | 6.2 | 6.2 | 7.1 |
+| loss incl. render of predictions | (in forward) | 6.5 | 6.6 | 6.3 |
+| - of which Hungarian matching (cost matrix + assignment) | **95.3** | 2.4 | 2.3 | 2.2 |
+| backward + loss terms + optimizer | 32.6 | 20.0 + 1.5 | 20.0 + 1.5 | 16.9 + 1.5 |
+| **total per step** | **236.5** | 37.7 | 39.8 | 36.5 |
+Full schedule: official 3.70 h; **ours about 36-40 min (56,320 x 38-40 ms)**. In the official code the suspected culprit is confirmed: the per-sample Python loop of `optimize_parameters` (`cdist`, Gaussian Wasserstein and a host copy for each of the 64 samples) costs 95 ms, 40 % of the step,
+and the data synthesis another 25 %. Our batched cost matrix (one `(B, N, N)` tensor, equal to the official per-sample cost on the valid columns: tested) takes 2.3 ms, so after that change **matching is no longer a bottleneck** and the choice of assignment solver
+(scipy per sample 2.4 ms including the transfer, GPU enumeration 2.3 ms within noise at this batch size) is immaterial for speed; `auto` keeps the GPU enumeration on CUDA (no host sync). The step is now dominated by the backward pass
+(about 20 ms, many small kernels: 8 sequential compositing steps, a 394 px brush warp per stroke) and is launch-bound, which is why bf16 does not accelerate it. Equivalence of the new matching with the old one: the cost matrices (`test_batched_cost_matrix_equals_the_official_per_sample_costs`),
+the optimum of both solvers against brute force (T-012) and the four loss terms against the official ones (T-012).
+
+**bf16 comparison** (3000 steps, same seed, validation at the end, 512 patches): fp32 total 4.92 (pixel 0.673, L1 0.252, W 0.296, BCE 3.70, count error 0.947); bf16 total 4.87 (0.675, 0.252, 0.294, 3.65, 0.930): same curve within run-to-run noise. Speed 38.1 vs 38.2 ms per step;
+peak VRAM 851 vs 651 MiB. **Default: fp32** (no speed gain, parity not proven over a full schedule); `precision: bf16` is available (network under autocast, losses and renderer in fp32).
+
+**Short GPU run** (`schedule.max_steps=3000`, fp32): validation total 68.7 at step 0 -> 5.5 (500) -> 4.9 (3000); curve in `docs/media/pt_train_curve.png`. Peak VRAM **851 MiB** (allocated, ours) against 6.2 GB measured on the same GPU for the official code in `trainspeed`
+(which keeps an unfold-based morphology and per-sample tensors; the 3.6 GB quoted in section 5 came from the earlier measurement, whose protocol differs). Test: `test_gpu_smoke_run_decreases_the_validation_loss` (300 steps, slow + gpu).
+Note that at lr 1e-4 and 3000 steps the model is far from converged (the full schedule is 56,320 steps), and that the BCE term (weight 10, pos_weight 10) dominates the total at that stage.

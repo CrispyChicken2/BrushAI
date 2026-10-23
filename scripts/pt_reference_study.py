@@ -39,6 +39,7 @@ import time
 import types
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 import torch
 
@@ -246,30 +247,59 @@ def datastats(batches: int = 200) -> dict[str, object]:
 
 def trainspeed(steps: int = 60) -> dict[str, float]:
     """Time of one official training step (data synthesis + Hungarian matching + backward), batch
-    64, fp32."""
+    64, fp32, and its phases: ``set_input`` (data), ``forward`` (network + stroke rendering) and
+    ``matching`` (the per-sample Hungarian block of ``optimize_parameters``, replicated here and
+    timed in isolation). ``rest`` = step - data - forward - matching = loss terms, backward and
+    optimizer."""
+    from scipy.optimize import linear_sum_assignment
+
     cwd = Path.cwd()
     try:
-        model = _official_model(gpu=True)
+        model: Any = _official_model(gpu=True)
         torch.cuda.reset_peak_memory_stats()
 
-        def step() -> None:
-            model.set_input({"A_paths": ["x"] * 64})  # type: ignore[attr-defined]
-            model.optimize_parameters()  # type: ignore[attr-defined]
+        def matching() -> None:
+            with torch.no_grad():
+                for i in range(model.gt_param.shape[0]):
+                    gt = model.gt_param[i, model.gt_decision[i].bool()]
+                    pred = model.pred_param[i]
+                    l1 = torch.cdist(pred, gt, p=1)
+                    pb = pred.unsqueeze(1).repeat(1, gt.shape[0], 1)
+                    gb = gt.unsqueeze(0).repeat(pred.shape[0], 1, 1)
+                    w = model.gaussian_w_distance(pb, gb)
+                    dec = (1 - model.pred_decision[i]).unsqueeze(-1).repeat(1, gt.shape[0])
+                    linear_sum_assignment((l1 + w + dec).cpu())
 
-        for _ in range(5):
-            step()
-        torch.cuda.synchronize()
-        t0 = time.perf_counter()
-        for _ in range(steps):
-            step()
-        torch.cuda.synchronize()
-        per_step = (time.perf_counter() - t0) / steps
+        def clock() -> float:
+            torch.cuda.synchronize()
+            return time.perf_counter()
+
+        totals = dict.fromkeys(("data", "forward", "matching", "step"), 0.0)
+        for i in range(5 + steps):
+            t0 = clock()
+            model.set_input({"A_paths": ["x"] * 64})
+            t1 = clock()
+            model.forward()
+            t2 = clock()
+            matching()
+            t3 = clock()
+            model.optimize_parameters()
+            t4 = clock()
+            if i >= 5:
+                totals["data"] += t1 - t0
+                totals["forward"] += t2 - t1
+                totals["matching"] += t3 - t2
+                totals["step"] += (t1 - t0) + (t4 - t3)
     finally:
         os.chdir(cwd)
+    ms = {f"{k}_ms": 1000 * v / steps for k, v in totals.items()}
+    ms["rest_ms"] = ms["step_ms"] - ms["data_ms"] - ms["forward_ms"] - ms["matching_ms"]
+    per_step = ms["step_ms"] / 1000
     res = {
         "seconds_per_step": per_step,
         "hours_for_56320_steps": per_step * 56320 / 3600,
         "peak_vram_gb": torch.cuda.max_memory_allocated() / 2**30,
+        **ms,
     }
     print(json.dumps(res))
     OUT.mkdir(parents=True, exist_ok=True)
