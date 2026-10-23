@@ -1,0 +1,41 @@
+# Paint Transformer training = the official recipe (docs/design/paint_transformer.md section 5):
+# Adam lr 1e-4 betas (0.5, 0.999), batch 64, 220 epochs x 256 steps = 56,320 steps (3.60 M samples),
+# lr x0.3 every 5 epochs after epoch 200. Run: python -m scripts.train_pt --config configs/stroke_model/pt.yaml
+seed: 0
+deterministic: false     # deterministic cuDNN kernels (slower)
+device: auto
+output_dir: outputs/pt_train
+brush_dir: data/raw/pt_brush   # python -m scripts.fetch_pt_brushes
+batch_size: 64
+precision: fp32          # fp32 | bf16 (autocast of the network, losses in fp32), see the design note
+log_every: 25
+checkpoint_every: 2000
+resume: ""               # "" fresh | auto (output_dir/latest.pt) | path
+tensorboard: false       # needs the optional `tensorboard` package
+
+model:
+  colour_mode: sampled   # sampled (official code) | predicted
+
+loss:
+  preset: official       # official | paper_weights | custom (configs/pt/loss_paper.yaml)
+  matcher: auto          # auto | scipy | gpu
+
+optim:
+  lr: 1.0e-4
+  beta1: 0.5
+  beta2: 0.999
+  weight_decay: 0.0
+  grad_clip: 0.0         # 0 = off (official)
+
+schedule:
+  steps_per_epoch: 256
+  n_epochs: 200
+  n_epochs_decay: 20
+  decay_every: 5
+  decay_gamma: 0.3
+  max_steps: 0           # 0 = the full 56,320 steps
+
+val:
+  seed: 12345
+  batches: 8             # 8 x 64 = 512 fixed held-out patches
+  every: 1000
