@@ -62,7 +62,7 @@ def main(argv: list[str] | None = None) -> dict[str, float]:
     out = args.out or Path(cfg.output_dir)
     out.mkdir(parents=True, exist_ok=True)
     dump_config(cfg, out)
-    seed_everything(cfg.seed, cfg.deterministic)
+    seed_everything(cfg.seed, cfg.deterministic, cfg.cudnn_deterministic)
     device = get_device(cfg.device)
     size = (cfg.optim.height, cfg.optim.width)
     target = center_crop_resize(load_image(args.input), size)

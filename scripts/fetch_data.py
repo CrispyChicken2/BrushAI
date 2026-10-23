@@ -18,6 +18,7 @@ import hashlib
 import ssl
 import sys
 import urllib.request
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -40,13 +41,24 @@ def download(url: str, dest: Path, insecure: bool) -> None:
 
 
 def fetch(
-    manifest: Path, out: Path, update: bool = False, insecure: bool = False
+    manifest: Path,
+    out: Path,
+    update: bool = False,
+    insecure: bool = False,
+    ids: Sequence[str] | None = None,
 ) -> dict[str, Path]:
-    """Fetch every image of the manifest; returns id -> local path."""
+    """Fetch the images of the manifest (all, or only ``ids``); returns id -> local path."""
     spec: dict[str, Any] = yaml.safe_load(manifest.read_text(encoding="utf-8"))
     paths: dict[str, Path] = {}
     changed = False
+    known = {item["id"] for item in spec["images"]}
+    if ids is not None and not set(ids) <= known:
+        raise KeyError(
+            f"unknown image ids {sorted(set(ids) - known)}; manifest has {sorted(known)}"
+        )
     for item in spec["images"]:
+        if ids is not None and item["id"] not in ids:
+            continue
         dest = out / f"{item['id']}.jpg"
         if not dest.exists() or (item["sha256"] and sha256_of(dest) != item["sha256"]):
             download(item["url"], dest, insecure)
