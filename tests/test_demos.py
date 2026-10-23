@@ -98,20 +98,28 @@ def test_sequence_hash_and_results_markdown(tmp_path: Path) -> None:
         "peak_vram_mb": 3400.0,
     }
     rows = [
-        {"name": "m1_a", "image_id": "x", "seed": 0, "metrics": base, "gif_mb": 1.5},
+        {
+            "name": "m1_a",
+            "image_id": "x",
+            "seed": 0,
+            "metrics": base,
+            "gif_mb": 1.5,
+            "sequence_sha256": "abcdef0123456789",
+        },
         {
             "name": "m1_b",
             "image_id": "y",
             "seed": 0,
             "metrics": base | {"lpips_alex": 0.45},
             "gif_mb": 2.0,
+            "sequence_sha256": "0123",
         },
     ]
     text = results_markdown(rows)
     lines = [ln for ln in text.splitlines() if ln.startswith("| m1_")]
     assert lines[0].endswith("| yes |") and lines[1].endswith("| NO |")
     assert "0.300" in lines[0] and "0.450" in lines[1]
-    assert "[m1_a](m1_a_compare.jpg)" in text
+    assert "[m1_a](m1_a_compare.jpg)" in text and "`abcdef012345`" in text
 
 
 def test_compare_image_is_small(tmp_path: Path) -> None:

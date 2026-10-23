@@ -117,8 +117,8 @@ def results_markdown(rows: list[dict[str, object]]) -> str:
         f"Revised M1 target (docs/experiments/optim_sweep.md): LPIPS-VGG <= {TARGETS['lpips_vgg']}, held-out LPIPS-Alex <= "
         f"{TARGETS['lpips_alex']}, <= 2000 strokes, <= 10 min per 512 px image.",
         "",
-        "| demo | input | strokes | L1 | PSNR (dB) | SSIM | LPIPS-VGG | LPIPS-Alex | runtime (s) | peak VRAM (GB) | seed | GIF (MB) | target met |",
-        "|------|-------|---------|----|-----------|------|-----------|------------|-------------|----------------|------|----------|------------|",
+        "| demo | input | strokes | L1 | PSNR (dB) | SSIM | LPIPS-VGG | LPIPS-Alex | runtime (s) | peak VRAM (GB) | seed | GIF (MB) | sequence sha256 | target met |",
+        "|------|-------|---------|----|-----------|------|-----------|------------|-------------|----------------|------|----------|-----------------|------------|",
     ]
     for r in rows:
         m: dict[str, float] = r["metrics"]  # type: ignore[assignment]
@@ -130,9 +130,14 @@ def results_markdown(rows: list[dict[str, object]]) -> str:
         lines.append(
             f"| {r['name']} | {r['image_id']} | {m['num_strokes']:.0f} | {m['l1']:.4f} | {m['psnr']:.2f} | {m['ssim']:.3f} | "
             f"{m['lpips_vgg']:.3f} | {m['lpips_alex']:.3f} | {m['runtime_seconds']:.0f} | {m['peak_vram_mb'] / 1024:.1f} | "
-            f"{r['seed']} | {r['gif_mb']:.2f} | {'yes' if met else 'NO'} |"
+            f"{r['seed']} | {r['gif_mb']:.2f} | `{str(r['sequence_sha256'])[:12]}` | {'yes' if met else 'NO'} |"
         )
     lines += [
+        "",
+        "Notes: every demo is the baseline defaults (`configs/baseline_optim.yaml`) with seed 0 and `cudnn_deterministic: true`, so the whole run is "
+        "bitwise reproducible on the GPU: the sequence hash (parameters, brush variants, tags) is identical across reruns. "
+        "A demo marked NO misses the revised target; textured, high-frequency inputs (see `docs/experiments/optim_sweep.md`, per-image table) "
+        "are expected to. GIFs: 480 px, 15 fps, 10 s of painting + 2 s hold, coarse-to-fine pacing (`easing: by_level`).",
         "",
         "Side-by-side (input | painting): "
         + ", ".join(
@@ -151,6 +156,11 @@ def main(argv: list[str] | None = None) -> list[dict[str, object]]:
     parser.add_argument(
         "--media", type=Path, default=MEDIA, help="where the GIFs/compare images/results.md go"
     )
+    parser.add_argument(
+        "--results-only",
+        action="store_true",
+        help="only rewrite m1_results.md from the stored metrics JSONs",
+    )
     parser.add_argument("--only", action="append", help="demo name (repeatable)")
     parser.add_argument(
         "--reuse", action="store_true", help="reuse an existing sequence.npz (skip painting)"
@@ -160,6 +170,15 @@ def main(argv: list[str] | None = None) -> list[dict[str, object]]:
     )
     args = parser.parse_args(argv)
 
+    if args.results_only:
+        rows = [
+            json.loads(p.read_text(encoding="utf-8"))
+            for p in sorted(args.out.glob("m1_*/metrics.json"))
+        ]
+        args.media.mkdir(parents=True, exist_ok=True)
+        (args.media / "m1_results.md").write_text(results_markdown(rows), encoding="utf-8")
+        print(f"wrote {args.media / 'm1_results.md'} from {len(rows)} metrics files")
+        return rows
     paths = fetch_demo_inputs(args.insecure)
     rows: list[dict[str, object]] = []
     for cfg_path in sorted(DEMO_DIR.glob("m1_*.yaml")):
