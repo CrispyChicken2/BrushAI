@@ -7,13 +7,14 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] M2 Paint Transformer reimplementation + reproduction (à ticketiser après la gate M1)
+- [ ] M2 suite : tickets T-011.. à écrire après l'étude T-010 (bbox renderer, pt_brush, data gen, modèle, training, inférence, repro, gate)
 - [ ] M3 Evaluation harness + baseline numbers (3 baselines)
 - [ ] M4 Contribution : allocation sémantique puis ordre pictural, ablations complètes
 - [ ] M5 Front-end SDXL + app Gradio + HF Space
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
+- [~] 010 [T-010] Paint Transformer study note, reproduction targets, M2 plan (M2)
 
 ## Fait
 - [x] 008 [T-008] M1 gate review: fresh-clone reproduction (65e5be9)
