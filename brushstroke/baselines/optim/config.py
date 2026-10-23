@@ -26,16 +26,17 @@ class OptimConfig:
 
     height: int = 512
     width: int = 512
-    # grid m x m per level, and the new strokes per patch at each level (1794 strokes in total)
-    levels: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 6, 8, 12, 16, 20])
-    strokes_per_patch: list[int] = field(default_factory=lambda: [1, 1, 1, 1, 1, 2, 2, 2, 2])
-    iters: int = 100  # optimization steps per level
-    iters_per_level: list[int] = field(default_factory=list)  # overrides `iters` (one per level)
+    # grid m x m per level, and the new strokes per patch at each level (2037 strokes in total)
+    levels: list[int] = field(default_factory=lambda: [1, 2, 4, 8, 16, 20])
+    strokes_per_patch: list[int] = field(default_factory=lambda: [1, 1, 1, 3, 4, 2])
+    iters: int = 100  # optimization steps per level when iters_per_level is empty
+    # steps per level (one entry per level; empty = `iters` everywhere): most steps at fine levels
+    iters_per_level: list[int] = field(default_factory=lambda: [100, 100, 100, 300, 300, 150])
     optimizer: str = "adam"  # adam | rmsprop (as in SNP)
     lr: float = 0.02  # on the unconstrained (logit) parameters
     lr_final_frac: float = 0.1  # lr decays (cosine) to lr * lr_final_frac within each level
-    finetune_all: bool = False  # also optimize the strokes of earlier levels (frozen by default)
-    finetune_lr_factor: float = 0.3  # lr multiplier of the earlier strokes when finetune_all
+    finetune_all: bool = True  # also optimize the strokes of earlier levels at every level
+    finetune_lr_factor: float = 1.0  # lr multiplier of the earlier strokes when finetune_all
     background: list[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])  # initial canvas RGB
     # initialization of the new strokes of a level
     init_error_power: float = 2.0  # position sampling weights = blurred |target - canvas| ** power
