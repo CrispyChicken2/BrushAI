@@ -137,17 +137,36 @@ CUDA work). Peak GPU memory is measured with `brushstroke.utils.device.reset_pea
 `scripts/paint_optim.py` decomposes an image into strokes by progressive optimization (Stylized Neural Painting style,
 see [docs/design/optim_baseline.md](docs/design/optim_baseline.md)). Settings are in `configs/baseline_optim.yaml`; any
 key can be overridden on the command line. The input image is not in the repository: use a public-domain or
-self-made image, for example in `data/raw/` (gitignored).
+self-made image, for example in `data/raw/` (gitignored). The evaluation images can be fetched with
+`python -m scripts.fetch_data` (see [docs/data_sources.md](docs/data_sources.md)).
 
 ```
 .venv\Scripts\python -m scripts.paint_optim --input data/raw/mona_lisa.jpg --out outputs/optim_run
-.venv\Scripts\python -m scripts.paint_optim --input data/raw/mona_lisa.jpg --out outputs/optim_fast optim.iters=20 loss.lpips=0
+.venv\Scripts\python -m scripts.paint_optim --input data/raw/mona_lisa.jpg --out outputs/optim_fast optim.iters_per_level=[20,20,20,20,20,20] loss.lpips=0
 ```
 
+`optim.iters` is used only when `optim.iters_per_level` is empty; the default sets the steps per level explicitly.
+
 The output directory gets `final.png`, `target.png`, `progress/level_XX.png` (canvas after each level),
-`sequence.npz` (the stroke sequence), `metrics.json` and `loss_curve.json`. On a 512 x 512 image with 1794 strokes (RTX 5070,
-about 2.5 minutes, 6.7 GB peak VRAM) the baseline reaches L1 0.036 and LPIPS-VGG 0.44. The M1 target (LPIPS below 0.25
-within 2000 strokes) is **not met**; the design note has the tuning runs.
+`sequence.npz` (the stroke sequence), `metrics.json` and `loss_curve.json`. The default schedule (2037 strokes at 512 x 512,
+about 9.4 minutes and 3.3 GB peak VRAM on an RTX 5070) reaches a mean LPIPS-VGG of 0.308 and a held-out LPIPS-AlexNet of
+0.359 over 5 images x 3 seeds (the T-005 settings gave 0.416 and 0.465). The M1 target (LPIPS-VGG below 0.25 within 2000
+strokes) is **not met**; a revised target is proposed in the experiment report, pending the chef's decision.
+
+## Experiments
+
+The baseline study (hypotheses H1 to H7, 5 images x 3 seeds, held-out metric) is in
+[docs/experiments/optim_sweep.md](docs/experiments/optim_sweep.md), with the generated tables in
+`docs/experiments/optim_sweep_tables.md`. The stored run files live in `outputs/exp_optim` (gitignored, not in the
+repository). Regenerating the tables and figures from them takes seconds:
+
+```
+.venv\Scripts\python -m scripts.exp_optim_sweep --aggregate-only --figures
+```
+
+A full re-run of the sweep takes about 10 hours on an RTX 5070 and is resumable: `.venv\Scripts\python -m scripts.exp_optim_sweep`
+(`--stage NAME` runs one stage, `--force` recomputes existing runs). The images are fetched first with
+`.venv\Scripts\python -m scripts.fetch_data`; add `--insecure` only behind a TLS-intercepting proxy.
 
 ## Animating a painting
 

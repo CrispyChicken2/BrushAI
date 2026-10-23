@@ -57,13 +57,16 @@ approach, matches the squared cell distance for Dirac-like inputs, differentiabl
 Not reproduced: SNP's dilation/erosion of foreground/alpha and its dedicated neural renderer; its other brush types. The SNP
 paper's exact grid/budget schedule was read only through the repo (per-level counts are not in the files above).
 
-## Results (512^2 public-domain image, RTX 5070)
+## Results of T-005 (512^2 public-domain image, RTX 5070; superseded by the T-009 defaults)
+These are the T-005 numbers, kept as the record of the first run. The current defaults and their 5-image confirmation are in
+[../experiments/optim_sweep.md](../experiments/optim_sweep.md).
+
 Image: *Mona Lisa* (Leonardo da Vinci, c. 1503), Wikimedia Commons file
 `Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg` (960 px thumbnail, public domain, 2-D reproduction of a work
 long out of copyright), center-cropped to a square and resized to 512^2. Kept out of git (`data/raw/`).
 
-Final configuration (`configs/baseline_optim.yaml`: 9 levels up to 20 x 20, 1794 strokes, Adam lr 0.02, 100 steps/level,
-L1 + 0.1 LPIPS), seed 0:
+T-005 configuration (9 levels up to 20 x 20, 1794 strokes, Adam lr 0.02, 100 steps/level, frozen earlier strokes,
+L1 + 0.1 LPIPS; the frozen copy is `configs/experiments/baseline_t005.yaml`), seed 0:
 
 | metric | value |
 |--------|-------|

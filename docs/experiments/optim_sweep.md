@@ -126,7 +126,9 @@ initialization. Chosen from `combo`, `combo2`, `cand_*` of the sweep; the choice
 (H1b, H2, H6) with the loss/optimizer left at the T-005 values (H4: no robust gain). The sweep keeps the T-005 settings frozen in
 `configs/experiments/baseline_t005.yaml` so the tables remain reproducible.
 
-Confirmation (5 images × 3 seeds, mean ± std over the 15 runs; ΔVGG/ΔAlex paired vs old):
+Confirmation (5 images × 3 seeds, mean ± std over the 15 runs; ΔVGG/ΔAlex paired vs old). "old" means the **T-005 settings on the
+same stroke schedule as the row**: `s2000` (1938 strokes) for the ~2000 budget and `s1000` (994 strokes) for the ~1000 budget. It is
+not the 1794-stroke schedule of the T-005 configuration file (`configs/experiments/baseline_t005.yaml`).
 
 | budget | config | strokes | L1 | PSNR | LPIPS-VGG | LPIPS-Alex | ΔVGG | ΔAlex | time | VRAM |
 |--------|--------|---------|----|------|-----------|------------|------|-------|------|------|

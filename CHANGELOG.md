@@ -2,6 +2,18 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-009] Investigation of the optimization-baseline quality gap; new baseline defaults
+
+- Sweep of hypotheses H1 to H7 (`scripts/exp_optim_sweep.py`, `configs/experiments/optim_sweep.yaml`), with held-out
+  LPIPS-AlexNet reported for every run, screening on 2 images and confirmation on 5 images x 3 seeds. Verdicts and tables in
+  `docs/experiments/optim_sweep.md` and `optim_sweep_tables.md`.
+- New baseline defaults in `configs/baseline_optim.yaml`: grids 1 to 20 with more strokes at the fine levels (2037 strokes),
+  more steps at the fine levels (`iters_per_level`), joint fine-tuning of earlier strokes (`finetune_all`). Mean over 5 images x 3 seeds:
+  LPIPS-VGG 0.416 -> 0.308, held-out LPIPS-AlexNet 0.465 -> 0.359, about 9.4 min and 3.3 GB per 512 px image.
+- Code additions needed by the sweep: `iters_per_level`, `init_mode`, `init_size_mode`, `final_pass_iters`, LPIPS-AlexNet.
+- The M1 target (LPIPS-VGG < 0.25) is **not met**. A revised target is proposed in the report, pending the chef's decision.
+- Data: `scripts/fetch_data.py` with checksums and `docs/data_sources.md` (public-domain images, licenses recorded).
+
 ## [T-006] Stroke-by-stroke animation with partial reveal and ffmpeg export
 
 - `brushstroke/animation/`: deterministic timeline (overlap, minimum reveal frames, uniform or decelerating slots, seeded
