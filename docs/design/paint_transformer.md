@@ -252,3 +252,35 @@ textures differ slightly because the official code nearest-resizes the brush to 
 - Throughput on the RTX 5070 (`python -m scripts.pt_reference_study datagen`): **13.6 k patches/s at batch 64, 43 k at 256, 50 k at 1024**, against **1.07 k patches/s for the official `set_input` on the same GPU** (13x faster);
   at batch 64 that is 4.7 ms per batch against 237 ms for a whole official training step, so data synthesis is not a bottleneck (what dominates the rest of the official step was not profiled here; the per-sample CPU Hungarian matching is the likely suspect).
 - Validity rule implemented as in the code (threshold 0.75, only earlier *valid* strokes count; unit-tested on constructed overlaps including the 0.75 boundary).
+
+## 12. Model and losses in this repository (T-012)
+
+**Code:** `brushstroke/stroke_model/model.py` (`PaintTransformer`, `PTModelConfig`, `SignWithSigmoidGrad`, `init_official_weights`), `brushstroke/stroke_model/losses.py`
+(`PaintTransformerLoss`, `PTLossConfig`, `gaussian_w_distance`, matchers), configs `configs/pt/{model,loss_official,loss_paper}.yaml`, tests `tests/test_pt_model.py`, `tests/test_pt_losses.py`.
+
+**Model.** Same module and parameter names as the official `Painter(5, 8, 256, 8, 3, 3)`: **9,072,902 trainable parameters** (tested), the released `state_dict` loads with `strict` matching and
+reproduces the official outputs. On the weights `model.pth` (16 random input pairs, eval mode) the maximum absolute difference of the shape parameters and of the logits is **0.0** (bit-identical; the test tolerance is 1e-5). The colour is sampled from the target at the predicted centre (official code) by `PaintTransformer.sample_colour`; `colour_mode: predicted` builds an 8-output head
+(paper description, ablation: not equivalent to the released weights).
+
+**Losses** (`PaintTransformerLoss(brushes, PTLossConfig)(shape, colour, logits, batch)` -> `LossOutput(total, pixel, gt, w, decision, rec, assign)`), sources: DETR set loss (Carion et al., ECCV 2020), Gaussian
+Wasserstein-2 distance between the rectangles' Gaussians (Yang et al., ICML 2021, cited by the paper):
+- pixel: L1 between the canvas with the predicted strokes painted (PT train rendering, binary decision with the sigmoid straight-through gradient) and the target;
+- Hungarian matching of the 8 predictions to the valid ground-truth strokes with cost L1 + Wasserstein + confidence cost, then parameter L1 and Wasserstein over matched pairs and BCE (with `pos_weight`) over all predictions.
+- Presets: `official` (default, = the code: pos_weight 10, BCE 10, pixel 10, L1 1, W 10, matching confidence cost `1 - logit`) and `paper_weights` (pos_weight/lambda_r 8, BCE 1, pixel 1, L1 1, W 10, confidence cost `lambda_r * -log sigmoid(logit)`, which is
+  the paper's lambda_r-weighted BCE). `preset: custom` keeps each field (`lambda_*`, `pos_weight`, `matching_cost`) as given. The colour discrepancy is the model flag `colour_mode` (above).
+
+**Equivalence with the official code.** With the same weights and batch (eval mode), the four weighted loss terms equal those of `PainterModel.optimize_parameters` to float precision (seeds 0, 1; batch 32):
+pixel 1.221690, gt 0.455586, w 5.370845, decision 42.711430 on both sides. `gaussian_w_distance` clamps the square-root arguments at 1e-20 only to keep gradients finite; with the first version (1e-12) the w term differed by 0.06 % at initialization because the
+untrained predictions have sub-pixel widths, which shows the clamp must stay below the squared widths.
+
+**Matching.** `scipy.optimize.linear_sum_assignment` (per sample, as DETR and the official code) is the reference; because it forces a device-to-host copy and a Python loop per sample, an exact batched alternative is provided:
+exhaustive search over the 8! = 40,320 assignments on the GPU (`matcher: gpu`, N <= 8 only; ties may select another optimal assignment, same optimal total cost). Tested against brute force (N = 3, 4, 5, negative costs, partial validity) for both matchers.
+Time for 64 patches x 8 strokes with ~7 valid on the RTX 5070: scipy 2.37 ms (including the transfer), GPU enumeration 0.59 ms; on CPU scipy is 0.70 ms and enumeration 19.7 ms, so `matcher: auto` uses the GPU enumeration on CUDA only.
+
+**Wasserstein tests.** zero for identical strokes, symmetric, equal to the closed form for commuting covariances, `|dmu|^2 + (w1/2-w2/2)^2 + (h1/2-h2/2)^2` (also with a common rotation), and zero between a rectangle and the same rectangle rotated by a quarter turn
+(the distance sees only the Gaussian, so theta has period 1/2 and the sign of `h` is free).
+
+**Observations useful for the training ticket.**
+- At initialization the predicted `w, h` are about 0.03 (sub-pixel): the pixel term has **exactly zero gradient** until the other terms grow the strokes (also in the official code); the gradient test therefore checks all four terms after 120 optimization steps (norms for the official preset: pixel 3.97, gt 0.38, w 4.38, decision 62.0).
+- Because the Wasserstein term is invariant to the sign of `h` and to a half-turn of `theta`, the network can keep negative heights (observed on an overfitting run: predicted `h` about -0.4 versus ground truth +0.4) at zero Wasserstein cost; the parameter L1 term pulls it back only slowly. The pixel loss does not care either (the PT renderer uses `h > w` to pick the brush).
+  Overfitting 4 patches with a 1-layer network: total loss 66.25 -> 1.13 in 700 steps (pixel 0.61, L1 0.14, W 0.30, BCE 0.077); the residual is dominated by the pixel term (strokes cannot reproduce the gradient-textured targets exactly) and this symmetry. A constant learning rate of 1e-3 without clipping was unstable on the full-size network.
