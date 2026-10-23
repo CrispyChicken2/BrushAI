@@ -31,14 +31,15 @@ loss:
 optim:
   height: 512
   width: 512
-  levels: [1, 2, 3, 4, 6, 8, 12, 16, 20]           # progressive m x m grids
-  strokes_per_patch: [1, 1, 1, 1, 1, 2, 2, 2, 2]  # new strokes per patch, per level (total 1794)
-  iters: 100                                # steps per level
+  levels: [1, 2, 4, 8, 16, 20]              # progressive m x m grids
+  strokes_per_patch: [1, 1, 1, 3, 4, 2]     # new strokes per patch, per level (total 2037)
+  iters: 100                                # steps per level when iters_per_level is empty
+  iters_per_level: [100, 100, 100, 300, 300, 150]   # most steps at the fine levels (T-009, H1b/H1c)
   optimizer: adam                           # rmsprop (as SNP) | adam
   lr: 0.02                                  # on logit-space parameters
   lr_final_frac: 0.1
-  finetune_all: false                       # also optimize earlier levels' strokes
-  finetune_lr_factor: 0.3
+  finetune_all: true                        # also optimize earlier levels' strokes at every level (T-009, H6)
+  finetune_lr_factor: 1.0                   # ... with the same lr as the new strokes
   background: [1.0, 1.0, 1.0]
   init_error_power: 2.0
   init_blur_frac: 0.25

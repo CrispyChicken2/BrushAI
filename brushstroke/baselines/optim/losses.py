@@ -19,26 +19,35 @@ def l1_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     return (pred - target).abs().mean()
 
 
-def get_lpips(device: torch.device | str) -> torch.nn.Module:
-    """LPIPS-VGG network (Zhang et al., CVPR 2018) on ``device``, frozen, eval mode, cached.
+def get_lpips(device: torch.device | str, net: str = "vgg") -> torch.nn.Module:
+    """LPIPS network (Zhang et al., CVPR 2018) on ``device``, frozen, eval mode, cached.
 
-    The VGG16 backbone weights are downloaded by torchvision on first use.
+    Args:
+        net: ``"vgg"`` (the training loss term) or ``"alex"`` (the held-out evaluation metric, never
+            used in a loss). The ImageNet backbone weights are fetched by torchvision on first use.
     """
-    key = str(device)
+    if net not in ("vgg", "alex"):
+        raise ValueError(f"unknown LPIPS backbone {net!r}; expected 'vgg' or 'alex'")
+    key = f"{net}:{device}"
     if key not in _LPIPS_CACHE:
         import lpips
 
-        net = lpips.LPIPS(net="vgg", verbose=False).to(device).eval()
-        for p in net.parameters():
+        model = lpips.LPIPS(net=net, verbose=False).to(device).eval()
+        for p in model.parameters():
             p.requires_grad_(False)
-        _LPIPS_CACHE[key] = net
+        _LPIPS_CACHE[key] = model
     return _LPIPS_CACHE[key]
 
 
+def lpips_distance(pred: torch.Tensor, target: torch.Tensor, net: str = "vgg") -> torch.Tensor:
+    """Mean LPIPS distance with the given backbone (scalar); inputs in [0, 1] map to [-1, 1]."""
+    model = get_lpips(pred.device, net)
+    return torch.as_tensor(model(pred * 2.0 - 1.0, target * 2.0 - 1.0)).mean()
+
+
 def lpips_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-    """Mean LPIPS-VGG distance (scalar); inputs in [0, 1] are mapped to [-1, 1] for the net."""
-    net = get_lpips(pred.device)
-    return torch.as_tensor(net(pred * 2.0 - 1.0, target * 2.0 - 1.0)).mean()
+    """Mean LPIPS-VGG distance (scalar); the LPIPS term of the training loss."""
+    return lpips_distance(pred, target, "vgg")
 
 
 class CombinedLoss:

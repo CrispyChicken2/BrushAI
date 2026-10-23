@@ -7,6 +7,14 @@ Tests: `tests/test_optim_baseline.py`.
 **Placement.** `brushstroke/baselines/optim/` (new subpackage): baselines (a) optimization, (b) Paint Transformer and
 (c) the RL agent are siblings and are kept apart from `stroke_model/` (our learned predictor) and `contribution/`.
 
+> **Update (T-009).** The defaults described below are those of T-005 (9 levels, 100 steps per level, frozen earlier strokes,
+> LPIPS-VGG 0.44 at 1794 strokes on the Mona Lisa). T-009 found that under-optimization and the frozen schedule caused most of the
+> quality gap and changed the defaults of `configs/baseline_optim.yaml` to: grids 1, 2, 4, 8, 16, 20 with 1, 1, 1, 3, 4, 2 strokes
+> per patch (2037 strokes), steps per level 100, 100, 100, 300, 300, 150 (`iters_per_level`), `finetune_all: true` with the same learning
+> rate for the earlier strokes. Mean over 5 images × 3 seeds: LPIPS-VGG 0.416 → 0.308, held-out LPIPS-Alex 0.465 → 0.359, 563 s
+> per image. The T-005 configuration is preserved in `configs/experiments/baseline_t005.yaml`. New flags: `init_mode`,
+> `init_size_mode`, `final_pass_iters`, `iters_per_level`. See [../experiments/optim_sweep.md](../experiments/optim_sweep.md).
+
 ## Method
 1. Canvas = flat background colour (white).
 2. Levels `g` in `levels` (grid `g x g`, default 1, 2, 3, 4, 6, 8, 12, 16, 20). At each level, `strokes_per_patch[level]`

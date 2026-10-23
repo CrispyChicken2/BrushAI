@@ -27,7 +27,7 @@ import torch
 from brushstroke.baselines.optim.config import LossConfig, OptimConfig
 from brushstroke.baselines.optim.init import cosine_lr, dead_strokes, sample_strokes
 from brushstroke.baselines.optim.losses import CombinedLoss
-from brushstroke.renderer.brushes import BrushConfig, get_brush_bank
+from brushstroke.renderer.brushes import BrushBank, BrushConfig, get_brush_bank
 from brushstroke.renderer.params import params_from_unconstrained, unconstrained_from_params
 from brushstroke.renderer.pipeline import RenderConfig, render
 from brushstroke.strokes import BrushSpec, StrokeSequence
@@ -99,8 +99,10 @@ def paint_optim(
         raise ValueError(f"target must have shape (3, {h}, {w}), got {tuple(target.shape)}")
     if len(cfg.levels) != len(cfg.strokes_per_patch) or not cfg.levels:
         raise ValueError("levels and strokes_per_patch must be non-empty and of equal length")
-    if cfg.iters < 1:
-        raise ValueError("iters must be >= 1")
+    if cfg.iters < 1 or any(i < 1 for i in cfg.iters_per_level):
+        raise ValueError("iters (and iters_per_level) must be >= 1")
+    if cfg.iters_per_level and len(cfg.iters_per_level) != len(cfg.levels):
+        raise ValueError("iters_per_level must be empty or have one entry per level")
 
     spec = BrushSpec(
         kind=brush_cfg.kind,
@@ -134,7 +136,7 @@ def paint_optim(
         t_level = time.perf_counter()
         patch_ids = torch.arange(grid * grid).repeat_interleave(per_patch)
         m = patch_ids.numel()
-        init = sample_strokes(tgt, canvas, grid, patch_ids, cfg, gen)
+        init = sample_strokes(tgt, canvas, grid, patch_ids, cfg, gen, per_patch)
         new_idx = torch.randint(0, spec.bank_size, (m,), generator=gen)
         raw = unconstrained_from_params(init[None]).to(dev).requires_grad_()
         groups: list[dict[str, object]] = [{"params": [raw], "lr": cfg.lr}]
@@ -154,9 +156,10 @@ def paint_optim(
         idx_prev = brush_idx.to(dev)[None]
         losses: list[torch.Tensor] = []
 
-        for it in range(cfg.iters):
+        n_iters = cfg.iters_per_level[li] if cfg.iters_per_level else cfg.iters
+        for it in range(n_iters):
             for g, base in zip(opt.param_groups, base_lrs, strict=True):
-                g["lr"] = cosine_lr(base, cfg.lr_final_frac, it, cfg.iters)
+                g["lr"] = cosine_lr(base, cfg.lr_final_frac, it, n_iters)
             opt.zero_grad(set_to_none=True)
             new_params = params_from_unconstrained(raw)
             if prev_raw is not None:
@@ -178,13 +181,15 @@ def paint_optim(
             loss.backward()  # type: ignore[no-untyped-call]
             opt.step()
             losses.append(loss.detach())
-            if cfg.resample_every > 0 and (it + 1) % cfg.resample_every == 0 and it + 1 < cfg.iters:
+            if cfg.resample_every > 0 and (it + 1) % cfg.resample_every == 0 and it + 1 < n_iters:
                 with torch.no_grad():
                     cur = params_from_unconstrained(raw)[0].cpu()
                     dead = dead_strokes(cur, cfg)
                     if bool(dead.any()):
                         rows = torch.nonzero(dead).flatten()
-                        fresh = sample_strokes(tgt, img.detach(), grid, patch_ids[rows], cfg, gen)
+                        fresh = sample_strokes(
+                            tgt, img.detach(), grid, patch_ids[rows], cfg, gen, per_patch
+                        )
                         raw[0, rows] = unconstrained_from_params(fresh[None])[0].to(dev)
                         _reset_state_rows(opt, raw, rows.to(dev))
 
@@ -231,6 +236,19 @@ def paint_optim(
                 li, canvas, _build(params, spec, h, w, brush_idx, level_tags, patch_tags, cfg, {})
             )
 
+    final_curve: list[float] = []
+    final_seconds = 0.0
+    if cfg.final_pass_iters > 0 and params.shape[0] > 0:
+        t_final = time.perf_counter()
+        canvas, params, final_curve = _final_pass(
+            params, brush_idx, bank, background, tgt, loss_fn, cfg, render_cfg, dev
+        )
+        _sync(dev)
+        final_seconds = time.perf_counter() - t_final
+    with torch.no_grad():
+        final_loss = {k: float(v) for k, v in loss_fn.terms(canvas[None], tgt_b).items()} | {
+            "l1_metric": float((canvas - tgt).abs().mean())
+        }
     _sync(dev)
     meta = {
         "producer": "optim_baseline",
@@ -241,12 +259,61 @@ def paint_optim(
         "loss_curve": curves,
         "level_final_loss": level_final,
         "level_seconds": level_seconds,
+        "final_pass_curve": final_curve,
+        "final_pass_seconds": final_seconds,
+        "final_loss": final_loss,
         "runtime_seconds": time.perf_counter() - t_start,
         "peak_vram_mb": peak_vram_mb(),
         "torch_version": torch.__version__,
         "device": str(dev),
     }
     return _build(params, spec, h, w, brush_idx, level_tags, patch_tags, cfg, meta)
+
+
+def _final_pass(
+    params: torch.Tensor,
+    brush_idx: torch.Tensor,
+    bank: BrushBank,
+    background: torch.Tensor,
+    tgt: torch.Tensor,
+    loss_fn: CombinedLoss,
+    cfg: OptimConfig,
+    render_cfg: RenderConfig,
+    dev: torch.device,
+) -> tuple[torch.Tensor, torch.Tensor, list[float]]:
+    """Jointly fine-tune all strokes (``final_pass_iters`` steps): canvas, params, losses."""
+    h, w = cfg.height, cfg.width
+    n = params.shape[0]
+    base_lr = cfg.lr * cfg.final_pass_lr_factor
+    raw = unconstrained_from_params(params[None]).to(dev).requires_grad_()
+    opt = _make_optimizer(cfg.optimizer, [{"params": [raw], "lr": base_lr}], base_lr)
+    use_ckpt = n * h * w * BYTES_PER_STROKE_PIXEL > cfg.checkpoint_bytes
+    rcfg = dataclasses.replace(render_cfg, use_checkpoint=use_ckpt or render_cfg.use_checkpoint)
+    idx = brush_idx.to(dev)[None]
+    losses: list[torch.Tensor] = []
+    for it in range(cfg.final_pass_iters):
+        for g in opt.param_groups:
+            g["lr"] = cosine_lr(base_lr, cfg.lr_final_frac, it, cfg.final_pass_iters)
+        opt.zero_grad(set_to_none=True)
+        img = render(
+            params_from_unconstrained(raw),
+            bank,
+            h,
+            w,
+            canvas=background.view(3),
+            cfg=rcfg,
+            brush_index=idx,
+        )[0]
+        loss = loss_fn(img[None], tgt[None])
+        loss.backward()  # type: ignore[no-untyped-call]
+        opt.step()
+        losses.append(loss.detach())
+    with torch.no_grad():
+        new_params = params_from_unconstrained(raw)[0]
+        canvas = render(
+            new_params[None], bank, h, w, canvas=background.view(3), cfg=rcfg, brush_index=idx
+        )[0]
+    return canvas, new_params.cpu(), [float(v) for v in torch.stack(losses).cpu()]
 
 
 def _build(

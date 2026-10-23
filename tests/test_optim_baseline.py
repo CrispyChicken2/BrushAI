@@ -206,6 +206,9 @@ def small_cfg(**kw: object) -> OptimConfig:
         "levels": [1, 2, 3],
         "strokes_per_patch": [3, 2, 2],
         "iters": 60,
+        "iters_per_level": [],
+        "finetune_all": False,
+        "finetune_lr_factor": 0.3,
     }
     return dataclasses.replace(OptimConfig(), **{**base, **kw})  # type: ignore[arg-type]
 

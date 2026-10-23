@@ -32,6 +32,7 @@ def sample_strokes(
     patch_ids: torch.Tensor,
     cfg: OptimConfig,
     gen: torch.Generator,
+    per_patch: int = 1,
 ) -> torch.Tensor:
     """Draw fresh stroke parameters for strokes assigned to patches of a ``grid x grid`` division.
 
@@ -42,6 +43,7 @@ def sample_strokes(
         patch_ids: ``(M,)`` long, the patch of each stroke to draw.
         cfg: initialization settings (``init_*``).
         gen: CPU generator (all randomness comes from it, so runs are reproducible).
+        per_patch: strokes per patch at this level (used by ``init_size_mode="density"``).
 
     Returns:
         ``(M, 9)`` float32 CPU parameters in the renderer convention.
@@ -62,12 +64,20 @@ def sample_strokes(
         wt = weights[y0:y1, x0:x1].reshape(-1)
         if not bool(wt.sum() > 1e-12):
             wt = torch.ones_like(wt)
+        if cfg.init_mode == "random":
+            wt = torch.ones_like(wt)
         pick = torch.multinomial(wt, rows.numel(), replacement=True, generator=gen)
         ys, xs = y0 + pick // (x1 - x0), x0 + pick % (x1 - x0)
         out[rows, 0] = (xs.float() + 0.5) / w
         out[rows, 1] = (ys.float() + 0.5) / h
-        out[rows, 5:8] = colour_src[:, ys, xs].T
-    length = cfg.init_size_scale * (0.6 + 0.6 * torch.rand(m, generator=gen)) / grid
+        if cfg.init_mode == "random":
+            out[rows, 5:8] = torch.rand(rows.numel(), 3, generator=gen)
+        else:
+            out[rows, 5:8] = colour_src[:, ys, xs].T
+    if cfg.init_mode not in ("error", "random") or cfg.init_size_mode not in ("patch", "density"):
+        raise ValueError("init_mode must be error|random and init_size_mode patch|density")
+    divisor = grid * (math.sqrt(per_patch) if cfg.init_size_mode == "density" else 1.0)
+    length = cfg.init_size_scale * (0.6 + 0.6 * torch.rand(m, generator=gen)) / divisor
     out[:, 2] = length.clamp(max=1.0)
     lo, hi = cfg.init_aspect
     out[:, 3] = (out[:, 2] * (lo + (hi - lo) * torch.rand(m, generator=gen))).clamp(min=1e-3)
