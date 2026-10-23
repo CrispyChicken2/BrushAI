@@ -2,6 +2,17 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-013] Paint Transformer training pipeline
+
+- `scripts/train_pt.py` and `brushstroke/stroke_model/train.py`: the official schedule (56,320 steps of batch 64, Adam lr 1e-4,
+  betas (0.5, 0.999), lr x0.3 every 5 epochs at the end), all set in `configs/stroke_model/pt.yaml`.
+- Fixed-seed synthetic validation set, CSV logs, checkpoints with exact resume (a resumed CPU run is bit-identical to an
+  uninterrupted one), optional bf16 (default fp32: no speed gain, 0.85 GB peak VRAM at batch 64) and a step profiler.
+- Speed: the official code spends 40 % of its step in a per-sample matching loop; the batched cost matrix brings our step to
+  about 38 ms against 237 ms for the official code, so the full schedule should take about 36 to 40 minutes on the RTX 5070.
+- A 3000-step validation run (`docs/media/pt_train_curve.png`); the full run has not been launched.
+- Design note section 13 with the step-time table.
+
 ## [T-012] Paint Transformer model and Hungarian-matched losses
 
 - `brushstroke/stroke_model/model.py`: `PaintTransformer`, the official architecture with the same parameter names: 9,072,902

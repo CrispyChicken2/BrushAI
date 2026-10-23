@@ -10,6 +10,9 @@ Files: `default.yaml` (run settings, `brushstroke.config.RunConfig`) and `baseli
 `experiments/` holds the sweep inputs: `optim_sweep.yaml` (schedules, stages and variants), `images.yaml` (evaluation images with
 checksums) and `baseline_t005.yaml` (frozen T-005 settings, so the sweep stays reproducible after the defaults changed).
 
+`stroke_model/pt.yaml` is the training configuration of the Paint Transformer (`scripts/train_pt.py`): the official schedule,
+the validation set, precision, resume and the loss preset.
+
 `pt/` holds the Paint Transformer configs: `model.yaml` (the architecture, `brushstroke.stroke_model.PTModelConfig`),
 `loss_official.yaml` and `loss_paper.yaml` (the two loss presets, `PTLossConfig`), and `brushes.yaml`, the manifest of the
 official brush images (URLs at a pinned commit, licence, SHA-256), read by `scripts/fetch_pt_brushes.py`. The PT-compatible rendering mode is switched in `default.yaml` (`render.mode: pt`).

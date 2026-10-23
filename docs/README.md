@@ -4,7 +4,7 @@
 |----------|---------|
 | [plan/M1.md](plan/M1.md) | Milestone M1 (renderer, optimization-only decomposition, animation export): tickets, VRAM estimate, success criteria |
 | [plan/M2.md](plan/M2.md) | Milestone M2 (Paint Transformer reimplementation and reproduction): tickets, measured estimates, proposed refinements (not applied) |
-| [design/paint_transformer.md](design/paint_transformer.md) | Study note of Paint Transformer (T-010; implementation of the PT mode and generator in section 11, T-011; model and losses in section 12, T-012): parameterization, synthetic data, model, losses, training, inference, reproduction targets, licences, paper-vs-code discrepancies |
+| [design/paint_transformer.md](design/paint_transformer.md) | Study note of Paint Transformer (T-010; implementation of the PT mode and generator in section 11, T-011; model and losses in section 12, T-012; training pipeline and step profile in section 13, T-013): parameterization, synthetic data, model, losses, training, inference, reproduction targets, licences, paper-vs-code discrepancies |
 | [plan/M1_retro.md](plan/M1_retro.md) | M1 gate review (T-008): fresh-clone reproduction, criterion-by-criterion table with numbers, measured cost per stage, limitations, proposed tickets for M2+ |
 | [design/optim_baseline.md](design/optim_baseline.md) | Baseline (a), optimization-only progressive decomposition (T-005): method, Sinkhorn OT, differences from SNP, T-005 results; its update note points to the T-009 defaults |
 | [experiments/optim_sweep.md](experiments/optim_sweep.md) | Quality-gap investigation of baseline (a) (T-009): hypotheses H1 to H7 with verdicts, held-out LPIPS-Alex, new default with mean ± std, revised M1 target proposal |
@@ -16,7 +16,7 @@
 | [design/brushes.md](design/brushes.md) | Procedural brush masks and canvas texture (T-002): what each kind models, orientation convention, references |
 | [design/](design/README.md) | Index of the design notes (folder README) |
 | [media/m1_results.md](media/m1_results.md) | M1 demos (T-007): metrics table per demo, generated from the stored metrics; side-by-side images and GIFs in `media/` |
-| [media/](media/README.md) | Folder README: demo GIFs (<= 4 MB), side-by-side images, results table |
+| [media/](media/README.md) | Folder README: demo GIFs (<= 4 MB), side-by-side images, results table, Paint Transformer validation curve (T-013) |
 
 Other entry points: [README.md](../README.md) (setup, layout, configuration, checks), [CHANGELOG.md](../CHANGELOG.md)
 (changes per ticket), [configs/](../configs/README.md), [tests/](../tests/README.md), [scripts/](../scripts/README.md),
