@@ -7,7 +7,6 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 013 [T-013] Paint Transformer training pipeline (M2)
 - [ ] 014 [T-014] Full PT training runs to convergence, 3 seeds (M2)
 - [ ] 015 [T-015] PT multi-scale inference + optional per-patch refinement (M2)
 - [ ] 016 [T-016] PT reproduction experiment and gap analysis (M2)
@@ -19,9 +18,10 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 012 [T-012] Paint Transformer model and Hungarian-matched losses (M2)
+- [~] 013 [T-013] Paint Transformer training pipeline (M2)
 
 ## Fait
+- [x] 012 [T-012] Paint Transformer model and Hungarian-matched losses (M2) (dcb38e0)
 - [x] 011 [T-011] PT-compatible rendering mode + synthetic stroke data generator (M2) (1257338)
 - [x] 010 [T-010] Paint Transformer study note, reproduction targets, M2 plan (23d725b)
 - [x] 008 [T-008] M1 gate review: fresh-clone reproduction (65e5be9)
