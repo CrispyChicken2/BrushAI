@@ -1,0 +1,4 @@
+# Paint Transformer losses = the official code (docs/design/paint_transformer.md sections 4 and 9)
+# pos_weight 10, BCE 10, pixel 10, stroke L1 1, Wasserstein 10, matching cost 1 - logit.
+preset: official
+matcher: auto   # auto | scipy | gpu (exhaustive search on the GPU, same optimum, N <= 8)
