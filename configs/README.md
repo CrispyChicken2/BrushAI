@@ -10,8 +10,9 @@ Files: `default.yaml` (run settings, `brushstroke.config.RunConfig`) and `baseli
 `experiments/` holds the sweep inputs: `optim_sweep.yaml` (schedules, stages and variants), `images.yaml` (evaluation images with
 checksums) and `baseline_t005.yaml` (frozen T-005 settings, so the sweep stays reproducible after the defaults changed).
 
-`pt/brushes.yaml` is the manifest of the official Paint Transformer brush images (URLs at a pinned commit, licence, SHA-256),
-read by `scripts/fetch_pt_brushes.py`. The PT-compatible rendering mode is switched in `default.yaml` (`render.mode: pt`).
+`pt/` holds the Paint Transformer configs: `model.yaml` (the architecture, `brushstroke.stroke_model.PTModelConfig`),
+`loss_official.yaml` and `loss_paper.yaml` (the two loss presets, `PTLossConfig`), and `brushes.yaml`, the manifest of the
+official brush images (URLs at a pinned commit, licence, SHA-256), read by `scripts/fetch_pt_brushes.py`. The PT-compatible rendering mode is switched in `default.yaml` (`render.mode: pt`).
 
 `demos/` holds one partial YAML per M1 demo (`m1_portrait.yaml`, `m1_landscape.yaml`, `m1_photo.yaml`). Each inherits the
 baseline and animation defaults and only sets the seed, the image, `cudnn_deterministic: true` and the animation of the demo.

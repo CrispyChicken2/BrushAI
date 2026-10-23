@@ -2,6 +2,18 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-012] Paint Transformer model and Hungarian-matched losses
+
+- `brushstroke/stroke_model/model.py`: `PaintTransformer`, the official architecture with the same parameter names: 9,072,902
+  trainable parameters; the official released weights load strictly, and their outputs match the official code exactly
+(max difference 0.0; this test runs when the official files are present).
+- `brushstroke/stroke_model/losses.py`: pixel loss (through the PT renderer of T-011), stroke L1, Wasserstein distance between
+  Gaussian stroke representations, and confidence BCE with Hungarian matching (SciPy reference, exhaustive GPU matcher for up to 8
+  strokes). Both matchers agree with a brute-force search in the tests.
+- Two presets from YAML (`configs/pt/loss_official.yaml`, `loss_paper.yaml`): `official` (the default, the weights of the official
+  code) and `paper_weights` (the weights of the paper). The model config is `configs/pt/model.yaml`.
+- Tests: an overfitting run on one small batch drives the total loss down by more than 95 %; every loss term has non-zero gradients.
+
 ## [T-011] Paint Transformer-compatible rendering mode and synthetic stroke data generator
 
 - `render.mode: pt` (`brushstroke/renderer/pt.py`): renders our `(B, N, 9)` strokes as the official Paint Transformer code does

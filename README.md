@@ -8,7 +8,7 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is under way: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
-Paint Transformer-compatible renderer mode and synthetic stroke generator are in place (T-011).
+Paint Transformer-compatible renderer mode, synthetic stroke generator (T-011), model and Hungarian-matched losses (T-012) are in place.
 Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
@@ -84,7 +84,7 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
 brushstroke/          Python package
   renderer/           brush masks and canvas texture (T-002); differentiable batched stroke renderer (T-003);
                       Paint Transformer-compatible mode `render.mode: pt` (T-011)
-  stroke_model/       stroke predictor (M2): synthetic stroke data generator (T-011); model and losses to come
+  stroke_model/       stroke predictor (M2): Paint Transformer model and losses (T-012), synthetic stroke generator (T-011)
   contribution/       semantic allocation and painterly ordering (M4)
   animation/          stroke-by-stroke replay with partial reveal, ffmpeg export (T-006)
   generation/         text/image front-ends (M5)
@@ -260,6 +260,21 @@ image = render(params, bank, 256, 256, cfg=cfg.render)  # (2, 3, 256, 256), blac
 The mapping between Paint Transformer's parameters and ours, and the derivation of the mode, are in
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md) (sections 1 and 11). The synthetic stroke generator
 (`brushstroke.stroke_model.SyntheticStrokeGenerator`) follows the official training data distribution and runs on the GPU.
+
+The model is `brushstroke.stroke_model.PaintTransformer`, the official architecture with the same parameter names, so the
+released weights load strictly. It has 9,072,902 trainable parameters:
+
+```python
+from brushstroke.stroke_model import PaintTransformer, count_parameters
+
+model = PaintTransformer()
+count_parameters(model)  # 9072902
+```
+
+The losses (pixel, stroke L1, Wasserstein between Gaussian stroke representations, and confidence BCE with Hungarian matching)
+are `PaintTransformerLoss`. Two presets are selectable from `configs/pt/loss_*.yaml`: `official` (the weights of the official code,
+the default) and `paper_weights` (the weights of the paper). The paper and code disagree in several places; see
+[docs/design/paint_transformer.md](docs/design/paint_transformer.md) (section 9 and section 12).
 
 CI (`.github/workflows/ci.yml`) runs on Ubuntu with Python 3.11 and CPU torch: ruff check, ruff format check,
 mypy and `pytest -m "not gpu and not slow"`.
