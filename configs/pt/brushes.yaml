@@ -1,0 +1,24 @@
+# Official Paint Transformer brush images (Apache-2.0), fetched (not committed) by scripts/fetch_pt_brushes.py into data/raw/pt_brush/.
+# Source: https://github.com/Huage001/PaintTransformer at commit 7960b8eef2f6af7171af01933a3d8dbc73190a8d (see docs/data_sources.md).
+# `train_*` are the images read by train/models/painter_model.py, `inference_*` those read by inference/inference.py (different files).
+assets:
+  - id: inference_brush_large_vertical
+    file: inference_brush_large_vertical.png
+    url: https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/inference/brush/brush_large_vertical.png
+    license: Apache-2.0
+    sha256: 3b2074c1b1f0b32b1b049a3810de544acf61553196d8cf0ce5458a3f64dbc98a
+  - id: inference_brush_large_horizontal
+    file: inference_brush_large_horizontal.png
+    url: https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/inference/brush/brush_large_horizontal.png
+    license: Apache-2.0
+    sha256: d05607378b8ce2efe55a1d35c99d85f9b87b10f696f9481f727acca700ae5bb9
+  - id: train_brush_large_vertical
+    file: train_brush_large_vertical.png
+    url: https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/train/brush/brush_large_vertical.png
+    license: Apache-2.0
+    sha256: 7a59df5d865cd7688a44d2e0d7c14b01d8c676178f4e1121e1c19b1f9d1f61c1
+  - id: train_brush_large_horizontal
+    file: train_brush_large_horizontal.png
+    url: https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/train/brush/brush_large_horizontal.png
+    license: Apache-2.0
+    sha256: 9fc5dc4d7d968ad50a1e6b5cfb529e863354843d7c1ff6c8b9547e658d242779

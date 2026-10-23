@@ -34,6 +34,25 @@ generated from these public-domain images); the inputs themselves are never comm
 | `m1_landscape` | landscape | `starry_night` | The Starry Night | Vincent van Gogh | 1889 | <https://commons.wikimedia.org/wiki/File:Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg> | Public domain (author died in 1890) | `70ddc5f0b95875823ddf261ad749b0faaaa5405b5cfcfdd803628c28da847137` |
 | `m1_photo` | photo with a clear subject | `earth_apollo17` | The Earth seen from Apollo 17 ("Blue Marble") | NASA / Apollo 17 crew | 1972-12-07 | <https://commons.wikimedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg> | Public domain (NASA work) | `16eaa54446f761a80ee8de604107b66432a1e6b489aa99d4777dc92765fae80a` |
 
+## Paint Transformer brush images and official code (T-011, T-010)
+
+The PT-compatible renderer mode needs the four brush images of the official repository `Huage001/PaintTransformer`
+(Apache License 2.0, commit `7960b8eef2f6af7171af01933a3d8dbc73190a8d`; attribution: Songhua Liu et al., Baidu). They are
+**fetched, never committed**, by `python -m scripts.fetch_pt_brushes [--insecure]` (manifest `configs/pt/brushes.yaml`, SHA-256 verified):
+the `train_*` pair is what `train/models/painter_model.py` reads, the `inference_*` pair what `inference/inference.py` reads (different files).
+If they are missing the PT mode raises an error that names this command; there is no fallback brush.
+
+| asset id | file in `data/raw/pt_brush/` | source (commit 7960b8e) | license | SHA-256 |
+|---|---|---|---|---|
+| `inference_brush_large_vertical` | `inference_brush_large_vertical.png` | <https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/inference/brush/brush_large_vertical.png> | Apache-2.0 | `3b2074c1b1f0b32b1b049a3810de544acf61553196d8cf0ce5458a3f64dbc98a` |
+| `inference_brush_large_horizontal` | `inference_brush_large_horizontal.png` | <https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/inference/brush/brush_large_horizontal.png> | Apache-2.0 | `d05607378b8ce2efe55a1d35c99d85f9b87b10f696f9481f727acca700ae5bb9` |
+| `train_brush_large_vertical` | `train_brush_large_vertical.png` | <https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/train/brush/brush_large_vertical.png> | Apache-2.0 | `7a59df5d865cd7688a44d2e0d7c14b01d8c676178f4e1121e1c19b1f9d1f61c1` |
+| `train_brush_large_horizontal` | `train_brush_large_horizontal.png` | <https://raw.githubusercontent.com/Huage001/PaintTransformer/7960b8eef2f6af7171af01933a3d8dbc73190a8d/train/brush/brush_large_horizontal.png> | Apache-2.0 | `9fc5dc4d7d968ad50a1e6b5cfb529e863354843d7c1ff6c8b9547e658d242779` |
+
+The official code files used for the parity tests and the pretrained weights are fetched by `python -m scripts.pt_reference_study fetch`
+into `data/raw/pt_official/` (also gitignored); see `docs/design/paint_transformer.md` section 8 for their license status (the weights
+carry no separate license: reference use only, never redistributed).
+
 ## Models / weights (not redistributed)
 - VGG16 (ImageNet) backbone of LPIPS-VGG and AlexNet (ImageNet) of LPIPS-Alex: downloaded by `torchvision` into the torch
   hub cache on first use. LPIPS linear heads: shipped with the `lpips` package (BSD-2-Clause, Zhang et al.).
