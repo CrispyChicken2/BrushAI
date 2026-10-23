@@ -14,9 +14,9 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 008 [T-008] M1 gate review: fresh-clone reproduction (M1)
 
 ## Fait
+- [x] 008 [T-008] M1 gate review: fresh-clone reproduction (65e5be9)
 - [x] 007 [T-007] Three polished reproducible demo GIFs (90fc7f9)
 - [x] 009 [T-009] Investigate optimization-baseline quality gap, sweeps (ae94ac7)
 - [x] 006 [T-006] Animation replay with partial reveal + ffmpeg export (bdee6a7)
