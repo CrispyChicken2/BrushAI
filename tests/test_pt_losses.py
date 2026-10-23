@@ -249,3 +249,30 @@ def test_overfitting_a_tiny_batch_drives_the_loss_down() -> None:
     )
     assert float(out.total) < 0.05 * first
     assert float(out.decision) < 0.2 and float(out.w) < 0.5
+
+
+@needs_official
+def test_batched_cost_matrix_equals_the_official_per_sample_costs() -> None:
+    """Our batched (B, N, N) cost on the valid columns == the official per-sample cost."""
+    model = po.official_train_model()
+    model.net_g.eval()
+    torch.manual_seed(0)
+    model.set_input({"A_paths": ["x"] * 16})
+    with torch.no_grad():
+        model.forward()
+    brushes = load_pt_brushes("train", po.BRUSHES, "cpu")
+    loss = PaintTransformerLoss(brushes)
+    logits = model.pred_decision
+    cost = loss.cost_matrix(model.pred_param, logits, model.gt_param)
+    for i in range(16):
+        valid = model.gt_decision[i].bool()
+        gt = model.gt_param[i, valid]
+        pred = model.pred_param[i]
+        pb = pred.unsqueeze(1).repeat(1, gt.shape[0], 1)
+        gb = gt.unsqueeze(0).repeat(pred.shape[0], 1, 1)
+        reference = (
+            torch.cdist(pred, gt, p=1)
+            + model.gaussian_w_distance(pb, gb)
+            + (1 - logits[i]).unsqueeze(-1).repeat(1, gt.shape[0])
+        )
+        assert torch.allclose(cost[i][:, valid], reference, rtol=1e-4, atol=1e-5)
