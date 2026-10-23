@@ -4,7 +4,9 @@ Neural stroke-based painting: turn a text prompt or an image into a painting mad
 of brush strokes, replayed as a stroke-by-stroke animation. The research focus is semantic-aware stroke
 allocation, painterly stroke ordering and an "anytime quality" metric.
 
-**Status: M1 complete** (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criteria audit: [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). Documentation index: [docs/README.md](docs/README.md).
+**Status: M1 reviewed (gate, T-008).** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
+not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
+[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
 ## M1 demos
@@ -96,7 +98,7 @@ report/               technical report
 ## Configuration
 
 Run settings are typed dataclasses loaded from YAML in `configs/`, with `key.sub=value` overrides from the
-command line. The root schema is `brushstroke.config.RunConfig` (sections `brush:` and `canvas:` so far; the
+command line. The root schema is `brushstroke.config.RunConfig` (sections `brush:`, `canvas:` and `render:`; the
 YAML values override the dataclass defaults, and unknown keys or wrong types raise an error).
 
 ```python

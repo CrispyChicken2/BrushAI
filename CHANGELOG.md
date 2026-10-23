@@ -2,6 +2,15 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-008] M1 gate review: fresh-clone reproduction and milestone audit
+
+- Fresh clone of `main`, new venv, README commands only: setup, checks (190 tests), README snippets and the three demos all
+  run. The regenerated demos are byte-identical to the committed ones (sequence hashes, GIFs, comparison images).
+- README: status updated (M1 reviewed; three of four criteria met, LPIPS criterion not met), licence table, LPIPS weight
+  download and proxy notes, the demo runtime shown in minutes so a rerun does not change the tracked table.
+- `docs/plan/M1_retro.md`: criterion-by-criterion table with evidence, measured cost per stage, limitations, and ten proposed
+  tickets for M2 and later.
+
 ## [T-007] Three M1 demo GIFs, reproducible with one command
 
 - `python -m scripts.make_m1_demos`: fetch, paint (baseline defaults) and animate three public-domain inputs (portrait,
