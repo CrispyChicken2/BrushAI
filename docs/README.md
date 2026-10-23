@@ -12,7 +12,8 @@
 | [design/renderer.md](design/renderer.md) | Differentiable batched stroke renderer (T-003): parameter convention, rasterization, compositing, memory analysis, benchmark table |
 | [design/brushes.md](design/brushes.md) | Procedural brush masks and canvas texture (T-002): what each kind models, orientation convention, references |
 | [design/](design/README.md) | Index of the design notes (folder README) |
-| [media/](media/README.md) | Optimized demo GIFs referenced from the README (each <= 4 MB). None yet. |
+| [media/m1_results.md](media/m1_results.md) | M1 demos (T-007): metrics table per demo, generated from the stored metrics; side-by-side images and GIFs in `media/` |
+| [media/](media/README.md) | Folder README: demo GIFs (<= 4 MB), side-by-side images, results table |
 
 Other entry points: [README.md](../README.md) (setup, layout, configuration, checks), [CHANGELOG.md](../CHANGELOG.md)
 (changes per ticket), [configs/](../configs/README.md), [tests/](../tests/README.md), [scripts/](../scripts/README.md),

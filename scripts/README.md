@@ -9,4 +9,6 @@ Entry points, run from the repo root: `python -m scripts.<name>` or `python scri
 | `paint_optim` | paint an image with baseline (a) (T-005) |
 | `animate` | stroke-by-stroke animation of a `StrokeSequence` to MP4 / WebM / GIF (T-006) |
 | `fetch_data` | download the evaluation images and verify their checksums (T-009) |
+| `fetch_demo_inputs` | download the three M1 demo inputs (a subset of the T-009 manifest) and verify their checksums (T-007) |
+| `make_m1_demos` | the M1 deliverable: fetch, paint and animate the three demos, write `docs/media/` (T-007) |
 | `exp_optim_sweep` | the baseline sweep: runs and regenerates `docs/experiments/` tables and figures (T-009) |

@@ -7,6 +7,26 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 **Status: M1 in progress** (see [docs/plan/M1.md](docs/plan/M1.md)). Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
+## M1 demos
+
+Three paintings made by the optimization baseline from public-domain images, each animated stroke by stroke (10 s of
+painting and a 2 s hold; the GIFs are 480 px wide, about 1.2 MB each). Settings and reproduction: [Painting an image](#painting-an-image-baseline-a).
+
+| Portrait: *Girl with a Pearl Earring* | Landscape: *The Starry Night* | Photo: *Earth from Apollo 17* |
+|---|---|---|
+| ![Portrait demo](docs/media/m1_portrait.gif) | ![Landscape demo](docs/media/m1_landscape.gif) | ![Photo demo](docs/media/m1_photo.gif) |
+
+| demo | strokes | L1 | LPIPS-VGG | LPIPS-Alex (held out) | target met |
+|------|---------|----|-----------|------------------------|------------|
+| portrait | 2037 | 0.024 | 0.253 | 0.217 | yes |
+| landscape | 2037 | 0.071 | 0.358 | 0.432 | **no** |
+| photo | 2037 | 0.055 | 0.251 | 0.289 | yes |
+
+The target is the revised one adopted for the demos (LPIPS-VGG ≤ 0.35 and LPIPS-Alex ≤ 0.40 at ≤ 2000 strokes and ≤ 10 min
+per 512 px image). The landscape misses it: its swirling high-frequency brushwork is hard to reproduce with about 2000 strokes.
+Full table with runtime, VRAM, SSIM and hashes: [docs/media/m1_results.md](docs/media/m1_results.md). Regenerate everything with
+`.venv\Scripts\python -m scripts.make_m1_demos` (about 29 minutes on an RTX 5070).
+
 ## Setup
 
 Requires Python 3.11. The pinned PyTorch build comes from the CUDA 12.8 index, which an NVIDIA RTX 50-series
@@ -150,8 +170,8 @@ self-made image, for example in `data/raw/` (gitignored). The evaluation images 
 The output directory gets `final.png`, `target.png`, `progress/level_XX.png` (canvas after each level),
 `sequence.npz` (the stroke sequence), `metrics.json` and `loss_curve.json`. The default schedule (2037 strokes at 512 x 512,
 about 9.4 minutes and 3.3 GB peak VRAM on an RTX 5070) reaches a mean LPIPS-VGG of 0.308 and a held-out LPIPS-AlexNet of
-0.359 over 5 images x 3 seeds (the T-005 settings gave 0.416 and 0.465). The M1 target (LPIPS-VGG below 0.25 within 2000
-strokes) is **not met**; a revised target is proposed in the experiment report, pending the chef's decision.
+0.359 over 5 images x 3 seeds (the T-005 settings gave 0.416 and 0.465). The original M1 target (LPIPS-VGG below 0.25 within
+2000 strokes) is **not met** on average; the revised target used for the demos is stated in the M1 demos section above.
 
 ## Experiments
 

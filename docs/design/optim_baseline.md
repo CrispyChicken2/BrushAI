@@ -107,6 +107,12 @@ Seed + `seed_everything(seed, deterministic=True)`: identical sequences on CPU (
 was bitwise reproducible in the renderer tests, but the whole optimization is not guaranteed bit-identical (see `renderer.md`:
 use `render.sampler: gather` with the deterministic flag for a guaranteed path); two GPU runs of the same configuration (tuning run and final run) gave L1 0.0357 and 0.0358.
 
+Update (T-007): the GPU non-determinism of the optimization comes from cuDNN's convolution backward in the LPIPS-VGG loss, not
+from `grid_sample`. The switch `cudnn_deterministic: true` (deterministic cuDNN only, full speed) makes runs bitwise identical:
+two full pipeline runs of the three M1 demos gave identical sequences, GIFs and metrics. The full `deterministic` mode is about
+3x slower and refuses the `grid_sample` backward, so the demos do not use it. Without the switch (the default), GPU runs are
+still not guaranteed bit-identical.
+
 ## Limitations
 - Cost is O(strokes * H * W) per step because each stroke is rasterized over the whole canvas (new strokes only touch one patch):
   cropping to the patch bounding box would cut the runtime a lot.

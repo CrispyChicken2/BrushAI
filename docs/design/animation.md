@@ -12,7 +12,9 @@ is finished there, even with `hold = 0`).
 
 Every stroke gets a start time, a reveal duration and a direction (all deterministic):
 - **Slots**: stroke k owns a time slot `T * w_k / sum(w)`; `w = 1` (`easing: uniform`) or grows linearly from 1 to
-  `decel_ratio` (`easing: decelerate`: fast coarse/background strokes, slower details).
+  `decel_ratio` (`easing: decelerate`: fast coarse/background strokes, slower details). `easing: by_level` (T-007, used by
+  the M1 demos) gives every coarse-to-fine level a time proportional to `strokes_in_level ** level_time_power` (default 0.5),
+  split evenly among its strokes, so the few large strokes of the coarse levels stay visible long enough.
 - **Reveal duration** = `overlap x slot` (overlap = average strokes in flight), but at least `min_reveal_frames`
   frames so that no stroke pops in; the maximum is the whole painting phase.
 - **Starts** are spread linearly over `[0, T - max(duration)]` in index order, so starts are non-decreasing and every

@@ -2,6 +2,17 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-007] Three M1 demo GIFs, reproducible with one command
+
+- `python -m scripts.make_m1_demos`: fetch, paint (baseline defaults) and animate three public-domain inputs (portrait,
+  landscape, photo); writes `docs/media/m1_{portrait,landscape,photo}.gif`, side-by-side images and `m1_results.md`.
+- Results at 512 px, 2037 strokes: portrait and photo meet the revised target (LPIPS-VGG 0.253 and 0.251, LPIPS-Alex 0.217
+  and 0.289); the landscape (The Starry Night) does not (0.358 / 0.432). Two full runs gave identical sequences, GIFs and metrics.
+- Animation: `easing: by_level` (time per coarse-to-fine level ~ strokes ** 0.5).
+- Reproducibility: `cudnn_deterministic` switch for the baseline (the GPU non-determinism came from cuDNN convolution backward
+  in the LPIPS-VGG loss); SSIM and shared image metrics in `brushstroke/eval/metrics.py`.
+- Demo inputs reuse the T-009 manifest and checksums; documented in `docs/data_sources.md`.
+
 ## [T-009] Investigation of the optimization-baseline quality gap; new baseline defaults
 
 - Sweep of hypotheses H1 to H7 (`scripts/exp_optim_sweep.py`, `configs/experiments/optim_sweep.yaml`), with held-out

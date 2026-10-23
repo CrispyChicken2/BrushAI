@@ -9,3 +9,6 @@ Files: `default.yaml` (run settings, `brushstroke.config.RunConfig`) and `baseli
 
 `experiments/` holds the sweep inputs: `optim_sweep.yaml` (schedules, stages and variants), `images.yaml` (evaluation images with
 checksums) and `baseline_t005.yaml` (frozen T-005 settings, so the sweep stays reproducible after the defaults changed).
+
+`demos/` holds one partial YAML per M1 demo (`m1_portrait.yaml`, `m1_landscape.yaml`, `m1_photo.yaml`). Each inherits the
+baseline and animation defaults and only sets the seed, the image, `cudnn_deterministic: true` and the animation of the demo.
