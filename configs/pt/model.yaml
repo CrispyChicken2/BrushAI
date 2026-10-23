@@ -1,0 +1,9 @@
+# Paint Transformer = the official Painter(5, 8, 256, 8, 3, 3): 9,072,902 parameters.
+strokes: 8
+hidden_dim: 256
+heads: 8
+enc_layers: 3
+dec_layers: 3
+dropout: 0.1
+patch_size: 32
+colour_mode: sampled   # sampled (official code) | predicted (paper description, ablation)
