@@ -6,8 +6,9 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 
 **Status: M1 reviewed (gate, T-008).** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
-[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is in planning: its study note is
-[docs/design/paint_transformer.md](docs/design/paint_transformer.md) and its plan is [docs/plan/M2.md](docs/plan/M2.md).
+[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is under way: the study note is
+[docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
+Paint Transformer-compatible renderer mode and synthetic stroke generator are in place (T-011).
 Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
@@ -81,8 +82,9 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
 
 ```
 brushstroke/          Python package
-  renderer/           brush masks and canvas texture (T-002); differentiable batched stroke renderer (T-003)
-  stroke_model/       stroke predictor (M2)
+  renderer/           brush masks and canvas texture (T-002); differentiable batched stroke renderer (T-003);
+                      Paint Transformer-compatible mode `render.mode: pt` (T-011)
+  stroke_model/       stroke predictor (M2): synthetic stroke data generator (T-011); model and losses to come
   contribution/       semantic allocation and painterly ordering (M4)
   animation/          stroke-by-stroke replay with partial reveal, ffmpeg export (T-006)
   generation/         text/image front-ends (M5)
@@ -229,6 +231,35 @@ Run from the repo root, with the venv interpreter:
 ```
 
 On Linux, replace `.venv\Scripts\python` with `.venv/bin/python`.
+
+The Paint Transformer parity tests compare against the official code and brush images. They need the official files
+(`python -m scripts.pt_reference_study fetch`) and the brush images (`python -m scripts.fetch_pt_brushes`); without them they are
+skipped, and each skip says which command to run.
+
+## Paint Transformer compatible mode (M2)
+
+`render.mode: pt` renders the strokes exactly as the official Paint Transformer code does: two brush images chosen by `h > w`,
+binarized and eroded alpha, a dilated `gray * colour` foreground, a black canvas and no opacity (the ninth parameter `a` is the
+0/1 stroke decision). `render.pt_alpha` selects the inference (`pt_infer`) or training (`pt_train`) pipeline. The default
+procedural mode is unchanged. The brush images are not committed: fetch them first with `python -m scripts.fetch_pt_brushes`
+(Apache-2.0, see [docs/data_sources.md](docs/data_sources.md)); without them the mode raises an error that names the command.
+
+```python
+import torch
+
+from brushstroke.config import RunConfig
+from brushstroke.renderer import BrushBank, render
+from brushstroke.utils.config import load_config
+
+cfg = load_config(RunConfig, "configs/default.yaml", overrides=["render.mode=pt"])
+bank = BrushBank.from_config(cfg.brush)  # ignored in pt mode
+params = torch.rand(2, 32, 9)  # read as PT strokes
+image = render(params, bank, 256, 256, cfg=cfg.render)  # (2, 3, 256, 256), black canvas
+```
+
+The mapping between Paint Transformer's parameters and ours, and the derivation of the mode, are in
+[docs/design/paint_transformer.md](docs/design/paint_transformer.md) (sections 1 and 11). The synthetic stroke generator
+(`brushstroke.stroke_model.SyntheticStrokeGenerator`) follows the official training data distribution and runs on the GPU.
 
 CI (`.github/workflows/ci.yml`) runs on Ubuntu with Python 3.11 and CPU torch: ruff check, ruff format check,
 mypy and `pytest -m "not gpu and not slow"`.

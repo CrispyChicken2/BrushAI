@@ -2,6 +2,20 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-011] Paint Transformer-compatible rendering mode and synthetic stroke data generator
+
+- `render.mode: pt` (`brushstroke/renderer/pt.py`): renders our `(B, N, 9)` strokes as the official Paint Transformer code does
+  (two brush images chosen by `h > w`, binarized and eroded alpha in `pt_infer` / `pt_train`, dilated foreground, black canvas,
+  no opacity). Bit-identical to the official inference `param2stroke` in the tests (max difference 0); the training pipeline
+  agrees to 1.8e-7. The default procedural mode is unchanged.
+- Parameter adapters between Paint Transformer and our convention, following the study note.
+- `scripts/fetch_pt_brushes.py`: the four official brush images, fetched with SHA-256 checks into `data/raw/pt_brush/` (not committed).
+  Without them the PT mode fails with a message naming the command.
+- `brushstroke/stroke_model/synthetic.py`: GPU synthetic stroke generator following the official `set_input` distribution. Its
+  batches equal the official ones with the same random stream; 13.6 k patches/s at batch 64 on the RTX 5070, against 1.07 k/s for
+  the official code.
+- Tests skip with a reason when the official files or brush images are absent.
+
 ## [T-010] Paint Transformer study note, reproduction targets, M2 plan
 
 - `docs/design/paint_transformer.md`: the parameterization and renderer of the official code, the synthetic training data, the model,
