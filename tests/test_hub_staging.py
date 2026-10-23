@@ -7,7 +7,7 @@ from pathlib import Path
 
 import torch
 
-from scripts.pt_training_report import mean_std, plateau_improvement
+from scripts.pt_training_report import PRE_DECAY, mean_std, window_gain
 from scripts.upload_pt_to_hub import build_staging
 
 
@@ -33,9 +33,13 @@ def test_staging_folder_has_weights_only_card_and_config_hash(tmp_path: Path) ->
 
 
 def test_plateau_criterion_and_mean_std() -> None:
-    steps = list(range(0, 1001, 50))
+    steps = list(range(0, 1001, 20))
     flat = [5.0 + 0.0001 * (1000 - s) / 1000 for s in steps]
     falling = [5.0 * (1 - 0.0005 * s) for s in steps]
-    assert plateau_improvement(steps, flat) < 0.01 < plateau_improvement(steps, falling)
+    assert window_gain(steps, flat, PRE_DECAY) < 0.01 < window_gain(steps, falling, PRE_DECAY)
+    # a median ignores the isolated evaluation spikes
+    spiky = list(flat)
+    spiky[40] = 9.0  # step 800, inside the first pre-decay window
+    assert window_gain(steps, spiky, PRE_DECAY) < 0.01
     assert mean_std([1.0, 3.0]) == (2.0, 2**0.5)
     assert mean_std([4.0]) == (4.0, 0.0)
