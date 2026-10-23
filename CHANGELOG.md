@@ -2,6 +2,16 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-010] Paint Transformer study note, reproduction targets, M2 plan
+
+- `docs/design/paint_transformer.md`: the parameterization and renderer of the official code, the synthetic training data, the model,
+  the losses (with the paper and code weights side by side), training, inference, reproduction targets with feasibility verdicts,
+  licences and a list of paper-vs-code discrepancies. Each claim cites the paper or the official file and function, or is marked as measured.
+- `docs/plan/M2.md`: the M2 plan (T-010 to T-017), measured estimates and proposed refinements, none applied silently.
+- `scripts/pt_reference_study.py`: runs the official code and weights at a pinned commit with SHA-256 checks, outside git. Measured,
+  for example, a 9,072,902-parameter model and about 3.7 h for the official training recipe on this hardware.
+- No change to the package.
+
 ## [T-008] M1 gate review: fresh-clone reproduction and milestone audit
 
 - Fresh clone of `main`, new venv, README commands only: setup, checks (190 tests), README snippets and the three demos all

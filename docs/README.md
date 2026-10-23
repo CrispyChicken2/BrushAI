@@ -3,6 +3,8 @@
 | Document | Content |
 |----------|---------|
 | [plan/M1.md](plan/M1.md) | Milestone M1 (renderer, optimization-only decomposition, animation export): tickets, VRAM estimate, success criteria |
+| [plan/M2.md](plan/M2.md) | Milestone M2 (Paint Transformer reimplementation and reproduction): tickets, measured estimates, proposed refinements (not applied) |
+| [design/paint_transformer.md](design/paint_transformer.md) | Study note of Paint Transformer (T-010): parameterization, synthetic data, model, losses, training, inference, reproduction targets, licences, paper-vs-code discrepancies |
 | [plan/M1_retro.md](plan/M1_retro.md) | M1 gate review (T-008): fresh-clone reproduction, criterion-by-criterion table with numbers, measured cost per stage, limitations, proposed tickets for M2+ |
 | [design/optim_baseline.md](design/optim_baseline.md) | Baseline (a), optimization-only progressive decomposition (T-005): method, Sinkhorn OT, differences from SNP, T-005 results; its update note points to the T-009 defaults |
 | [experiments/optim_sweep.md](experiments/optim_sweep.md) | Quality-gap investigation of baseline (a) (T-009): hypotheses H1 to H7 with verdicts, held-out LPIPS-Alex, new default with mean ± std, revised M1 target proposal |

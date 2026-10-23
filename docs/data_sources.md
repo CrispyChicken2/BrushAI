@@ -37,3 +37,16 @@ generated from these public-domain images); the inputs themselves are never comm
 ## Models / weights (not redistributed)
 - VGG16 (ImageNet) backbone of LPIPS-VGG and AlexNet (ImageNet) of LPIPS-Alex: downloaded by `torchvision` into the torch
   hub cache on first use. LPIPS linear heads: shipped with the `lpips` package (BSD-2-Clause, Zhang et al.).
+
+## Paint Transformer reference (T-010, study only)
+Used only as a reference point, outside git (`scripts/pt_reference_study.py`; details and citations in
+[design/paint_transformer.md](design/paint_transformer.md), section 8).
+- **Code**: `Huage001/PaintTransformer` (the author's PyTorch re-implementation), Apache License 2.0, pinned to commit
+  `7960b8eef2f6af7171af01933a3d8dbc73190a8d`; each file is checked against a SHA-256 in the script. Downloaded to
+  `data/raw/pt_official/` (gitignored). Not vendored: the repository contains no copied files.
+- **Brush images** (`inference/brush/*.png`, `train/brush/*.png`): Apache-2.0 assets of the same repository, not committed.
+- **Pretrained weights** (`model.pth`, 36.3 MB, Google Drive link from the README, SHA-256 `1fbd761a...`, full value in the script):
+  no license is stated by the authors. Treated as research reference material: never committed or redistributed, loaded with
+  `torch.load(..., weights_only=True)`.
+- The paper (Liu et al., ICCV 2021, arXiv 2108.03798) is cited, not copied.
+- The datasets of the paper (Kaggle landscape pictures, WikiArt, FFHQ) are not used.

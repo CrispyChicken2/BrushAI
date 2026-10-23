@@ -6,7 +6,9 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 
 **Status: M1 reviewed (gate, T-008).** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
-[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). Documentation index: [docs/README.md](docs/README.md).
+[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is in planning: its study note is
+[docs/design/paint_transformer.md](docs/design/paint_transformer.md) and its plan is [docs/plan/M2.md](docs/plan/M2.md).
+Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
 ## M1 demos
@@ -244,5 +246,6 @@ Code: MIT (see [LICENSE](LICENSE)). Third-party components are not redistributed
 | ffmpeg (external executable, not bundled) | MP4/WebM/GIF export | LGPL/GPL depending on the build you install |
 | VGG16 and AlexNet ImageNet weights | LPIPS backbones, downloaded at run time into the torch cache | torchvision pretrained weights (trained on ImageNet; subject to the ImageNet terms of use) |
 | evaluation and demo images | experiments and demos | public domain / NASA, per image in [docs/data_sources.md](docs/data_sources.md) |
+| Paint Transformer official code (Apache-2.0) and pretrained weights (no license stated) | study only, a reference point outside git; the code is not vendored | Apache-2.0; weights are never redistributed (see [docs/data_sources.md](docs/data_sources.md)) |
 
 The demo GIFs in `docs/media/` are paintings generated from the public-domain inputs above. Model weights and datasets are never committed.
