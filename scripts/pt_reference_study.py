@@ -1,17 +1,29 @@
-"""Study tools for T-010: run the *official* Paint Transformer code and weights as a reference point.
+"""Study tools for T-010: run the *official* Paint Transformer code and weights as a reference
+point.
 
-Nothing from the official repository is committed. The files (Apache-2.0) are downloaded at a pinned commit into
-``data/raw/pt_official/`` (gitignored) with SHA-256 verification, and the pretrained weights from the authors' Google Drive
-link. **`fetch` followed by `reference`, `datastats` or `trainspeed` downloads and executes third-party code** (Apache-2.0, pinned by commit
-and SHA-256 per file) and loads third-party weights (SHA-256-pinned pickle, loaded with ``weights_only=True``). Usage (repo root)::
+Nothing from the official repository is committed. The files (Apache-2.0) are downloaded at a
+pinned commit into
+``data/raw/pt_official/`` (gitignored) with SHA-256 verification, and the pretrained weights from
+the authors' Google Drive
+link. **`fetch` followed by `reference`, `datastats` or `trainspeed` downloads and executes
+third-party code** (Apache-2.0, pinned by commit
+and SHA-256 per file) and loads third-party weights (SHA-256-pinned pickle, loaded with
+``weights_only=True``). Usage (repo root)::
 
-    python -m scripts.pt_reference_study fetch [--insecure]     # code at the pinned commit + weights
-    python -m scripts.pt_reference_study reference              # official inference on the 5 evaluation images
-    python -m scripts.pt_reference_study datastats              # official synthetic-data generator statistics
-    python -m scripts.pt_reference_study trainspeed             # official training step time and VRAM
+    python -m scripts.pt_reference_study fetch [--insecure]     # code at the pinned commit +
+    weights
+    python -m scripts.pt_reference_study reference              # official inference on the 5
+    evaluation images
+    python -m scripts.pt_reference_study datastats              # official synthetic-data generator
+    statistics
+    python -m scripts.pt_reference_study trainspeed             # official training step time and
+    VRAM
+    python -m scripts.pt_reference_study datagen                # our synthetic generator vs the
+    official set_input (speed)
 
 Results are printed and written as JSON in ``outputs/pt_reference/``. The numbers are quoted in
-``docs/design/paint_transformer.md``. The weights are a pickle from the internet: they are only loaded with
+``docs/design/paint_transformer.md``. The weights are a pickle from the internet: they are only
+loaded with
 ``torch.load(..., weights_only=True)``.
 """
 
@@ -88,8 +100,11 @@ def fetch(insecure: bool = False) -> None:
             dest.write_bytes(data)
     weights = ROOT / "model.pth"
     if not weights.exists() or _sha(weights.read_bytes()) != WEIGHTS_SHA256:
-        # Google Drive serves a "virus scan" page for large files: the confirm token is the literal "t".
-        url = f"https://drive.usercontent.google.com/download?id={WEIGHTS_ID}&export=download&confirm=t"
+        # Google Drive serves a "virus scan" page for large files: the confirm token is "t".
+        url = (
+            f"https://drive.usercontent.google.com/download?id={WEIGHTS_ID}"
+            "&export=download&confirm=t"
+        )
         data = _get(url, insecure)
         if _sha(data) != WEIGHTS_SHA256:
             raise RuntimeError("pretrained weights: checksum mismatch")
@@ -98,7 +113,8 @@ def fetch(insecure: bool = False) -> None:
 
 
 def reference() -> list[dict[str, object]]:
-    """Official inference (parallel mode, K=4) on the evaluation images; strokes, time, VRAM and our metrics."""
+    """Official inference (parallel mode, K=4) on the evaluation images; strokes, time, VRAM and
+    our metrics."""
     sys.path.insert(0, str(Path.cwd()))
     from brushstroke.eval.metrics import image_metrics
     from brushstroke.utils.io import center_crop_resize, load_image, save_image
@@ -201,7 +217,8 @@ def _official_model(gpu: bool) -> object:
 
 
 def datastats(batches: int = 200) -> dict[str, object]:
-    """Statistics of the official synthetic data generator (``set_input``): valid target strokes per patch."""
+    """Statistics of the official synthetic data generator (``set_input``): valid target strokes
+    per patch."""
     cwd = Path.cwd()
     try:
         model = _official_model(gpu=False)
@@ -228,7 +245,8 @@ def datastats(batches: int = 200) -> dict[str, object]:
 
 
 def trainspeed(steps: int = 60) -> dict[str, float]:
-    """Time of one official training step (data synthesis + Hungarian matching + backward), batch 64, fp32."""
+    """Time of one official training step (data synthesis + Hungarian matching + backward), batch
+    64, fp32."""
     cwd = Path.cwd()
     try:
         model = _official_model(gpu=True)
@@ -259,11 +277,54 @@ def trainspeed(steps: int = 60) -> dict[str, float]:
     return res
 
 
+def datagen(batches: int = 30) -> dict[str, dict[str, float]]:
+    """Throughput (patches/s) of our synthetic generator vs the official ``set_input`` on the GPU,
+    batch 64 / 256."""
+    sys.path.insert(0, str(Path.cwd()))
+    from brushstroke.renderer.pt import load_pt_brushes
+    from brushstroke.stroke_model import SyntheticStrokeGenerator
+
+    cwd = Path.cwd()
+    results: dict[str, dict[str, float]] = {}
+    ours = SyntheticStrokeGenerator(load_pt_brushes("train", Path("data/raw/pt_brush"), "cuda"))
+    for size in (64, 256, 1024):
+        g = torch.Generator(device="cuda").manual_seed(0)
+        ours.sample(size, g)
+        torch.cuda.synchronize()
+        t0 = time.perf_counter()
+        for _ in range(batches):
+            ours.sample(size, g)
+        torch.cuda.synchronize()
+        results[f"ours_batch{size}"] = {
+            "patches_per_second": size * batches / (time.perf_counter() - t0)
+        }
+    try:
+        model = _official_model(gpu=True)
+        model.opt.batch_size = 64  # type: ignore[attr-defined]
+        model.set_input({"A_paths": ["x"] * 64})  # type: ignore[attr-defined]
+        torch.cuda.synchronize()
+        t0 = time.perf_counter()
+        for _ in range(batches):
+            model.set_input({"A_paths": ["x"] * 64})  # type: ignore[attr-defined]
+        torch.cuda.synchronize()
+        results["official_batch64"] = {
+            "patches_per_second": 64 * batches / (time.perf_counter() - t0)
+        }
+    finally:
+        os.chdir(cwd)
+    print(json.dumps(results))
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "datagen.json").write_text(json.dumps(results, indent=1), encoding="utf-8")
+    return results
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
-    parser.add_argument("command", choices=["fetch", "reference", "datastats", "trainspeed"])
+    parser.add_argument(
+        "command", choices=["fetch", "reference", "datastats", "trainspeed", "datagen"]
+    )
     parser.add_argument(
         "--insecure", action="store_true", help="skip TLS certificate verification (proxy)"
     )
@@ -274,6 +335,8 @@ def main(argv: list[str] | None = None) -> None:
         reference()
     elif args.command == "datastats":
         datastats()
+    elif args.command == "datagen":
+        datagen()
     else:
         trainspeed()
 
