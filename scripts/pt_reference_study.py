@@ -2,7 +2,8 @@
 
 Nothing from the official repository is committed. The files (Apache-2.0) are downloaded at a pinned commit into
 ``data/raw/pt_official/`` (gitignored) with SHA-256 verification, and the pretrained weights from the authors' Google Drive
-link. Usage (repo root)::
+link. **`fetch` followed by `reference`, `datastats` or `trainspeed` downloads and executes third-party code** (Apache-2.0, pinned by commit
+and SHA-256 per file) and loads third-party weights (SHA-256-pinned pickle, loaded with ``weights_only=True``). Usage (repo root)::
 
     python -m scripts.pt_reference_study fetch [--insecure]     # code at the pinned commit + weights
     python -m scripts.pt_reference_study reference              # official inference on the 5 evaluation images

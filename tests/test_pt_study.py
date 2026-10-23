@@ -23,6 +23,19 @@ def test_design_note_cites_the_same_commit_and_weights() -> None:
     note = (ROOT / "docs" / "design" / "paint_transformer.md").read_text(encoding="utf-8")
     assert study.COMMIT in note and study.WEIGHTS_SHA256 in note
     assert "9,072,902" in note and "Apache" in note
+    # the schedule and loss-weight numbers written in the note
+    for text in (
+        "56,320",
+        "205-209",
+        "2.7e-6",
+        "8.1e-7",
+        "lambda_r",
+        "pos_weight",
+        "Eq. 11",
+        "Eq. 13",
+        "Eq. 2",
+    ):
+        assert text in note, text
 
 
 def test_official_lr_schedule_arithmetic_quoted_in_the_note() -> None:

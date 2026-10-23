@@ -4,7 +4,7 @@ Exact, cited specification of *Paint Transformer* (PT; Liu, Lin, He, Li, Deng, L
 and from the author's code, so that the M2 reimplementation and its gaps can be judged against facts.
 
 **Sources and how they are cited**
-- **[P §x]** = the paper (arXiv v1 HTML rendering, read in full; sections, equations and Tables 1-2 as numbered there).
+- **[P §x]** = the paper (arXiv v2, read in full from its HTML rendering via ar5iv; the review cross-checked the text against `arxiv.org/html/2108.03798v2`; sections, equations and Tables 1-2 as numbered there).
 - **[C file:function]** = <https://github.com/Huage001/PaintTransformer> at commit **`7960b8eef2f6af7171af01933a3d8dbc73190a8d`**
   (2021-10-20, "Update README.md"), files read in full: `inference/{inference,network,morphology}.py`, `train/train.py`,
   `train/train.sh`, `train/models/{painter_model,networks,base_model}.py`, `train/options/*.py`, `train/util/morphology.py`,
@@ -102,18 +102,19 @@ Per training step with batch size `B` (64 in `train.sh`):
 ## 4. Losses [P §3.4; C train/models/painter_model.py:optimize_parameters]
 
 `rec` = the canvas after rendering the predicted strokes with binarized confidence; targets `render`.
-- **Pixel loss:** `L1(rec, render)` (mean over pixels) x `lambda_pixel = 10` [C]; [P Eq. 7: plain L1, no weight given].
+- **Pixel loss:** `L1(rec, render)` (mean over pixels) x `lambda_pixel = 10` [C]; paper: `L_pixel = ||I_r - I_t||_1` [P Eq. 7] and the total is `L = L_stroke + L_pixel` [P Eq. 2], i.e. **pixel weight 1**.
 - **Hungarian matching** per patch between the 8 predictions and the *valid* ground-truth strokes (`scipy.optimize.linear_sum_assignment`, on CPU, per sample),
   cost = `cdist(pred5, gt5, p=1)` (L1 over the 5 shape parameters) `+ W-distance + (1 - decision_logit)` [C: `cost_matrix_decision = (1 - decision)` with `decision` the raw logit].
-  [P Eq. 12: `g_v (D_L1 + D_W + D_bce)` with a BCE cost: deviation.] Invalid GT strokes are excluded from the matching (the same effect as `g_v = 0`).
+  [P Eq. 12: `M_{u,v} = g_v (D_L1 + D_W + D_bce)` with `D_bce` of Eq. 11 (the lambda_r-weighted BCE): deviation.] Invalid GT strokes are excluded from the matching (the same effect as `g_v = 0`).
 - **Stroke L1** (`loss_gt`): `L1Loss` (mean over the matched pairs and the 5 parameters) x `lambda_gt = 1`.
 - **Wasserstein stroke loss** (`loss_w`): `gaussian_w_distance` between the 2-D Gaussians of the strokes, `|mu_1 - mu_2|^2 + (w1^2 + h1^2)/4 + (w2^2 + h2^2)/4 - 2 Tr((S1^{1/2} S2 S1^{1/2})^{1/2})`
   [C gaussian_w_distance, get_sigma, get_sigma_sqrt; P Eq. 9-10, with `w/2, h/2` as in Eq. 9; the code's covariance entries use `w^2/4` and `h^2/4` for `S` and `w/2, h/2` for `S^{1/2}`],
   mean over matched pairs x `lambda_w = 10`.
 - **Confidence loss** (`loss_decision`): `BCEWithLogitsLoss(pos_weight = lambda_recall = 10)` over **all** `B x 8` predictions, positives = the predictions matched to a valid GT stroke,
-  x `lambda_decision = 10`.
+  x `lambda_decision = 10`. Paper: `D_bce = -lambda_r g_v log sigma(c_u) - (1 - g_v) log(1 - sigma(c_u))` [P Eq. 11], where **`lambda_r` is the recall weight on the positive term** (it equals the code's `pos_weight`), and the stroke loss
+  `L_stroke = (1/n) sum_i g_{Y_i} (lambda_L1 D_L1 + lambda_W D_W + lambda_bce D_bce)` [P Eq. 13] weights the three terms by `lambda_L1, lambda_W, lambda_bce` (the code's `lambda_gt`, `lambda_w`, `lambda_decision`).
 - **Total:** `loss = 10 * L1_pixel + 1 * L1_stroke + 10 * W + 10 * BCE` [C defaults in `painter_model.py:modify_commandline_options`; `train.sh` does not override them].
-  [P §4.1 gives `lambda_r = 8, lambda_L1 = 1, lambda_W = 10, lambda_bce = 1` and no pixel weight: deviation, section 9.]
+  [P §4.1 gives `lambda_r = 8, lambda_L1 = 1, lambda_W = 10, lambda_bce = 1`; with Eq. 2, 11, 13 the paper total is `1 * L_pixel + L_stroke` with recall weight 8, i.e. the mapping paper <-> code of section 9: deviation in the recall weight (8 vs 10), the BCE weight (1 vs 10) and the pixel weight (1 vs 10).]
 - Stroke order is not supervised at stroke level [P §3.4]; the image-level pixel loss with sequential compositing is what regulates it.
 
 ## 5. Training hyperparameters
@@ -196,8 +197,13 @@ Feasibility summary: **reproducible**: T1b, T1c, T2a, T2b, Fig. 5/6/7. **Partial
 |------|-------|----------------------|--------------------------------------|
 | stroke predicts colour | stroke has `r, g, b`; predictor outputs stroke parameters | predictor outputs 5 shape parameters; colour sampled from the target at the predicted centre | **follow the code** (it is what the released weights do); keep colour prediction as a flagged ablation |
 | invalid-label threshold | 60 % of a previous stroke's area | 75 % (`iou < 0.75`) | follow the code; flag |
-| loss weights | `lambda_r = 8`, `L1 = 1`, `W = 10`, `bce = 1`, no pixel weight | pixel 10, gt 1, W 10, decision 10, recall (pos_weight) 10 | follow the code; the paper numbers cannot be matched to either exactly |
-| matching cost | `D_L1 + D_W + D_bce` | `L1 + W + (1 - logit)` | implement both as a flag (default code) |
+| recall weight in `D_bce` ([P Eq. 11], also inside the matching cost, Eq. 12) | `lambda_r = 8` | `lambda_recall` = 10 (`pos_weight`) | follow the code; flag `paper` = 8 |
+| stroke L1 ([P Eq. 13]) | `lambda_L1 = 1` | `lambda_gt` = 1 | same |
+| Wasserstein ([P Eq. 13]) | `lambda_W = 10` | `lambda_w` = 10 | same |
+| confidence BCE ([P Eq. 13]) | `lambda_bce = 1` | `lambda_decision` = 10 | follow the code; flag `paper` = 1 |
+| pixel loss ([P Eq. 2]: `L = L_stroke + L_pixel`) | weight 1 | `lambda_pixel` = 10 | follow the code; flag `paper` = 1 |
+| matching cost ([P Eq. 12]) | `D_L1 + D_W + D_bce` (with the `lambda_r`-weighted BCE) | `L1 + W + (1 - logit)` | see the next row |
+| **"paper loss weights" preset** | `pos_weight` 8, BCE weight 1, pixel weight 1, stroke L1 1, W 10, matching with the `lambda_r`-weighted BCE | `pos_weight` 10, 10, 10, 1, 10, matching `1 - logit` | T-012 should expose both presets; the paper preset is an unvalidated alternative (the released weights were trained with the code values) |
 | batch size / length | 128 / 30,000 iterations | 64 / 56,320 steps (3.6 M samples) | equal sample budget: use the code's schedule |
 | Adam betas | not stated | (0.5, 0.999) | follow the code |
 | positional encoding | concatenated | added | follow the code |
