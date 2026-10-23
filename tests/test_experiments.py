@@ -21,6 +21,7 @@ from scripts.exp_optim_sweep import (
     aggregate,
     build_jobs,
     mean_std,
+    paired_delta,
     render_tables,
 )
 from scripts.fetch_data import fetch, sha256_of
@@ -39,7 +40,15 @@ def target_image(size: int = 48) -> torch.Tensor:
 
 
 def cfg_small(**kw: object) -> OptimConfig:
-    base = {"height": 48, "width": 48, "levels": [1, 2], "strokes_per_patch": [3, 2], "iters": 25}
+    base = {
+        "height": 48,
+        "width": 48,
+        "levels": [1, 2],
+        "strokes_per_patch": [3, 2],
+        "iters": 25,
+        "iters_per_level": [],
+        "finetune_all": False,
+    }
     return dataclasses.replace(OptimConfig(), **{**base, **kw})  # type: ignore[arg-type]
 
 
@@ -253,6 +262,12 @@ def test_mean_std_and_aggregate_and_tables() -> None:
     assert "## base" in text and "0.450 ± 0.071" in text and "LPIPS-Alex" in text
     assert "## references" in text and "| blur | 1 |" in text
     assert "h2_alloc" not in text  # stages without records are omitted
+    # paired deltas: iters200/a (0.30) vs default/a (0.40) -> -0.100 in LPIPS-VGG and Alex
+    assert "-0.100" in text
+    d = paired_delta(records, "h1_iters", "iters200", "base/default", "lpips_vgg")  # type: ignore[arg-type]
+    assert d is not None and d[0] == pytest.approx(-0.10) and d[2] == 1
+    assert paired_delta(records, "base", "default", "base/default", "lpips_vgg") is None  # type: ignore[arg-type]
+    assert paired_delta(records, "h1_iters", "missing", "base/default", "l1") is None  # type: ignore[arg-type]
 
 
 def test_iters_per_level() -> None:
