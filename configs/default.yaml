@@ -25,4 +25,7 @@ render:
   brush_seed: 0          # seed of the per-stroke brush variant choice
   dtype: auto            # compositing dtype: auto (= params dtype) | float32 | float64 | bfloat16
   sampler: grid_sample   # grid_sample | gather (gather: deterministic CUDA backward)
+  mode: default          # default (procedural brushes) | pt (Paint Transformer compatible, needs scripts/fetch_pt_brushes.py)
+  pt_alpha: pt_infer     # pt mode: pt_infer | pt_train
+  pt_brush_dir: data/raw/pt_brush
   min_size: 0.001        # smallest w / h used by the parameter helpers

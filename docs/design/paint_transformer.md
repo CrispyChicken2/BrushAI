@@ -218,3 +218,37 @@ Open questions that cannot be settled from these sources: which of the two imple
 
 `python -m scripts.pt_reference_study fetch|reference|datastats|trainspeed` (official files pinned by SHA-256, weights by SHA-256; outputs in `outputs/pt_reference/`). Environment: RTX 5070, PyTorch 2.11.0+cu128. The wrapper counts
 `decision.sum()` per layer by wrapping `param2img_parallel`; metrics are the M1 `brushstroke.eval.metrics.image_metrics` on the same 512 x 512 center crops as the baseline.
+
+## 11. Implementation in this repository (T-011)
+
+**Code:** `brushstroke/renderer/pt.py` (PT mode renderer, adapters), `brushstroke/stroke_model/synthetic.py` (data generator), `scripts/fetch_pt_brushes.py` +
+`configs/pt/brushes.yaml` (assets, SHA-256, Apache-2.0). Tests: `tests/test_pt_mode.py`, `tests/test_synthetic.py` (they compare against the official code when
+`data/raw/pt_official/` and `data/raw/pt_brush/` exist, otherwise skip with the command to run; the CI subset therefore skips them).
+
+**Use.** `render.mode: pt` (config section `render:`; `pt_alpha: pt_infer | pt_train`, `pt_brush_dir`) switches `brushstroke.renderer.render` / `render_progressive` to the PT mode: the
+`(B, N, 9)` strokes are read as PT strokes (`ours_to_pt`: first 8 parameters, the ninth `a` is the **0/1 decision**, `a > 0` = painted), the canvas is **black**, the `brush` argument is ignored
+and the official brush PNGs are loaded (`pt_infer` -> the `inference/brush` pair, `pt_train` -> the `train/brush` pair). The default mode is untouched (all existing tests pass unchanged).
+Direct API: `pt_param2stroke(param, H, W, brushes, mode)`, `render_pt`, `render_pt_progressive`, `pt_composite`, `pt_to_ours`, `ours_to_pt`, `patch_to_canvas` (patch units -> canvas fractions, with
+`shifted=True` for the half-patch final layer).
+
+**What the official code does that is easy to miss (found while matching it).**
+- `train/util/morphology.py:Dilation2d/Erosion2d.forward` **write into their input in place** (`x[:, [i]] = channel`) and return it; `inference/morphology.py` does not. Equivalent results, but a test that reuses the input tensor sees it modified.
+- The train and inference pipelines differ in the order binarize / warp (note section 1.3) and in the brush files; our two modes follow them separately.
+- Morphology is implemented with `max_pool2d` (`-max_pool2d(-x)` for the erosion); it equals the official `unfold`-based one exactly (tested, bit-equal).
+
+**Parity with the official renderer (random strokes, both brushes used, `h > w` and `h <= w`).** Maximum absolute difference of the foreground and alpha maps:
+| mode | sizes | max abs diff |
+|------|-------|--------------|
+| `pt_infer` vs `inference.py:param2stroke` | 32², 64², 48 x 80 | **0.0** (bit-identical) |
+| `pt_train` vs `PainterModel.param2stroke` + official `Dilation2d/Erosion2d` | 32², 64² | 1.8e-7 (we warp the gray brush and multiply by the colour afterwards instead of colourizing the 394 px image first) |
+The acceptance target was <= 1/255 = 3.9e-3. The patch-to-canvas adapter was checked against the official four-phase window renderer on one stroke (centroid within 1 px, IoU of the painted footprints > 0.9): the
+textures differ slightly because the official code nearest-resizes the brush to the 64 px window while we resize it to the layer canvas, the geometry is the same (note section 1).
+
+**Synthetic generator** (`SyntheticStrokeGenerator.sample(batch, generator)`), same random draws as `set_input` (`rand(B/4, 8, 12)` then `rand(B, 8, 12)`):
+- With the same CPU random stream the batches **equal the official ones**: ground-truth parameters and labels bit-identical, canvases and targets within 2.4e-7 (seeds 0, 1, 2, batch 64).
+- Statistics over 12,800 patches (two GPU seeds): valid strokes per patch 6.937 / 6.940 (std 0.911 / 0.910) against the official 6.923 (0.911); histogram 0..8 `[0, 0, 0, 3, 116, 730, 2826, 5291, 3834]` and `[0, 0, 0, 7, 107, 738, 2777, 5336, 3835]` against the official `[0, 0, 1, 4, 107, 761, 2857, 5331, 3739]`.
+  Test tolerances: mean within 0.06 (standard error of a difference of two means of 12,800 patches is 0.011, so >5 sigma), std within 0.04, each histogram bin within 5 sigma of the difference of two multinomial proportions + 0.001.
+- Determinism: same `torch.Generator` seed -> bit-identical batches (CPU and GPU, tested); different seeds differ.
+- Throughput on the RTX 5070 (`python -m scripts.pt_reference_study datagen`): **13.6 k patches/s at batch 64, 43 k at 256, 50 k at 1024**, against **1.07 k patches/s for the official `set_input` on the same GPU** (13x faster);
+  at batch 64 that is 4.7 ms per batch against 237 ms for a whole official training step, so data synthesis is not a bottleneck (what dominates the rest of the official step was not profiled here; the per-sample CPU Hungarian matching is the likely suspect).
+- Validity rule implemented as in the code (threshold 0.75, only earlier *valid* strokes count; unit-tested on constructed overlaps including the 0.75 boundary).

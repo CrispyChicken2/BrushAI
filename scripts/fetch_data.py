@@ -46,20 +46,25 @@ def fetch(
     update: bool = False,
     insecure: bool = False,
     ids: Sequence[str] | None = None,
+    section: str = "images",
 ) -> dict[str, Path]:
-    """Fetch the images of the manifest (all, or only ``ids``); returns id -> local path."""
+    """Fetch the items of a manifest section (all, or only ``ids``); returns id -> local path.
+
+    Each item has ``id``, ``url`` and ``sha256``; the local file name is ``file`` if given, else
+    ``<id>.jpg``.
+    """
     spec: dict[str, Any] = yaml.safe_load(manifest.read_text(encoding="utf-8"))
     paths: dict[str, Path] = {}
     changed = False
-    known = {item["id"] for item in spec["images"]}
+    known = {item["id"] for item in spec[section]}
     if ids is not None and not set(ids) <= known:
         raise KeyError(
             f"unknown image ids {sorted(set(ids) - known)}; manifest has {sorted(known)}"
         )
-    for item in spec["images"]:
+    for item in spec[section]:
         if ids is not None and item["id"] not in ids:
             continue
-        dest = out / f"{item['id']}.jpg"
+        dest = out / item.get("file", f"{item['id']}.jpg")
         if not dest.exists() or (item["sha256"] and sha256_of(dest) != item["sha256"]):
             download(item["url"], dest, insecure)
         digest = sha256_of(dest)
