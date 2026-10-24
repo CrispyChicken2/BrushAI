@@ -51,6 +51,7 @@ class StrokeScores:
     w: float = 0.0
     pairs: int = 0
     negative_h: int = 0
+    negative_w: int = 0
     painted: int = 0
 
     def add(
@@ -71,7 +72,9 @@ class StrokeScores:
         self.l1 += float(out.gt) * pairs
         self.w += float(out.w) * pairs
         self.pairs += pairs
-        self.negative_h += int((shape[rows, out.assign[rows, cols]][:, 3] < 0).sum())
+        matched = shape[rows, out.assign[rows, cols]]
+        self.negative_h += int((matched[:, 3] < 0).sum())
+        self.negative_w += int((matched[:, 2] < 0).sum())
         self.painted += int((logits > 0).sum())
 
     def result(self) -> dict[str, float]:
@@ -80,15 +83,21 @@ class StrokeScores:
             "d_l1": self.l1 / self.pairs,
             "d_w": self.w / self.pairs,
             "h_negative": self.negative_h / self.pairs,
+            "w_negative": self.negative_w / self.pairs,
             "painted_per_patch": self.painted / self.patches,
         }
 
 
 @torch.no_grad()
 def network_scores(
-    net: PaintTransformer, loss: PaintTransformerLoss, data: Iterable[PatchBatch], abs_h: bool
+    net: PaintTransformer,
+    loss: PaintTransformerLoss,
+    data: Iterable[PatchBatch],
+    abs_h: bool,
+    abs_w: bool = False,
 ) -> dict[str, float]:
-    """Stroke metrics of a network on ``data`` (eval mode); ``abs_h`` replaces ``h`` by ``|h|``."""
+    """Stroke metrics of a network on ``data`` (eval mode); ``abs_h`` / ``abs_w`` replace ``h`` /
+    ``w`` by their absolute value (the renderer is blind to the sign of either)."""
     net.eval()
     scores = StrokeScores()
     for batch in data:
@@ -96,6 +105,9 @@ def network_scores(
         if abs_h:
             shape = shape.clone()
             shape[..., 3] = shape[..., 3].abs()
+        if abs_w:
+            shape = shape.clone()
+            shape[..., 2] = shape[..., 2].abs()
         scores.add(loss, shape, colour, logits, batch)
     return scores.result()
 

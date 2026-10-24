@@ -38,7 +38,9 @@ PAPER_TRAIN_HOURS = {"PT": 3.79, "RL": 40.0, "Optim": 10.16}
 
 def dump(name: str, payload: object) -> None:
     DATA.mkdir(parents=True, exist_ok=True)
-    (DATA / f"{name}.json").write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    (DATA / f"{name}.json").write_text(
+        json.dumps(payload, indent=1), encoding="utf-8", newline="\n"
+    )
 
 
 def load(name: str) -> Any:
@@ -66,4 +68,4 @@ def write_block(name: str, text: str, doc: Path = DOC) -> None:
         body = head + block + rest.split(end, 1)[1]
     else:
         body = body.rstrip("\n") + "\n\n" + block + "\n"
-    doc.write_text(body, encoding="utf-8")
+    doc.write_text(body, encoding="utf-8", newline="\n")

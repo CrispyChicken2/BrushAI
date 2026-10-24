@@ -87,6 +87,9 @@ def test_untrained_network_is_far_worse_and_abs_h_only_changes_negative_heights(
     assert raw["d_l1"] > 0.1 and raw["d_w"] > 0.05
     assert raw["h_negative"] > 0 and folded["h_negative"] == 0  # the fold removes every negative h
     assert folded["d_l1"] <= raw["d_l1"] + 1e-9  # |h| is never farther from a positive ground truth
+    both = network_scores(net, loss, data, abs_h=True, abs_w=True)
+    assert both["d_l1"] <= folded["d_l1"] + 1e-9
+    assert 0 <= raw["w_negative"] <= 1
 
 
 @needs_brushes
@@ -166,9 +169,10 @@ def _fake_stroke(l_pixel: float, d_l1: float, d_w: float) -> dict:
         "d_l1": d_l1,
         "d_w": d_w,
         "h_negative": 0.0,
+        "w_negative": 0.0,
         "painted_per_patch": 7.5,
     }
-    return {"raw": scores, "abs_h": scores}
+    return {"raw": scores, "abs_h": scores, "abs_wh": scores}
 
 
 def _fake_real(l_pixel: float, l_pcpt: float) -> dict:

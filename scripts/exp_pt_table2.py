@@ -94,6 +94,7 @@ def run() -> dict[str, object]:
 
     cfg = load_config(PaintOptimConfig, "configs/baseline_optim.yaml")
     optim: dict[str, float] = {}
+    optim_strokes: dict[str, int] = {}
     for size in SIZES:
         cfg.optim.height = cfg.optim.width = size
         target = load_image(inputs(size)["mona_lisa"])
@@ -102,9 +103,10 @@ def run() -> dict[str, object]:
         if device.type == "cuda":
             torch.cuda.synchronize()
         optim[str(size)] = time.perf_counter() - start
+        optim_strokes[str(size)] = len(seq)
         print(size, "optim", optim[str(size)], len(seq), flush=True)
     result["optim_seconds"] = optim
-    result["optim_strokes"] = 2037
+    result["optim_strokes"] = optim_strokes
 
     result["training"] = training_times()
     dump("table2", result)
@@ -145,6 +147,11 @@ def report() -> None:
     off = [med(data["pt_official_code_seconds"][str(s)]) for s in SIZES]
     opt = [data["optim_seconds"][str(s)] for s in SIZES]
     paper_pt, paper_opt = PAPER_TIME["PT"], PAPER_TIME["Optim"]
+    counts = data["optim_strokes"]  # one count for all sizes (older data) or one per size
+    counts = counts if isinstance(counts, dict) else dict.fromkeys(map(str, SIZES), counts)
+    strokes_label = " / ".join(f"{counts[str(s)]:,}" for s in SIZES) + " strokes"
+    if len(set(counts.values())) == 1:
+        strokes_label = f"{counts[str(SIZES[0])]:,} strokes"
     lines = [
         f"**T2a, inference time (s)** at 128 / 256 / 512 px ({data['gpu']}; paper: 2080 Ti). PT = median of 25 runs (5 images x 5), Optim = one run on Mona Lisa.",
         "",
@@ -155,7 +162,7 @@ def report() -> None:
         f"| paper Optim | {paper_opt[0]} | {paper_opt[1]} | {paper_opt[2]} | {paper_opt[2] / paper_opt[0]:.1f}x |",
         f"| **ours PT** (official weights) | {pt[0]:.3f} | {pt[1]:.3f} | {pt[2]:.3f} | {pt[2] / pt[0]:.1f}x |",
         f"| official PT code (same weights) | {off[0]:.3f} | {off[1]:.3f} | {off[2]:.3f} | {off[2] / off[0]:.1f}x |",
-        f"| **ours Optim** (M1 baseline, 2,037 strokes) | {opt[0]:.1f} | {opt[1]:.1f} | {opt[2]:.1f} | {opt[2] / opt[0]:.1f}x |",
+        f"| **ours Optim** (M1 baseline, {strokes_label}) | {opt[0]:.1f} | {opt[1]:.1f} | {opt[2]:.1f} | {opt[2] / opt[0]:.1f}x |",
         "",
         "| ratio Optim / PT | 128 | 256 | 512 |",
         "|---|---|---|---|",

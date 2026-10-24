@@ -109,13 +109,14 @@ def strokes() -> None:
     store = _stored("table1_strokes")
     for group, items in GROUPS.items():
         for key, path in items:
-            if not _finished(path, group) or key in store.get(group, {}):
+            if not _finished(path, group) or "abs_wh" in store.get(group, {}).get(key, {}):
                 continue
             net, info = load_pt_model(path, device)
             store.setdefault(group, {})[key] = {
                 "step": info["step"],
                 "raw": network_scores(net, loss, data, abs_h=False),
                 "abs_h": network_scores(net, loss, data, abs_h=True),
+                "abs_wh": network_scores(net, loss, data, abs_h=True, abs_w=True),
             }
             print(group, key, store[group][key], flush=True)
             dump("table1_strokes", store)
@@ -166,7 +167,7 @@ def real() -> None:
     store = _stored("table1_real")
     for group, items in GROUPS.items():
         for key, path in items:
-            if not _finished(path, group) or key in store.get(group, {}):
+            if not _finished(path, group) or "abs_wh" in store.get(group, {}).get(key, {}):
                 continue
             net, _ = load_pt_model(path, device)
             rows = {}
@@ -267,13 +268,13 @@ def build_real_table(real_data: dict, optim_data: dict) -> str:
 
 def build_stroke_table(data: dict) -> str:
     lines = [
-        "| row | L_pixel | D_L1 | D_W | painted strokes / patch | matched strokes with h < 0 |",
-        "|---|---|---|---|---|---|",
+        "| row | L_pixel | D_L1 | D_W | painted strokes / patch | matched strokes with h < 0 | with w < 0 |",
+        "|---|---|---|---|---|---|---|",
     ]
     for name in ("RL", "Optim", "PT"):
         p = PAPER_STROKES[name]
         lines.append(
-            f"| paper {name} | {p[0]} | {p[1] if p[1] is not None else 'n/a'} | {p[2] if p[2] is not None else 'n/a'} | n/a | n/a |"
+            f"| paper {name} | {p[0]} | {p[1] if p[1] is not None else 'n/a'} | {p[2] if p[2] is not None else 'n/a'} | n/a | n/a | n/a |"
         )
     labels = {
         "official": "official model",
@@ -283,19 +284,24 @@ def build_stroke_table(data: dict) -> str:
     for group, label in labels.items():
         if group not in data:
             continue
-        for mode, suffix in (("abs_h", " (`|h|`)"), ("raw", " (raw `h`)")):
+        for mode, suffix in (
+            ("abs_wh", " (`|w|`, `|h|`)"),
+            ("abs_h", " (`|h|`)"),
+            ("raw", " (raw)"),
+        ):
             cols = [
                 _group_strokes(data, group, mode, k)
                 for k in ("l_pixel", "d_l1", "d_w", "painted_per_patch")
             ]
-            cols.append(_group_strokes(data, group, "raw", "h_negative"))  # raw sign in both rows
+            cols.append(_group_strokes(data, group, "raw", "h_negative"))  # raw sign in all rows
+            cols.append(_group_strokes(data, group, "raw", "w_negative"))
             lines.append(
-                f"| {label}{suffix} | {fmt_ms(cols[0], 4)} | {fmt_ms(cols[1], 4)} | {fmt_ms(cols[2], 4)} | {fmt_ms(cols[3], 2)} | {fmt_ms([100 * x for x in cols[4]], 1)} % |"
+                f"| {label}{suffix} | {fmt_ms(cols[0], 4)} | {fmt_ms(cols[1], 4)} | {fmt_ms(cols[2], 4)} | {fmt_ms(cols[3], 2)} | {fmt_ms([100 * x for x in cols[4]], 1)} % | {fmt_ms([100 * x for x in cols[5]], 1)} % |"
             )
     if "optim" in data:
         o = data["optim"]["optim"]["abs_h"]  # type: ignore[index]
         lines.append(
-            f"| **ours Optim** (random init, 300 it., same count as the official PT) | {o['l_pixel']:.4f} | {o['d_l1']:.4f} | {o['d_w']:.4f} | {o['painted_per_patch']:.2f} | n/a |"
+            f"| **ours Optim** (random init, 300 it., same count as the official PT) | {o['l_pixel']:.4f} | {o['d_l1']:.4f} | {o['d_w']:.4f} | {o['painted_per_patch']:.2f} | n/a | n/a |"
         )
     return "\n".join(lines)
 
@@ -349,6 +355,29 @@ def build_ablation_table(real_data: dict, stroke_data: dict) -> str:
     return "\n".join(lines)
 
 
+def build_symmetry_table(stroke_data: dict) -> str:
+    """D_L1 per seed with the sign of ``h`` folded, then of ``w`` and ``h``: the renderer (and
+    ``D_W``) cannot see these signs, only ``D_L1`` pins the parameter convention."""
+    lines = [
+        "| model | seed 0 | seed 1 | seed 2 |",
+        "|---|---|---|---|",
+    ]
+    sets = {"full": "ours"} | {label: f"abl_{name}" for name, label in ABLATIONS.items()}
+    for label, group in sets.items():
+        runs = stroke_data.get(group, {})
+        if not runs:
+            continue
+        cells = []
+        for key in sorted(runs):
+            run = runs[key]
+            cells.append(
+                f"{run['abs_h']['d_l1']:.3f} -> {run['abs_wh']['d_l1']:.3f}"
+                f" (w < 0: {100 * run['raw']['w_negative']:.0f} %)"
+            )
+        lines.append(f"| {label} | " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
 def report() -> None:
     real_data, stroke_data, optim_data = (
         _stored("table1_real"),
@@ -363,6 +392,8 @@ def report() -> None:
             build_stroke_table(stroke_data),
             "**T1c, loss ablations** (official recipe, `|h|`, mean ± std over seeds):",
             build_ablation_table(real_data, stroke_data),
+            "**D_L1 per seed, `|h|` -> `|w|`, `|h|`** (the sign of `w` and `h` is invisible to the renderer and to `D_W`; `w < 0` = share of matched strokes with a negative width, raw):",
+            build_symmetry_table(stroke_data),
         ]
     )
     write_block("TABLE1", text)
