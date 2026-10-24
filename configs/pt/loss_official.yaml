@@ -2,3 +2,5 @@
 # pos_weight 10, BCE 10, pixel 10, stroke L1 1, Wasserstein 10, matching cost 1 - logit.
 preset: official
 matcher: auto   # auto | scipy | gpu (exhaustive search on the GPU, same optimum, N <= 8)
+l1_invariance: none   # none (official) | exact | mirror | rot180 | swap (T-019 option B: class-minimal parameter L1)
+lambda_sign: 0.0      # T-019 option C: weight of relu(-w) + relu(-h); 0 = off (official)

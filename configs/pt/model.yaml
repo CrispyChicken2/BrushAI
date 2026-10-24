@@ -7,3 +7,4 @@ dec_layers: 3
 dropout: 0.1
 patch_size: 32
 colour_mode: sampled   # sampled (official code) | predicted (paper description, ablation)
+convention: raw        # raw (official) | positive (T-019 option A: w, h = softplus > 0, theta wrapped to [0, 1))
