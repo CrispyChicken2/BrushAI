@@ -219,3 +219,48 @@ def test_real_stage_skips_runs_already_stored(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setattr(exp_pt_table1, "paint", forbidden)
     monkeypatch.setattr(exp_pt_table1, "dump", forbidden)
     exp_pt_table1.real()
+
+
+# ------------------------------------------------------------------ T-017 verdicts
+
+
+def test_ablation_verdict_rules() -> None:
+    from scripts import exp_pt_ablation_verdict as v
+
+    assert v.welch_t([2.0, 2.1, 1.9], [1.0, 1.1, 0.9]) > v.T_CRITICAL
+    assert v.welch_t([1.0, 1.1, 0.9], [1.0, 1.1, 0.9]) == 0.0
+    assert (v.verdict(3), v.verdict(2), v.verdict(0)) == ("matters", "partly", "not reproduced")
+    assert v.kendall_tau([1, 2, 3], [1, 2, 3]) == 1.0
+    assert v.kendall_tau([1, 2, 3], [3, 2, 1]) == -1.0
+    assert v.ordering({"a": 1.5, "b": 1.48, "c": 1.1}) == "a ~ b > c"
+
+
+def test_ablation_verdict_report_marks_worse_and_better_cells() -> None:
+    from scripts import exp_pt_ablation_verdict as v
+
+    def stroke(l_pixel: float) -> dict:
+        return {"abs_h": _fake_stroke(l_pixel, 0.1, 0.02)["abs_h"]} | {
+            "abs_wh": _fake_stroke(l_pixel, 0.1, 0.02)["abs_h"]
+        }
+
+    def real(l_pixel: float) -> dict:
+        return {"mona_lisa": _fake_real(l_pixel, 0.8)["mona_lisa"]}
+
+    seeds = ("seed0", "seed1", "seed2")
+    full = (0.050, 0.051, 0.049)
+    worse = (0.080, 0.081, 0.079)
+    better = (0.030, 0.031, 0.029)
+    real_data = {
+        "ours": {s: real(x) for s, x in zip(seeds, full, strict=True)},
+        "abl_no_pixel": {s: real(x) for s, x in zip(seeds, worse, strict=True)},
+        "abl_no_dbce": {s: real(x) for s, x in zip(seeds, better, strict=True)},
+    }
+    stroke_data = {
+        "ours": {s: stroke(x) for s, x in zip(seeds, full, strict=True)},
+        "abl_no_pixel": {s: stroke(x) for s, x in zip(seeds, worse, strict=True)},
+        "abl_no_dbce": {s: stroke(x) for s, x in zip(seeds, better, strict=True)},
+    }
+    result = v.analyse(real_data, stroke_data, fold=False)
+    assert result["w/o L_pixel"]["worse"][0] and result["w/o D_bce"]["better"][0]
+    assert result["w/o L_pixel"]["verdict"] == "partly"  # only the two L_pixel columns move
+    assert "w/o D_bce" in v.build_report(real_data, stroke_data)
