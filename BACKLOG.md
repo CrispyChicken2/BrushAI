@@ -7,7 +7,6 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 018 [T-018] M2 demo and gate review (M2)
 - [ ] 019 [T-019] PT: constrain the sign of h, 3 seeds (M2, P2)
 - [ ] 020 [T-020] PT: BN recalibration for a usable validation curve (M2, P2)
 - [ ] M3 Evaluation harness + baseline numbers (3 baselines)
@@ -16,9 +15,10 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 017 [T-017] PT loss ablations, Table 1 (M2)
+- [~] 018 [T-018] M2 demo and gate review (M2)
 
 ## Fait
+- [x] 017 [T-017] PT loss ablations, Table 1 (M2) (900c6ed)
 - [x] 016 [T-016] PT reproduction experiment and gap analysis (M2) (de7ea8e)
 - [x] 015 [T-015] PT multi-scale inference + optional per-patch refinement (M2) (cca4ab5)
 - [x] 014 [T-014] Full PT training runs to convergence, 3 seeds (M2) (e0057c5)
