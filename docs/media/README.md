@@ -8,6 +8,8 @@ Demo outputs of the M1 pipeline (T-007), committed because they are small:
   `docs/design/paint_transformer.md`, section 13.
 - `pt_inference_layers.jpg` and `pt_inference_refine.jpg`: the layers of the Paint Transformer inference and the effect of the
   per-patch refinement (T-015); see `docs/experiments/pt_inference.md`.
+- `pt_repro_fig5.jpg`, `pt_repro_fig6.jpg`, `pt_repro_fig7.jpg`: Figures 5 to 7 of the Paint Transformer paper, reproduced on our
+  models (T-016); see `docs/experiments/pt_reproduction.md` for the verdicts (Fig. 5 and 7 reproduced, Fig. 6 partly).
 - `pt_training_official_recipe.png` and `pt_training_long.png`: training and validation curves of the three-seed runs of the
   official schedule and the stretched schedule (T-014); see `docs/experiments/pt_training.md`.
 

@@ -11,7 +11,9 @@ not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); 
 Paint Transformer-compatible renderer mode, synthetic stroke generator (T-011), model and Hungarian-matched losses (T-012) and the
 training pipeline (T-013) are in place, three full training runs have been done (T-014, see
 [docs/experiments/pt_training.md](docs/experiments/pt_training.md)), and the multi-scale inference pipeline reproduces the official
-inference exactly with the official weights (T-015, see [Painting with the Paint Transformer](#painting-with-the-paint-transformer-m2)).
+inference exactly with the official weights (T-015, see [Painting with the Paint Transformer](#painting-with-the-paint-transformer-m2)),
+and the reproduction study (T-016) checks the paper's results: the ablation and real-image claims are mostly not reproduced (see
+[Reproducing the Paint Transformer results](#reproducing-the-paint-transformer-results-m2)).
 Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
@@ -296,8 +298,9 @@ It needs the official brush images (`python -m scripts.fetch_pt_brushes`). The o
 committed): `train.csv` and `val.csv` (losses, the held-out validation set, step times, peak VRAM), `latest.pt`, `summary.json`
 and the resolved config. `resume=auto` continues from `latest.pt`; a resumed run is bit-identical to an uninterrupted one on CPU.
 
-Measured on an RTX 5070 with batch 64: about 38 ms per step alone (36 minutes for the official schedule, against 3.7 hours
-for the official code), and about 0.85 GB peak VRAM in fp32. Three seeds of the official schedule took 83 minutes each when three
+Speed on an RTX 5070 with batch 64: T-013 measured 38 ms per step, but the reproduction study (T-016) re-measured **94 ms per step**
+alone on an idle GPU, twice, and did not find the cause. At 94 ms the official schedule takes about 1.5 hours (the official code
+takes 3.7 to 8.7 hours on the same GPU). Peak VRAM is about 0.85 GB in fp32. Three seeds of the official schedule took 83 minutes each when three
 ran at the same time on the GPU.
 
 **Results (T-014).** The official schedule is not fully flat before the learning-rate decay (0.5 to 1.05 % per 10 % of the run),
@@ -353,6 +356,36 @@ checkpoints that predict negative heights this can change the painted result sli
 
 The forced strokes of the last layer are nearly useless: dropping them costs little quality and removes 15 to 18 % of the
 strokes. Which variant should be the default for animations is still open (see the design note, section 14).
+
+## Reproducing the Paint Transformer results (M2)
+
+The reproduction study (T-016) fixed its protocol before running anything; the results, the verdicts and the gap analysis are in
+[docs/experiments/pt_reproduction.md](docs/experiments/pt_reproduction.md). Summary, against the paper's own tables and figures:
+
+| item | verdict |
+|------|---------|
+| Table 1, real images (PT against the Optim baseline) | **not reproduced**: our optimization baseline is stronger than PT on every real-image metric (L_pixel 0.050 against 0.073) |
+| Table 1, stroke metrics | **partly**: the stretched recipe passes every criterion; the official recipe is 32 % above the paper on D_W |
+| Table 1, ablations | **mostly not**: 7 of 20 cells show the paper's direction; the paper's loss weights were not tried |
+| Table 2, time ratios | **partly**: ratios within a factor of 2, but PT's time grows 1.5x from 128 to 512 px, against 5.5x in the paper |
+| Table 2, training time | **reproduced (better)**: 1.48 h for the official schedule, against 3.8 to 8.7 h for the official code on the same GPU |
+| Figures 5 and 7 | **reproduced** |
+| Figure 6 | **partly**: only the pixel-loss ablation is visibly worse |
+
+Two caveats set the scale of these numbers. The absolute value of the perceptual loss depends on a layer choice that the paper does
+not publish, so only orderings and ratios are compared. Some models predict negative stroke parameters, and the results use the
+`|h|` fold, which is a diagnostic rather than an exact symmetry. The conclusion for the project, on our five images: a good
+optimization baseline beats the Paint Transformer on fidelity, and the argument for the Paint Transformer is speed.
+
+The two tables regenerate from the stored data with no GPU:
+
+```
+.venv\Scripts\python -m scripts.exp_pt_table1 report
+.venv\Scripts\python -m scripts.exp_pt_table2 report
+```
+
+The three figures (`scripts/exp_pt_figures.py`) run the models and need a GPU and the checkpoints in `outputs/`, which are not in the
+repository.
 
 ## License
 

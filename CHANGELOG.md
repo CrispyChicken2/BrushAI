@@ -4,6 +4,9 @@ All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest
 
 ## [T-016] Paint Transformer reproduction experiment and gap analysis
 
+- Correction to T-013 and T-014: the 38 ms training step was not reproduced. Re-measured alone on an idle GPU: 94 ms per step
+  (about 1.5 h for the official schedule). Cause not isolated. The README, the training note and the design note carry the correction.
+
 - `docs/experiments/pt_reproduction.md`: protocol committed before any run (L_pcpt = VGG16 relu3_3, synthesized-stroke protocol, tolerances),
   then results and gap analysis. Verdicts: T1b partly reproduced (stretched recipe passes all tolerances; official recipe D_W +32 %,
   and PT does not beat our Optim on stroke L_pixel), T1c mostly not reproduced (7 of 20 cells; the `w/o D_bce` D_L1 cell is a `w < 0` convention artefact), T1a ordering inverted (our Optim is stronger),
