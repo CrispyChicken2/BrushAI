@@ -188,13 +188,17 @@ def reference() -> list[dict[str, object]]:
 
 
 def official_paint(
-    image_path: str | Path, model_path: str | Path | None = None
+    image_path: str | Path,
+    model_path: str | Path | None = None,
+    timings: dict[str, float] | None = None,
 ) -> tuple[torch.Tensor, list[tuple[int, int]]]:
     """Run the official ``inference.py:main`` (parallel mode) and return its painting as a float
     ``(3, H, W)`` tensor (the official script saves ``(x * 255).astype(uint8)``, which truncates)
     together with the number of painted strokes of each layer.
 
     The official code uses CUDA when available. Requires ``fetch`` (third-party code, outside git).
+    If ``timings`` is given it receives ``seconds``: the time from the reading of the image (after the
+    model and brush loading) to the end of the painting, GPU synchronized.
     """
     root = ROOT.resolve()
     folder = root / "inference"
@@ -219,7 +223,24 @@ def official_paint(
             return original(param, decision, meta_brushes, cur_canvas)
 
         module.param2img_parallel = counting
-        module.save_img = lambda img, path: captured.__setitem__("img", img.detach().cpu().clone())
+        clock: dict[str, float] = {}
+        read_img = module.read_img
+
+        def timed_read(*args, **kwargs):  # type: ignore[no-untyped-def]
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            clock["start"] = time.perf_counter()
+            return read_img(*args, **kwargs)
+
+        def save(img, path):  # type: ignore[no-untyped-def]
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            if timings is not None:
+                timings["seconds"] = time.perf_counter() - clock["start"]
+            captured["img"] = img.detach().cpu().clone()
+
+        module.read_img = timed_read
+        module.save_img = save
         with tempfile.TemporaryDirectory() as tmp:
             module.main(str(image_file), str(weights_file), tmp, serial=False)
     finally:
