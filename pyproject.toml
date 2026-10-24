@@ -25,6 +25,10 @@ extend-exclude = [".venv"]
 "scripts/make_m1_demos.py" = ["E501"]  # long table-header strings
 "scripts/pt_reference_study.py" = ["E501"]  # pinned checksums and long docstring lines
 "scripts/pt_inference_study.py" = ["E501"]  # long table-header strings
+"scripts/exp_pt_table1.py" = ["E501"]  # long table strings
+"scripts/exp_pt_table2.py" = ["E501"]  # long table strings
+"scripts/exp_pt_figures.py" = ["E501"]  # long docstring lines
+"scripts/pt_repro_common.py" = ["E501"]  # paper numbers
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "NPY"]
@@ -35,7 +39,7 @@ strict = true
 files = ["brushstroke"]
 
 [[tool.mypy.overrides]]
-module = ["lpips", "lpips.*", "scipy.*"]
+module = ["lpips", "lpips.*", "scipy.*", "torchvision", "torchvision.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
