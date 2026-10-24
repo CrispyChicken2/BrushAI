@@ -198,6 +198,8 @@ def official_paint(
     """
     root = ROOT.resolve()
     folder = root / "inference"
+    image_file = Path(image_path).resolve()  # before the chdir below
+    weights_file = Path(model_path).resolve() if model_path else root / "model.pth"
     saved_path, cwd = list(sys.path), Path.cwd()
     sys.path.insert(0, str(folder))
     os.chdir(folder)  # the official script opens brush/*.png relative to its directory
@@ -219,12 +221,7 @@ def official_paint(
         module.param2img_parallel = counting
         module.save_img = lambda img, path: captured.__setitem__("img", img.detach().cpu().clone())
         with tempfile.TemporaryDirectory() as tmp:
-            module.main(
-                str(Path(image_path).resolve()),
-                str(Path(model_path).resolve() if model_path else root / "model.pth"),
-                tmp,
-                serial=False,
-            )
+            module.main(str(image_file), str(weights_file), tmp, serial=False)
     finally:
         sys.path[:] = saved_path
         os.chdir(cwd)

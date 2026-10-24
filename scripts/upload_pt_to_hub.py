@@ -42,8 +42,8 @@ weights of the original authors are redistributed).
 - Training: {steps} steps x batch 64, Adam lr 1e-4 (betas 0.5, 0.999) with the official decay, seed
   {seed}. Training-config SHA-256: `{config_hash}`.
 - Held-out synthetic validation (4096 patches): {metrics}
-- License: {license} for the weights and the code (<repository>); the original code is Apache-2.0
-  (`Huage001/PaintTransformer`).
+- License: {license} for the weights and the code (https://github.com/CrispyChicken2/BrushAI); the
+  original code is Apache-2.0 (`Huage001/PaintTransformer`).
 
 Load: `PaintTransformer().load_state_dict(torch.load("pytorch_model.pth"))` with
 `brushstroke.stroke_model.PaintTransformer`.
