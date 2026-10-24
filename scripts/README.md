@@ -14,4 +14,7 @@ Entry points, run from the repo root: `python -m scripts.<name>` or `python scri
 | `exp_optim_sweep` | the baseline sweep: runs and regenerates `docs/experiments/` tables and figures (T-009) |
 | `fetch_pt_brushes` | download the four official Paint Transformer brush images (Apache-2.0) and verify their checksums (T-011) |
 | `train_pt` | train the Paint Transformer stroke predictor: official schedule, validation, resume, bf16 option, step profile (T-013) |
+| `pt_training_report` | evaluate, archive and regenerate the tables and figures of the Paint Transformer training runs from the stored logs (`report` needs no GPU) (T-014) |
+| `pt_official_train` | train the official Paint Transformer code for a direct comparison, outside the package (T-014) |
+| `upload_pt_to_hub` | stage the trained weights, config hash and model card for Hugging Face; uploads only with `--push` (T-014) |
 | `pt_reference_study` | study of the official Paint Transformer code and weights (`fetch`, `reference`, `datastats`, `trainspeed`): downloads and runs third-party code, outside git (T-010) |

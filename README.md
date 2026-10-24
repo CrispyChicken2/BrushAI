@@ -9,7 +9,8 @@ not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); 
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is under way: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
 Paint Transformer-compatible renderer mode, synthetic stroke generator (T-011), model and Hungarian-matched losses (T-012) and the
-training pipeline (T-013) are in place; the full training run has not been done yet.
+training pipeline (T-013) are in place, and three full training runs have been done (T-014, see
+[docs/experiments/pt_training.md](docs/experiments/pt_training.md)).
 Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
@@ -85,7 +86,7 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
 brushstroke/          Python package
   renderer/           brush masks and canvas texture (T-002); differentiable batched stroke renderer (T-003);
                       Paint Transformer-compatible mode `render.mode: pt` (T-011)
-  stroke_model/       stroke predictor (M2): Paint Transformer model (T-012), losses (T-012), training pipeline (T-013),
+  stroke_model/       stroke predictor (M2): Paint Transformer model (T-012), losses (T-012), training pipeline (T-013, T-014),
                       synthetic stroke generator (T-011)
   contribution/       semantic allocation and painterly ordering (M4)
   animation/          stroke-by-stroke replay with partial reveal, ffmpeg export (T-006)
@@ -294,11 +295,28 @@ It needs the official brush images (`python -m scripts.fetch_pt_brushes`). The o
 committed): `train.csv` and `val.csv` (losses, the held-out validation set, step times, peak VRAM), `latest.pt`, `summary.json`
 and the resolved config. `resume=auto` continues from `latest.pt`; a resumed run is bit-identical to an uninterrupted one on CPU.
 
-Measured on an RTX 5070 with batch 64: about 38 ms per step, so the full schedule should take roughly 36 to 40 minutes, against
-3.7 hours for the official code. A 3000-step run was measured; the full 56,320-step run has not been launched yet, and it is
-the next step of M2 (T-014). Peak VRAM is about 0.85 GB in fp32. Details, the step profile and the validation curve are in
-[docs/design/paint_transformer.md](docs/design/paint_transformer.md) (section 13) and
-[docs/media/pt_train_curve.png](docs/media/pt_train_curve.png).
+Measured on an RTX 5070 with batch 64: about 38 ms per step alone (36 minutes for the official schedule, against 3.7 hours
+for the official code), and about 0.85 GB peak VRAM in fp32. Three seeds of the official schedule took 83 minutes each when three
+ran at the same time on the GPU.
+
+**Results (T-014).** The official schedule is not fully flat before the learning-rate decay (0.5 to 1.05 % per 10 % of the run),
+so the recipe was also run stretched to 112,640 steps (same shape, decay at 92 % of the run); all three stretched seeds meet the
+plateau criterion. On a common 4096-patch held-out set the stretched seeds 1 and 2 reach a total loss of 3.550 and 3.547, about
+8 % below the official pretrained weights (3.864). The step-by-step results, the official-code reference run and the findings are
+in [docs/experiments/pt_training.md](docs/experiments/pt_training.md); the tables and figures regenerate with
+`.venv\Scripts\python -m scripts.pt_training_report report` from the logs in `docs/experiments/data/` (no GPU needed).
+
+**Use `|h|`, not `h`, downstream.** Seed 0 learned a negative stroke height for every stroke (the loss and the renderer accept
+it, so nothing penalises it), and its loss is higher partly for that reason (with `|h|` it is still the highest of the three seeds). The checkpoint selected for the next steps
+(`outputs/pt_long/seed2/latest.pt`) has no such sign problem. Code that reads the predicted height must take `|h|`
+until a sign-fixing option is tested (a proposed ticket). Checkpoints are kept outside the repository.
+
+Hugging Face upload is prepared but not run: `scripts/upload_pt_to_hub.py` builds the staging folder with the weights, the
+config hash and a model card (MIT), and only uploads with `--push`.
+
+Details, the step profile and the validation curves are in [docs/design/paint_transformer.md](docs/design/paint_transformer.md)
+(section 13), [docs/media/pt_train_curve.png](docs/media/pt_train_curve.png) and the two curve figures in
+[docs/media/](docs/media/) (`pt_training_official_recipe.png`, `pt_training_long.png`).
 
 CI (`.github/workflows/ci.yml`) runs on Ubuntu with Python 3.11 and CPU torch: ruff check, ruff format check,
 mypy and `pytest -m "not gpu and not slow"`.
