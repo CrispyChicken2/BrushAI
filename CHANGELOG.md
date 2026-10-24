@@ -2,6 +2,16 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-016] Paint Transformer reproduction experiment and gap analysis
+
+- `docs/experiments/pt_reproduction.md`: protocol committed before any run (L_pcpt = VGG16 relu3_3, synthesized-stroke protocol, tolerances),
+  then results and gap analysis. Verdicts: T1b partly reproduced (stretched recipe passes all tolerances; official recipe D_W +32 %,
+  and PT does not beat our Optim on stroke L_pixel), T1c mostly not reproduced (8 of 20 cells), T1a ordering inverted (our Optim is stronger),
+  T2a ratios reproduced but PT growth 1.5x vs 5.5x (launch-bound), T2b better than the official code (1.48 h), Fig. 5 and 7 reproduced.
+- `brushstroke/eval/pcpt.py`, `brushstroke/eval/pt_strokes.py` (L_pcpt, unweighted stroke metrics, Optim comparison);
+  `scripts/exp_pt_table1.py`, `exp_pt_table2.py`, `exp_pt_ablations.py`, `exp_pt_figures.py`, `pt_repro_common.py`; `tests/test_pt_repro.py`.
+- 12 ablation trainings (4 terms x 3 seeds, official recipe); data in `docs/experiments/data/pt_reproduction/`, figures `docs/media/pt_repro_fig{5,6,7}.jpg`.
+
 ## [T-015] Paint Transformer multi-scale inference, sequence adapter and per-patch refinement
 
 - `brushstroke/stroke_model/inference.py`: the official multi-scale procedure (layers, four-phase windows, shifted final layer).
