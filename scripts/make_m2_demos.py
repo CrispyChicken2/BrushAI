@@ -120,6 +120,13 @@ def write_gif(files: dict[str, Path], dest: Path) -> float:
     return size / 1e6
 
 
+def runtime_label(seconds: float) -> str:
+    """Coarse runtime (a rerun differs by a few percent: the committed table must not change)."""
+    if seconds < 1:
+        return "< 1 s"
+    return f"{seconds / 60:.1f} min" if seconds >= 60 else f"{seconds:.0f} s"
+
+
 def results_markdown(rows: list[dict]) -> str:
     lines = [
         "# M2 demos: results",
@@ -128,7 +135,7 @@ def results_markdown(rows: list[dict]) -> str:
         "(this repository's model, T-014 checkpoint) against the M1 optimization baseline of the "
         "same input (`docs/media/m1_results.md`), 512 px.",
         "",
-        "| demo | input | method | strokes | L1 | PSNR (dB) | SSIM | LPIPS-VGG | LPIPS-Alex | runtime (s) | peak VRAM (GB) | sequence sha256 |",
+        "| demo | input | method | strokes | L1 | PSNR (dB) | SSIM | LPIPS-VGG | LPIPS-Alex | runtime | peak VRAM (GB) | sequence sha256 |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in rows:
@@ -136,7 +143,7 @@ def results_markdown(rows: list[dict]) -> str:
             lines.append(
                 f"| {r['name']} | {r['image_id']} | {method} | {m['num_strokes']:.0f} | {m['l1']:.4f} | "
                 f"{m['psnr']:.2f} | {m['ssim']:.3f} | {m['lpips_vgg']:.3f} | {m['lpips_alex']:.3f} | "
-                f"{m['runtime_seconds']:.1f} | {m['peak_vram_mb'] / 1024:.1f} | "
+                f"{runtime_label(m['runtime_seconds'])} | {m['peak_vram_mb'] / 1024:.1f} | "
                 f"{'`' + r['sequence_sha256'][:12] + '`' if method.startswith('Paint') else '(see m1_results.md)'} |"
             )
     lines += [

@@ -105,3 +105,33 @@ def test_partial_reveal_is_a_part_of_the_full_stroke() -> None:
     assert float(((mid > 1e-6) & ~(full > 1e-6)).sum()) == 0
     assert np.isfinite(float(full.sum()))
     assert isinstance(renderer, FrameRenderer)
+
+
+def test_m2_results_table_is_stable_across_reruns() -> None:
+    """Runtimes are coarse in the committed table (a rerun must not dirty it)."""
+    from scripts import make_m2_demos as m2
+
+    assert m2.runtime_label(0.2) == m2.runtime_label(0.8) == "< 1 s"
+    assert m2.runtime_label(565.6) == m2.runtime_label(566.4) == "9.4 min"
+    metrics = {
+        "num_strokes": 10.0,
+        "l1": 0.1,
+        "psnr": 20.0,
+        "ssim": 0.5,
+        "lpips_vgg": 0.3,
+        "lpips_alex": 0.3,
+        "runtime_seconds": 0.4,
+        "peak_vram_mb": 1024.0,
+    }
+    row = {
+        "name": "x",
+        "image_id": "y",
+        "pt": metrics,
+        "m1": metrics | {"runtime_seconds": 566.0},
+        "sequence_sha256": "ab" * 32,
+        "gif_mb": 0.5,
+        "sbs_gif_mb": 1.0,
+    }
+    text = m2.results_markdown([row])
+    assert "Paint Transformer" in text and "9.4 min" in text and "`abababababab`" in text
+    assert len(m2.sequence_sha256(pt_sequence())) == 64
