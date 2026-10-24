@@ -195,3 +195,60 @@ Starting from the discrepancy list of section 9 of the study note. Each cause is
 
 ### Proposed tickets
 Speed of small-size inference (host synchronizations in `paint_layer`); ablations with the paper's loss weights and matching cost (3 seeds x 4); an option that fixes the (w, h, theta) convention of the stroke parameters (loss or reparameterization) and a symmetry-invariant D_L1; a check of the synthesized-stroke protocol against the paper's D_W; the 38 ms vs 94 ms training-step discrepancy.
+
+
+## T-017: ordering of the loss terms and per-term verdicts
+
+**Scope and data.** T-017 asks for the four ablation trainings and their evaluation with the T-016 protocol. They were already run in T-016 (4 terms x 3 seeds, official recipe, `outputs/pt_abl/`, evaluated with the protocol above, tables in the "T1c" block), together with the three full-model seeds of T-014 (`outputs/pt_full/`). T-017 therefore trains nothing new: it fixes the ordering analysis and the per-term verdict rules below, applies them to the stored measurements (`docs/experiments/data/pt_reproduction/`), and reports them. One command regenerates the table: `python -m scripts.exp_pt_ablation_verdict report`.
+
+**Rules (written before the script that applies them; fixed knowing the T-016 ablation tables, so they are not blind to the data, only to the ordering statistics).**
+- Five columns per term, as in T1c: real L_pixel, real L_pcpt, stroke L_pixel, D_L1, D_W. Primary numbers: the T-016 protocol (`|h|`). Sensitivity: D_L1 with `|w|`, `|h|` folded (the fold is a diagnostic of the parameter convention, T-016 gap analysis item 3).
+- Effect of a term = ablated mean / full mean per column (> 1 = the term helps). A cell is **worse** if the ratio is > 1 and the Welch t statistic of (ablated - full) over the 3 + 3 seeds is >= 2.13 (one-sided 5 % level at about 4 degrees of freedom).
+- **Per-term verdict:** the term **matters (reproduced)** if its ablation is worse on at least 3 of the 5 columns, **partly** on 1 or 2, **not reproduced** on 0. In the paper every term is worse on all 5 columns (there is no seed statistic), so the paper's verdict is "matters" for the four terms.
+- **Importance of a term** = mean of its five ratios. **Ordering** = terms sorted by importance. Agreement with the paper = Kendall tau between the two importance vectors, and whether the most important term is the same. Ties (importances within 0.05 of each other) are reported as ties, not ranked.
+- The paper's ordering is computed from its Table 1 with the same rule.
+
+<!-- BEGIN ABLATION_VERDICT -->
+
+**Per-term verdicts, protocol numbers (`|h|`).** Cells: ablated / full ratio (`*` = significantly worse by the rule, `†` = significantly better without the term), paper ratio in brackets.
+
+| removed term | L_pixel (real) | L_pcpt (real) | L_pixel (strokes) | D_L1 | D_W | worse on | importance (ours / paper) | verdict (ours / paper) |
+|---|---|---|---|---|---|---|---|---|
+| w/o L_pixel | 1.21* (1.45) | 1.18* (1.25) | 1.44* (1.62) | 0.97 (2.90) | 0.94 (1.33) | 3 / 5 | 1.15 / 1.71 | matters / matters |
+| w/o D_L1 | 1.00 (1.32) | 0.99 (1.17) | 0.98 (1.83) | 1.90 (3.22) | 0.83 (1.06) | 0 / 5 | 1.14 / 1.72 | not reproduced / matters |
+| w/o D_W | 0.97 (1.23) | 0.99 (1.17) | 0.97 (1.10) | 1.08* (1.36) | 1.26* (1.89) | 2 / 5 | 1.06 / 1.35 | partly / matters |
+| w/o D_bce | 0.95† (1.27) | 0.95† (1.15) | 0.94† (1.24) | 1.46 (1.12) | 1.02 (1.17) | 0 / 5 | 1.06 / 1.19 | not reproduced / matters |
+
+- ordering, ours: w/o L_pixel ~ w/o D_L1 > w/o D_bce ~ w/o D_W  (importances w/o L_pixel 1.15, w/o D_L1 1.14, w/o D_W 1.06, w/o D_bce 1.06)
+- ordering, paper: w/o D_L1 ~ w/o L_pixel > w/o D_W > w/o D_bce
+- Kendall tau between the two importance vectors: +0.33; most important term: ours w/o L_pixel, paper w/o D_L1 (different).
+
+**Per-term verdicts, D_L1 with `|w|`, `|h|` folded.** Cells: ablated / full ratio (`*` = significantly worse by the rule, `†` = significantly better without the term), paper ratio in brackets.
+
+| removed term | L_pixel (real) | L_pcpt (real) | L_pixel (strokes) | D_L1 | D_W | worse on | importance (ours / paper) | verdict (ours / paper) |
+|---|---|---|---|---|---|---|---|---|
+| w/o L_pixel | 1.21* (1.45) | 1.18* (1.25) | 1.44* (1.62) | 0.97 (2.90) | 0.94 (1.33) | 3 / 5 | 1.15 / 1.71 | matters / matters |
+| w/o D_L1 | 1.00 (1.32) | 0.99 (1.17) | 0.98 (1.83) | 1.40 (3.22) | 0.83 (1.06) | 0 / 5 | 1.04 / 1.72 | not reproduced / matters |
+| w/o D_W | 0.97 (1.23) | 0.99 (1.17) | 0.97 (1.10) | 1.08* (1.36) | 1.26* (1.89) | 2 / 5 | 1.06 / 1.35 | partly / matters |
+| w/o D_bce | 0.95† (1.27) | 0.95† (1.15) | 0.94† (1.24) | 0.98 (1.12) | 1.02 (1.17) | 0 / 5 | 0.97 / 1.19 | not reproduced / matters |
+
+- ordering, ours: w/o L_pixel > w/o D_W ~ w/o D_L1 > w/o D_bce  (importances w/o L_pixel 1.15, w/o D_L1 1.04, w/o D_W 1.06, w/o D_bce 0.97)
+- ordering, paper: w/o D_L1 ~ w/o L_pixel > w/o D_W > w/o D_bce
+- Kendall tau between the two importance vectors: +0.33; most important term: ours w/o L_pixel, paper w/o D_L1 (different).
+
+Real-image L_pixel per ablation (mean ± std over seeds): w/o L_pixel: 0.0877 ± 0.0014, w/o D_L1: 0.0726 ± 0.0024, w/o D_W: 0.0704 ± 0.0018, w/o D_bce: 0.0690 ± 0.0006.
+
+<!-- END ABLATION_VERDICT -->
+
+### T-017 verdicts
+
+Seeds: 3 full-model seeds (T-014) and 3 seeds per ablation, official recipe; all numbers above are regenerated from the stored measurements.
+
+| term removed | verdict (rule) | what the numbers say |
+|---|---|---|
+| `L_pixel` | **matters** (3 of 5 columns) | pixel metrics worse: real L_pixel x1.21, L_pcpt x1.18, stroke L_pixel x1.44 (paper x1.45, x1.25, x1.62: same direction, 0.6 to 0.9 of the paper's size). The paper's large D_L1 / D_W increases (x2.90, x1.33) are absent (x0.97, x0.94): our stroke-parameter metrics do not need the pixel term. |
+| `D_W` | **partly** (2 of 5) | only its own metric and D_L1 move: D_W x1.26 (paper x1.89), D_L1 x1.08 (paper x1.36); no effect on the pixel metrics (x0.97 to 0.99, paper x1.10 to 1.23). |
+| `D_L1` | **not reproduced** (0 of 5 by the rule) | D_L1 itself rises x1.90 (paper x3.22) but the three seeds are 0.120 / 0.106 / 0.352, one of them with the `w < 0` convention (T-016 item 3), so the Welch test does not call it significant (x1.40 with the `\|w\|`, `\|h\|` fold, still not significant); no effect on the pixel metrics (x0.98 to 1.00, paper x1.17 to 1.83). |
+| `D_bce` | **not reproduced, opposite sign** (0 of 5 worse, 3 of 5 significantly *better*) | real L_pixel x0.95 (0.0690 ± 0.0006 against 0.0726 ± 0.0014), L_pcpt x0.95, stroke L_pixel x0.94, whereas the paper has x1.15 to 1.27. The D_L1 rise (x1.46) is the `w < 0` artefact (x0.98 folded). The model without the confidence term paints 7.88 strokes per synthesized patch against 7.68, but 4,433 strokes on the real images against 4,589, so more strokes does not explain the gain; the mechanism is not investigated (hypothesis: the weight 10 of the confidence term in the official recipe takes capacity from the geometry; untested). |
+
+**Ordering.** Ours (importance = mean ratio over the five columns): `L_pixel` 1.15 ~ `D_L1` 1.14 > `D_W` 1.06 ~ `D_bce` 1.06; with the folded D_L1: `L_pixel` 1.15 > `D_W` 1.06 ~ `D_L1` 1.04 > `D_bce` 0.97. The paper: `D_L1` 1.72 ~ `L_pixel` 1.71 > `D_W` 1.35 > `D_bce` 1.19. Kendall tau +0.33 in both analyses; the most important term is `L_pixel` for us and `D_L1` for the paper (a near tie in the paper: 1.72 against 1.71, so this disagreement is weak); the two agree that `L_pixel` is among the two terms that matter most and that `D_bce` is the least. They disagree on the size of every effect: our importances are 1.0 to 1.15, the paper's 1.2 to 1.7, so the term ranking is far less separated than the paper's, and for `D_L1` the "second most important" rank rests on one seed with the `w < 0` convention (it drops to third once folded). **Conclusion:** the paper's ordering is reproduced only in its coarse form (`L_pixel` important, `D_bce` last); the per-term claim that all four terms matter is reproduced for `L_pixel` only, partly for `D_W`, and not for `D_L1` and `D_bce` in our recipe (the code's loss weights, T-016 gap analysis item 4: the paper-weights variant was not run).
