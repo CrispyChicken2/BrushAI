@@ -6,7 +6,7 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 
 **Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)).** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
-[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is done: the study note is
+[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is reviewed at its gate, and the closing decision is the chef's: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
 Paint Transformer-compatible renderer mode, synthetic stroke generator (T-011), model and Hungarian-matched losses (T-012) and the
 training pipeline (T-013) are in place, three full training runs have been done (T-014, see
