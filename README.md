@@ -366,7 +366,7 @@ The reproduction study (T-016) fixed its protocol before running anything; the r
 |------|---------|
 | Table 1, real images (PT against the Optim baseline) | **not reproduced**: our optimization baseline is stronger than PT on every real-image metric (L_pixel 0.050 against 0.073) |
 | Table 1, stroke metrics | **partly**: the stretched recipe passes every criterion; the official recipe is 32 % above the paper on D_W |
-| Table 1, ablations | **mostly not**: 7 of 20 cells show the paper's direction; the paper's loss weights were not tried |
+| Table 1, ablations (per term, 3 seeds each) | **L_pixel matters** (removing it raises the pixel metrics by 1.2 to 1.4x, the paper 1.25 to 1.6x); **D_W partly** (only its own metric and D_L1 move); **D_L1 and D_bce not reproduced**: removing D_bce slightly *improves* the real-image pixel loss (0.95x). The ordering agrees only in coarse form (Kendall tau +0.33), and the effects are smaller than the paper's; the paper's loss weights were not tried |
 | Table 2, time ratios | **partly**: ratios within a factor of 2, but PT's time grows 1.5x from 128 to 512 px, against 5.5x in the paper |
 | Table 2, training time | **reproduced (better)**: 1.48 h for the official schedule, against 3.8 to 8.7 h for the official code on the same GPU |
 | Figures 5 and 7 | **reproduced** |
