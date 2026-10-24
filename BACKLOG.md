@@ -11,6 +11,8 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] 016 [T-016] PT reproduction experiment and gap analysis (M2)
 - [ ] 017 [T-017] PT loss ablations, Table 1 (M2)
 - [ ] 018 [T-018] M2 demo and gate review (M2)
+- [ ] 019 [T-019] PT: constrain the sign of h, 3 seeds (M2, P2)
+- [ ] 020 [T-020] PT: BN recalibration for a usable validation curve (M2, P2)
 - [ ] M3 Evaluation harness + baseline numbers (3 baselines)
 - [ ] M4 Contribution : allocation sémantique puis ordre pictural, ablations complètes
 - [ ] M5 Front-end SDXL + app Gradio + HF Space
