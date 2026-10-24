@@ -46,16 +46,7 @@ class FrameRenderer:
         levels = seq.scale_level.cpu().numpy() if seq.scale_level is not None else None
         self.timeline = timeline or build_timeline(len(seq), cfg, levels)
         self.n = len(seq)
-        spec = seq.brush
-        bank = get_brush_bank(
-            spec.kind, spec.bank_size, (spec.mask_height, spec.mask_width), spec.seed
-        )
-        self.masks = bank.masks.to(self.device)
-        assert seq.brush_index is not None
-        self.brush_index = seq.brush_index.to(self.device)
-        params = seq.params.to(self.device)
-        self.params = canonicalize(params[None], self.height, self.width)[0]
-        self.colors = params[:, RED : BLUE + 1]
+        self._setup(seq)
         self.reverse = torch.from_numpy(self.timeline.reverse).to(self.device)
         self.background = torch.tensor(seq.background, dtype=torch.float32, device=self.device)
         self.tex = (
@@ -71,6 +62,19 @@ class FrameRenderer:
             else None
         )
         self.reset()
+
+    def _setup(self, seq: StrokeSequence) -> None:
+        """Per-stroke tensors of the procedural renderer (brush masks, canonical parameters)."""
+        spec = seq.brush
+        bank = get_brush_bank(
+            spec.kind, spec.bank_size, (spec.mask_height, spec.mask_width), spec.seed
+        )
+        self.masks = bank.masks.to(self.device)
+        assert seq.brush_index is not None
+        self.brush_index = seq.brush_index.to(self.device)
+        params = seq.params.to(self.device)
+        self.params = canonicalize(params[None], self.height, self.width)[0]
+        self.colors = params[:, RED : BLUE + 1]
 
     def reset(self) -> None:
         """Back to the empty canvas (frames must then be requested in increasing order)."""

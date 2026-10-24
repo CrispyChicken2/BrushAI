@@ -16,6 +16,8 @@ seed: 0
 # rendering
 height: 0                # output size; 0 = the sequence canvas size
 width: 0
+renderer: auto           # auto | procedural | pt (auto: Paint Transformer strokes -> pt)
+pt_brush_dir: data/raw/pt_brush
 device: auto
 chunk_size: 32
 canvas_enabled: true

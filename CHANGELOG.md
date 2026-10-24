@@ -2,6 +2,17 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-018] M2 demos and gate review
+
+- `scripts/make_m2_demos.py` (one command): Paint Transformer paintings of the three M1 demo inputs, animated through the
+  animation module, side by side with the M1 baseline; `docs/media/m2_*.gif` (6 GIFs, each <= 1.3 MB), `m2_*_compare.jpg`,
+  `m2_results.md`; `configs/demos/m2.yaml`. The three reruns are byte-identical.
+- `brushstroke/animation/pt_frames.py`: `PTFrameRenderer` (official brush images, reveal along the long axis of the brush) and
+  `make_frame_renderer`; `AnimationConfig.renderer` (`auto` picks it for Paint Transformer sequences) and `pt_brush_dir`;
+  `FrameRenderer` gets a `_setup` hook (behaviour unchanged).
+- `docs/plan/M2_retro.md`: fresh-clone audit, success-criteria table, costs, limitations, proposed tickets; `docs/plan/M2.md`
+  ticket table at the final numbering.
+
 ## [T-017] Paint Transformer loss ablations: ordering of the terms and per-term verdicts
 
 - The four ablation trainings (3 seeds each) and their evaluation were done in T-016; T-017 adds the rules (written before the script),
