@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import pickle
 from dataclasses import asdict, replace
 from pathlib import Path
 
@@ -475,6 +476,23 @@ def test_load_pt_model_accepts_training_checkpoints_and_plain_state_dicts(tmp_pa
     assert not any(p.requires_grad for p in loaded.parameters())
     with pytest.raises(FileNotFoundError):
         load_pt_model(tmp_path / "missing.pt")
+
+
+class _Payload:
+    """Unpickling it would call ``print``: a stand-in for arbitrary code in a checkpoint."""
+
+    def __reduce__(self) -> tuple[object, tuple[object, ...]]:
+        return (print, ("executed",))
+
+
+def test_load_pt_model_never_unpickles_arbitrary_objects(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = tmp_path / "evil.pt"
+    torch.save({"model": _Payload(), "config": {}}, path)
+    with pytest.raises(pickle.UnpicklingError):
+        load_pt_model(path)
+    assert "executed" not in capsys.readouterr().out
 
 
 @needs_brushes

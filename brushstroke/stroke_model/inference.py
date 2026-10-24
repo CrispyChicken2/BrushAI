@@ -31,10 +31,12 @@ from __future__ import annotations
 
 import math
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 
@@ -50,6 +52,18 @@ from brushstroke.stroke_model.pt_sequence import (
 from brushstroke.stroke_model.refine import RefineConfig, refine_patch_strokes
 from brushstroke.strokes import StrokeSequence
 from brushstroke.utils.device import peak_vram_mb, reset_peak_vram
+
+
+def _numpy_state_globals() -> list[Callable[..., Any] | tuple[Callable[..., Any], str]]:
+    """The numpy objects of a pickled ``numpy.random`` state (torch's weights-only allowlist)."""
+    try:
+        from numpy._core import multiarray
+    except ImportError:  # numpy < 2
+        from numpy.core import multiarray  # type: ignore[no-redef]
+    return [multiarray._reconstruct, np.ndarray, np.dtype, type(np.dtype("uint32"))]
+
+
+_NUMPY_STATE_GLOBALS = _numpy_state_globals()
 
 
 class StrokePredictor(Protocol):
@@ -404,16 +418,18 @@ def load_pt_model(
 
     Raises:
         FileNotFoundError: ``path`` does not exist.
+        pickle.UnpicklingError: the file holds objects other than tensors, plain containers and
+            numpy RNG states (it is never fully unpickled).
     """
     ckpt = Path(path)
     if not ckpt.exists():
         raise FileNotFoundError(
             f"checkpoint {ckpt} not found (see docs/experiments/pt_training.md)"
         )
-    try:  # plain state_dicts (the released weights) load without unpickling arbitrary objects
+    # never a full unpickle: the training checkpoints also hold the numpy RNG states, whose few
+    # array-reconstruction globals are allowlisted; anything else in the file is refused
+    with torch.serialization.safe_globals(_NUMPY_STATE_GLOBALS):
         state = torch.load(ckpt, map_location="cpu", weights_only=True)
-    except Exception:  # noqa: BLE001 - our own training checkpoints hold the config and RNG states
-        state = torch.load(ckpt, map_location="cpu", weights_only=False)
     info: dict[str, object] = {"kind": "state_dict", "step": None}
     model_cfg = PTModelConfig()
     if isinstance(state, dict) and "model" in state and "config" in state:
