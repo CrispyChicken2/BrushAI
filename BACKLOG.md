@@ -15,9 +15,9 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 018 [T-018] M2 demo and gate review (M2)
 
 ## Fait
+- [x] 018 [T-018] M2 demo and gate review (M2) (c4dc730)
 - [x] 017 [T-017] PT loss ablations, Table 1 (M2) (900c6ed)
 - [x] 016 [T-016] PT reproduction experiment and gap analysis (M2) (de7ea8e)
 - [x] 015 [T-015] PT multi-scale inference + optional per-patch refinement (M2) (cca4ab5)
