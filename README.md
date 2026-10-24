@@ -9,8 +9,9 @@ not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); 
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is under way: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
 Paint Transformer-compatible renderer mode, synthetic stroke generator (T-011), model and Hungarian-matched losses (T-012) and the
-training pipeline (T-013) are in place, and three full training runs have been done (T-014, see
-[docs/experiments/pt_training.md](docs/experiments/pt_training.md)).
+training pipeline (T-013) are in place, three full training runs have been done (T-014, see
+[docs/experiments/pt_training.md](docs/experiments/pt_training.md)), and the multi-scale inference pipeline reproduces the official
+inference exactly with the official weights (T-015, see [Painting with the Paint Transformer](#painting-with-the-paint-transformer-m2)).
 Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
@@ -318,8 +319,40 @@ Details, the step profile and the validation curves are in [docs/design/paint_tr
 (section 13), [docs/media/pt_train_curve.png](docs/media/pt_train_curve.png) and the two curve figures in
 [docs/media/](docs/media/) (`pt_training_official_recipe.png`, `pt_training_long.png`).
 
-CI (`.github/workflows/ci.yml`) runs on Ubuntu with Python 3.11 and CPU torch: ruff check, ruff format check,
-mypy and `pytest -m "not gpu and not slow"`.
+## Painting with the Paint Transformer (M2)
+
+`scripts/paint_pt.py` paints an image with the multi-scale Paint Transformer inference: the official procedure (layers of
+decreasing patch size, four-phase windows, a shifted final layer), producing a `StrokeSequence`. The settings are in
+`configs/paint_pt.yaml`, and the checkpoint is passed on the command line (the released `model.pth` also works).
+
+```
+.venv\Scripts\python -m scripts.paint_pt --input data/raw/mona_lisa.jpg --out outputs/pt_run --checkpoint outputs/pt_long/seed2/latest.pt
+.venv\Scripts\python -m scripts.paint_pt --input data/raw/mona_lisa.jpg --out outputs/pt_refined --checkpoint outputs/pt_long/seed2/latest.pt refine.enabled=true
+```
+
+The output directory gets `sequence.npz`, `final.png`, `variants/final_official.png` and `variants/final_gated.png`,
+`progress/layer_XX.png`, `target.png`, `config.resolved.yaml` and `metrics.json`. `inference.final_layer` chooses which variant
+goes into `sequence.npz`: `official` paints every stroke of the last layer, `gated` only those the network is confident about.
+
+What is verified (details in [docs/experiments/pt_inference.md](docs/experiments/pt_inference.md)):
+
+- **Exact reproduction**: with the official weights, our output equals the official `inference.py` bit for bit (maximum absolute
+  difference 0.0) on the five evaluation images at 512 x 512 and on one image at 1024 x 1024.
+- **Stroke counts and cost**: 3,787 to 4,991 strokes per 512 px image with the official weights. One image takes about 0.23 s and
+  1.05 GB of peak GPU memory on the RTX 5070.
+- **The sequence reproduces the painting**: `replay_sequence` re-renders the exported sequence to the pipeline canvas up to float
+  rounding. The generic `StrokeSequence` render in PT mode is close but not identical; use the layer-aware replay for exact output.
+- **Per-patch refinement** (`refine.enabled=true`, off by default): 100 optimization steps per layer lower the L1 error by 27 %
+  (Mona Lisa) and 35 % (The Great Wave), and the held-out LPIPS-AlexNet by 0.06 to 0.08. This is measured on two images only.
+
+**Two caveats.** First, the T-014 checkpoint has a lower loss on the synthetic validation data, but on the five real images it is
+not better than the official weights (mean L1 0.071 against 0.067, LPIPS-AlexNet 0.496 against 0.496). The synthetic loss is not a
+good guide to real-image quality. Second, some models predict negative stroke heights; the pipeline takes `|h|` right after the
+network (`inference.abs_h: true`, on by default), so the sequence and every downstream consumer only see positive heights. For
+checkpoints that predict negative heights this can change the painted result slightly, since the brush is mirrored.
+
+The forced strokes of the last layer are nearly useless: dropping them costs little quality and removes 15 to 18 % of the
+strokes. Which variant should be the default for animations is still open (see the design note, section 14).
 
 ## License
 

@@ -17,5 +17,8 @@ the validation set, precision, resume and the loss preset.
 `loss_official.yaml` and `loss_paper.yaml` (the two loss presets, `PTLossConfig`), and `brushes.yaml`, the manifest of the
 official brush images (URLs at a pinned commit, licence, SHA-256), read by `scripts/fetch_pt_brushes.py`. The PT-compatible rendering mode is switched in `default.yaml` (`render.mode: pt`).
 
+`paint_pt.yaml` configures the multi-scale Paint Transformer inference (`scripts/paint_pt.py`): the checkpoint, the final-layer
+variant, `|h|`, and the per-patch refinement (off by default).
+
 `demos/` holds one partial YAML per M1 demo (`m1_portrait.yaml`, `m1_landscape.yaml`, `m1_photo.yaml`). Each inherits the
 baseline and animation defaults and only sets the seed, the image, `cudnn_deterministic: true` and the animation of the demo.
