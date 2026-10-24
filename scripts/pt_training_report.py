@@ -41,7 +41,7 @@ DOC = Path("docs/experiments/pt_training.md")
 FIGURES = Path("docs/media")
 BEGIN, END = "<!-- BEGIN GENERATED -->", "<!-- END GENERATED -->"
 PLATEAU_TOL = 0.01
-THIN_EVERY = 250  # steps between kept rows of the archived train.csv
+THIN_EVERY = 250  # steps averaged into one row of the archived train.csv
 EVAL_SEED, EVAL_BATCHES = 999, 64  # final evaluation set: 64 x 64 = 4096 patches
 TERMS = ("total", "pixel", "gt", "w", "decision", "count_error")
 TAGS = {
@@ -148,13 +148,27 @@ def evaluate_runs(runs: Path, official_run: Path | None = None) -> dict[str, Any
 
 
 def _thin_copy(src: Path, dest: Path) -> None:
+    """Archive ``src`` with one row per ``THIN_EVERY`` steps: the mean of the logged values in the
+    block (so that no information on the noise level of the curve is lost), ``step``/``epoch``/
+    ``lr`` taken at the end of the block."""
     rows = read_csv(src)
-    kept = [r for r in rows if int(r["step"]) % THIN_EVERY == 0 or r is rows[-1]]
+    fields = list(rows[0])
+    last_only = {"step", "epoch", "lr"}
+    blocks: dict[int, list[dict[str, str]]] = {}
+    for r in rows:
+        blocks.setdefault((int(r["step"]) - 1) // THIN_EVERY, []).append(r)
+    thinned = []
+    for block in blocks.values():
+        row = {k: block[-1][k] for k in fields}
+        for k in fields:
+            if k not in last_only:
+                row[k] = f"{statistics.mean(float(r[k]) for r in block):.6g}"
+        thinned.append(row)
     dest.parent.mkdir(parents=True, exist_ok=True)
     with dest.open("w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(fh, fieldnames=fields)
         writer.writeheader()
-        writer.writerows(kept)
+        writer.writerows(thinned)
 
 
 def archive_runs(runs: Path, tag: str, official_run: Path | None = None) -> None:
@@ -247,6 +261,11 @@ def _binned(
     return list(bins), [statistics.mean(v) for v in bins.values()]
 
 
+def _running_median(values: list[float], width: int) -> list[float]:
+    half = width // 2
+    return [statistics.median(values[max(0, i - half) : i + half + 1]) for i in range(len(values))]
+
+
 def build_figure(root: Path, out: Path, official_log: Path | None) -> None:
     import matplotlib
 
@@ -258,13 +277,14 @@ def build_figure(root: Path, out: Path, official_log: Path | None) -> None:
     fig, axes = plt.subplots(1, 3, figsize=(12, 3.3), dpi=90)
     for name, run in runs.items():
         axes[0].plot(*_column(run["val"], "total"), label=name)
-        axes[1].plot(*_column(run["val"], "total"), label=name, lw=0.9)
+        steps, values = _column(run["val"], "total")
+        axes[1].plot(steps, _running_median(values, 5), label=name)
         axes[2].plot(*_binned(run["train"], "total"), label=name)
     if official_log is not None and official_log.exists():
         axes[2].plot(*_binned(read_csv(official_log), "total"), "k--", label="official code")
     axes[0].set_title("validation total (log scale; eval-mode spikes, see text)", fontsize=8)
     axes[0].set_yscale("log")
-    axes[1].set_title("validation total, zoom (dashed: official weights)", fontsize=8)
+    axes[1].set_title("validation, 5-point running median (dashed: official weights)", fontsize=8)
     lowest = min(float(r["total"]) for run in runs.values() for r in run["val"])
     axes[1].set_ylim(lowest * 0.97, lowest * 1.3)
     if "official_pretrained" in final:
