@@ -4,9 +4,9 @@ Neural stroke-based painting: turn a text prompt or an image into a painting mad
 of brush strokes, replayed as a stroke-by-stroke animation. The research focus is semantic-aware stroke
 allocation, painterly stroke ordering and an "anytime quality" metric.
 
-**Status: M1 reviewed (gate, T-008).** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
+**Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)).** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
-[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is under way: the study note is
+[docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is done: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
 Paint Transformer-compatible renderer mode, synthetic stroke generator (T-011), model and Hungarian-matched losses (T-012) and the
 training pipeline (T-013) are in place, three full training runs have been done (T-014, see
@@ -38,6 +38,30 @@ Full table with runtime, VRAM, SSIM and hashes: [docs/media/m1_results.md](docs/
 `.venv\Scripts\python -m scripts.make_m1_demos` (about 29 minutes on an RTX 5070; it downloads and verifies the three inputs itself;
 behind a TLS-intercepting proxy add `--insecure`, and see the weights note in the troubleshooting section). A rerun from a fresh clone
 reproduces the committed GIFs byte for byte on the same GPU.
+
+## M2 demos
+
+The same three inputs painted by the Paint Transformer (this repository's model, T-014 checkpoint) and animated with the
+same animation module; on the right of each side-by-side GIF, the M1 optimization baseline on the left. 3,866 to 5,020 strokes
+in under a second, against 2,037 strokes in 9.4 minutes for the baseline, at a clearly lower fidelity (see the table).
+
+| Portrait | Landscape | Photo |
+|---|---|---|
+| ![Portrait, M1 vs PT](docs/media/m2_portrait_vs_m1.gif) | ![Landscape, M1 vs PT](docs/media/m2_landscape_vs_m1.gif) | ![Photo, M1 vs PT](docs/media/m2_photo_vs_m1.gif) |
+
+| demo | method | strokes | L1 | LPIPS-VGG | LPIPS-Alex | runtime |
+|---|---|---|---|---|---|---|
+| portrait | M1 optimization | 2037 | 0.024 | 0.253 | 0.217 | 9.4 min |
+| portrait | Paint Transformer | 3866 | 0.036 | 0.541 | 0.416 | < 1 s |
+| landscape | M1 optimization | 2037 | 0.071 | 0.358 | 0.432 | 9.4 min |
+| landscape | Paint Transformer | 5020 | 0.091 | 0.651 | 0.538 | < 1 s |
+| photo | M1 optimization | 2037 | 0.055 | 0.251 | 0.289 | 9.4 min |
+| photo | Paint Transformer | 4351 | 0.074 | 0.532 | 0.382 | < 1 s |
+
+Full table, the PT-only GIFs (`m2_<name>.gif`) and the input | M1 | PT images: [docs/media/m2_results.md](docs/media/m2_results.md).
+Regenerate with `.venv\Scripts\python -m scripts.make_m2_demos` (needs `outputs/pt_long/seed2/latest.pt`, or
+`--checkpoint data/raw/pt_official/model.pth` for the released weights; the M1 baselines are painted first if `outputs/m1/` is
+empty, about 28 minutes). The GIFs are reproduced byte for byte on a rerun. Milestone review: [docs/plan/M2_retro.md](docs/plan/M2_retro.md).
 
 ## Setup
 

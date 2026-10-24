@@ -11,6 +11,7 @@ Entry points, run from the repo root: `python -m scripts.<name>` or `python scri
 | `fetch_data` | download the evaluation images and verify their checksums (T-009) |
 | `fetch_demo_inputs` | download the three M1 demo inputs (a subset of the T-009 manifest) and verify their checksums (T-007) |
 | `make_m1_demos` | the M1 deliverable: fetch, paint and animate the three demos, write `docs/media/` (T-007) |
+| `make_m2_demos` | the M2 deliverable: Paint Transformer paintings of the three demo inputs, animated, side by side with the M1 baseline, write `docs/media/m2_*` (T-018) |
 | `exp_optim_sweep` | the baseline sweep: runs and regenerates `docs/experiments/` tables and figures (T-009) |
 | `fetch_pt_brushes` | download the four official Paint Transformer brush images (Apache-2.0) and verify their checksums (T-011) |
 | `train_pt` | train the Paint Transformer stroke predictor: official schedule, validation, resume, bf16 option, step profile (T-013) |
