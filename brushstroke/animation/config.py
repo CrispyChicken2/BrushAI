@@ -26,6 +26,8 @@ class AnimationConfig:
     direction: str = "random"  # forward | reverse | random (seeded per stroke)
     seed: int = 0
     # rendering
+    renderer: str = "auto"  # auto | procedural | pt (auto: Paint Transformer strokes -> pt)
+    pt_brush_dir: str = "data/raw/pt_brush"  # official brush images of the pt renderer
     height: int = 0  # output size in pixels; 0 = the sequence's canvas size
     width: int = 0
     device: str = "auto"
