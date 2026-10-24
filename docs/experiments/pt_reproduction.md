@@ -195,3 +195,15 @@ Starting from the discrepancy list of section 9 of the study note. Each cause is
 
 ### Proposed tickets
 Speed of small-size inference (host synchronizations in `paint_layer`); ablations with the paper's loss weights and matching cost (3 seeds x 4); an option that fixes the (w, h, theta) convention of the stroke parameters (loss or reparameterization) and a symmetry-invariant D_L1; a check of the synthesized-stroke protocol against the paper's D_W; the 38 ms vs 94 ms training-step discrepancy.
+
+
+## T-017: ordering of the loss terms and per-term verdicts
+
+**Scope and data.** T-017 asks for the four ablation trainings and their evaluation with the T-016 protocol. They were already run in T-016 (4 terms x 3 seeds, official recipe, `outputs/pt_abl/`, evaluated with the protocol above, tables in the "T1c" block), together with the three full-model seeds of T-014 (`outputs/pt_full/`). T-017 therefore trains nothing new: it fixes the ordering analysis and the per-term verdict rules below, applies them to the stored measurements (`docs/experiments/data/pt_reproduction/`), and reports them. One command regenerates the table: `python -m scripts.exp_pt_ablation_verdict report`.
+
+**Rules (written before the script that applies them; fixed knowing the T-016 ablation tables, so they are not blind to the data, only to the ordering statistics).**
+- Five columns per term, as in T1c: real L_pixel, real L_pcpt, stroke L_pixel, D_L1, D_W. Primary numbers: the T-016 protocol (`|h|`). Sensitivity: D_L1 with `|w|`, `|h|` folded (the fold is a diagnostic of the parameter convention, T-016 gap analysis item 3).
+- Effect of a term = ablated mean / full mean per column (> 1 = the term helps). A cell is **worse** if the ratio is > 1 and the Welch t statistic of (ablated - full) over the 3 + 3 seeds is >= 2.13 (one-sided 5 % level at about 4 degrees of freedom).
+- **Per-term verdict:** the term **matters (reproduced)** if its ablation is worse on at least 3 of the 5 columns, **partly** on 1 or 2, **not reproduced** on 0. In the paper every term is worse on all 5 columns (there is no seed statistic), so the paper's verdict is "matters" for the four terms.
+- **Importance of a term** = mean of its five ratios. **Ordering** = terms sorted by importance. Agreement with the paper = Kendall tau between the two importance vectors, and whether the most important term is the same. Ties (importances within 0.05 of each other) are reported as ties, not ranked.
+- The paper's ordering is computed from its Table 1 with the same rule.
