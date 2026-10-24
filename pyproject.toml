@@ -31,6 +31,8 @@ extend-exclude = [".venv"]
 "scripts/make_m2_demos.py" = ["E501"]  # long table strings
 "scripts/exp_pt_figures.py" = ["E501"]  # long docstring lines
 "scripts/pt_repro_common.py" = ["E501"]  # paper numbers
+"scripts/exp_pt_convention.py" = ["E501"]  # long table strings and docstring lines
+"scripts/pt_convention_report.py" = ["E501"]  # long table strings
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "NPY"]

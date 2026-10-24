@@ -87,3 +87,93 @@ python -m scripts.pt_training_report evaluate --runs outputs/pt_full            
 python -m scripts.pt_training_report archive  --runs outputs/pt_full --tag official_recipe   # and: --runs outputs/pt_long --tag long
 python -m scripts.pt_training_report report                                            # tables + figures from docs/experiments/data/
 ```
+
+## T-019: fixing the `(w, h, theta)` convention and a convention-invariant `D_L1`
+
+**Question.** Can the convention outliers of T-014 / T-016 (a seed predicts `h < 0` or `w < 0` for every stroke) be removed, or
+neutralized in the metric, without losing quality? **Hypotheses.** H1: a convention fix (option A, B or C below) leaves 0 of
+3 seeds with more than 50 % negative `w` or `h`, and the held-out total is not worse than the baseline recipe. H2: a
+convention-invariant `D_L1` agrees across seeds. Derivation of the equivalence classes and of the options:
+[docs/design/pt_convention.md](../design/pt_convention.md).
+
+### Protocol (fixed before the runs)
+- **Options** (flags, default = official behaviour, bitwise unchanged; checked by a forward and backward hash against `main`):
+  **A** `model.convention=positive` (`w`, `h` = softplus, `theta` wrapped into [0, 1)); **B** `loss.l1_invariance=mirror` (parameter
+  L1 of the loss and of the matching cost minimized over the mirror class of the prediction); **C** `loss.lambda_sign=10`
+  (`+ 10 mean(relu(-w) + relu(-h))`, the weight of the other terms). Official recipe (56,320 steps), seeds 0, 1, 2, otherwise the
+  T-014 settings. The stretched recipe (112,640 steps) only for the best option. Runs: `python -m scripts.exp_pt_convention train`.
+- **Evaluation**: the T-014 held-out set (4,096 patches, seed 999, same loss and matcher) for every model, the new runs and
+  the existing T-014 / T-016 checkpoints (`python -m scripts.exp_pt_convention evaluate`). Three totals of the official loss
+  (weights 10 / 1 / 10 / 10): `raw`; `|h|` (T-014 protocol, `h` replaced by `|h|`); `invariant` (parameter L1 and matching over the
+  mirror class). The invariant total is the **convention-neutral comparator**: it is the one used for H1, because options B and C
+  may keep a negative sign that the raw total penalizes. Stroke metrics are the unweighted terms of T-016 plus `D_L1` per class
+  level (`exact`, `mirror`, `rot180`, `swap`), all with the official matching.
+- **H1 rule** (per option, 3 seeds): *outlier seed* = more than 50 % of the matched strokes with `w < 0` or `h < 0`; *worse* =
+  mean invariant total above the baseline's and Welch t >= 2.13 (the T-017 rule); H1 is met when there is no outlier seed and the
+  option is not worse. Baseline = the T-014 runs of the same length (official: 3.771 +- 0.047 after `|h|`; stretched: 3.560 +- 0.021).
+  Option B keeps the sign free by design, so its outlier count is reported but it is judged on `D_L1` and on the total.
+- **Best option** = the one that meets H1 with the lowest invariant total, else the fewest outlier seeds, then the lowest total.
+- **H2 rule**: the coefficient of variation (std / mean over 3 seeds) of `D_L1` at a class level is at most 5 % and at least 3 times
+  lower than the raw `D_L1`'s, for the two T-014 groups (official and stretched recipe); the four T-016 ablation groups are reported
+  as supporting evidence. Levels: `exact` (strict: renders identically), `mirror` (primary), `rot180` and `swap` (diagnostics).
+
+### Results
+Regenerate with `python -m scripts.exp_pt_convention report` (reads `docs/experiments/data/pt_convention/`).
+
+<!-- BEGIN CONVENTION -->
+
+### Equivalence classes verified by rendering
+
+Mean absolute alpha difference between the stroke and each parameter variant, 4000 random strokes of the training distribution (64 x 64 pixels; the mean alpha is 0.091); `error / area` is the share of the stroke that changes. Unrelated strokes of the same distribution differ by 0.1424 (1.57 of the area).
+
+| variant `(sign w, sign h, theta shift, swap)` | class | alpha error (train) | error / area | foreground error (train) | alpha error (inference) |
+|---|---|---|---|---|---|
+| `(+1, +1, +1.0, -)` | rot180 (diagnostic) | 0.02753 | 0.303 | 0.03328 | 0.03325 |
+| `(+1, -1, +0.0, -)` | mirror | 0.01310 | 0.144 | 0.01694 | 0.01191 |
+| `(+1, -1, +1.0, -)` | rot180 (diagnostic) | 0.03047 | 0.336 | 0.03410 | 0.03638 |
+| `(-1, +1, +0.0, -)` | rot180 (diagnostic) | 0.03047 | 0.336 | 0.03477 | 0.03643 |
+| `(-1, +1, +1.0, -)` | mirror | 0.01310 | 0.144 | 0.01635 | 0.01196 |
+| `(-1, -1, +0.0, -)` | rot180 (diagnostic) | 0.02753 | 0.303 | 0.03304 | 0.03325 |
+| `(-1, -1, +1.0, -)` | exact | 0.00000 | 0.000 | 0.00306 | 0.00005 |
+| `(+1, +1, +0.5, swap)` | swap (diagnostic) | 0.02840 | 0.313 | 0.03551 | 0.03261 |
+| `(+1, +1, +1.5, swap)` | swap (diagnostic) | 0.02840 | 0.313 | 0.03539 | 0.03266 |
+| `(+1, -1, +0.5, swap)` | swap (diagnostic) | 0.02776 | 0.306 | 0.03623 | 0.03136 |
+| `(+1, -1, +1.5, swap)` | swap (diagnostic) | 0.02591 | 0.285 | 0.03192 | 0.03034 |
+| `(-1, +1, +0.5, swap)` | swap (diagnostic) | 0.02591 | 0.285 | 0.03248 | 0.03039 |
+| `(-1, +1, +1.5, swap)` | swap (diagnostic) | 0.02776 | 0.306 | 0.03575 | 0.03131 |
+| `(-1, -1, +0.5, swap)` | swap (diagnostic) | 0.02840 | 0.313 | 0.03555 | 0.03266 |
+| `(-1, -1, +1.5, swap)` | swap (diagnostic) | 0.02840 | 0.313 | 0.03571 | 0.03262 |
+
+### H2: convention-invariant D_L1 on the existing checkpoints (T-014, T-016)
+
+| model | L_pixel | D_L1 | D_L1 exact | D_L1 mirror | D_L1 rot180 | D_L1 swap | D_W | h < 0 | w < 0 | outlier seeds |
+|---|---|---|---|---|---|---|---|---|---|---|
+| official weights | 0.0410 | 0.0978 | 0.0978 | 0.0977 | 0.0947 | 0.0806 | 0.0240 | 0.0 % | 0.0 % | 0 / 1 |
+| ours, official recipe (T-014) | 0.0458 ± 0.0011 | 0.1476 ± 0.0836 | 0.1471 ± 0.0828 | 0.1015 ± 0.0039 | 0.0990 ± 0.0044 | 0.0842 ± 0.0028 | 0.0237 ± 0.0009 | 33.3 ± 57.7 % | 0.0 ± 0.0 % | 1 / 3 |
+| ours, stretched recipe (T-014) | 0.0417 ± 0.0002 | 0.1445 ± 0.0848 | 0.1439 ± 0.0837 | 0.0974 ± 0.0034 | 0.0947 ± 0.0037 | 0.0774 ± 0.0019 | 0.0220 ± 0.0009 | 33.3 ± 57.7 % | 0.0 ± 0.0 % | 1 / 3 |
+| ablation w/o pixel (T-016) | 0.0665 ± 0.0017 | 0.1465 ± 0.0856 | 0.1460 ± 0.0847 | 0.0980 ± 0.0020 | 0.0963 ± 0.0022 | 0.0857 ± 0.0023 | 0.0223 ± 0.0009 | 33.3 ± 57.7 % | 0.0 ± 0.0 % | 1 / 3 |
+| ablation w/o dl1 (T-016) | 0.0450 ± 0.0008 | 0.2403 ± 0.1248 | 0.2066 ± 0.0876 | 0.1190 ± 0.0128 | 0.1078 ± 0.0077 | 0.0805 ± 0.0037 | 0.0195 ± 0.0040 | 33.3 ± 57.7 % | 33.3 ± 57.7 % | 2 / 3 |
+| ablation w/o dw (T-016) | 0.0449 ± 0.0003 | 0.1098 ± 0.0019 | 0.1098 ± 0.0019 | 0.1098 ± 0.0019 | 0.1082 ± 0.0023 | 0.0925 ± 0.0005 | 0.0299 ± 0.0005 | 0.0 ± 0.0 % | 0.0 ± 0.0 % | 0 / 3 |
+| ablation w/o dbce (T-016) | 0.0426 ± 0.0003 | 0.2445 ± 0.1506 | 0.1908 ± 0.0834 | 0.1362 ± 0.0658 | 0.0985 ± 0.0054 | 0.0815 ± 0.0033 | 0.0238 ± 0.0008 | 66.7 ± 57.7 % | 33.3 ± 57.7 % | 2 / 3 |
+
+**Spread of `D_L1` across the 3 seeds (coefficient of variation = std / mean).**
+
+| group | raw | `\|h\|` fold | exact | mirror | rot180 | swap |
+|---|---|---|---|---|---|---|
+| ours, official recipe (T-014) | 56.7 % | 3.4 % | 56.3 % | 3.9 % | 4.5 % | 3.3 % |
+| ours, stretched recipe (T-014) | 58.7 % | 2.8 % | 58.2 % | 3.5 % | 3.9 % | 2.4 % |
+| ablation w/o pixel (T-016) | 58.4 % | 1.9 % | 58.0 % | 2.1 % | 2.3 % | 2.7 % |
+| ablation w/o dl1 (T-016) | 51.9 % | 71.9 % | 42.4 % | 10.8 % | 7.1 % | 4.6 % |
+| ablation w/o dw (T-016) | 1.7 % | 1.7 % | 1.7 % | 1.7 % | 2.1 % | 0.6 % |
+| ablation w/o dbce (T-016) | 61.6 % | 58.5 % | 43.7 % | 48.3 % | 5.4 % | 4.0 % |
+
+Bias of the invariant metric on the 12 models with no negative `w` or `h` (mean decrease of `D_L1` relative to the raw value; a level that lowers clean models also lowers wrong ones for the wrong reason): `exact` 0.0 %, `mirror` 0.1 %, `rot180` 2.6 %, `swap` 16.8 %.
+
+Rule (H2 holds at a level): coefficient of variation across seeds at most 5 % and at least 3 times lower than the raw `D_L1`'s.
+
+- `exact`: T-014 groups not both within the rule (no, no); ablation groups 0 / 4.
+- `mirror`: T-014 groups both within the rule (yes, yes); ablation groups 1 / 4.
+- `rot180`: T-014 groups both within the rule (yes, yes); ablation groups 1 / 4.
+- `swap`: T-014 groups both within the rule (yes, yes); ablation groups 3 / 4.
+
+<!-- END CONVENTION -->

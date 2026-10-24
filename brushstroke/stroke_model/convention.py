@@ -18,8 +18,8 @@ triples therefore paint (almost) the same stroke. Derivation (full note:
   rotation by pi. This is the *mirror class*: **approximate**, not an exact symmetry of the renderer
   (the ``|h|`` / ``|w|, |h|`` fold of T-016 is this class without the ``theta`` shift).
 * Larger approximate classes (rotation by pi of the stroke, then exchange of ``w`` and ``h`` with a
-  rotation by pi/2) differ on about 30 % of the area, the level of two unrelated strokes of similar
-  size: they are only used as diagnostics.
+  rotation by pi/2) differ on about 30 % of the area (two unrelated strokes of the same distribution
+  differ by 157 % of it, since they barely overlap): they are only used as diagnostics.
 
 ``theta`` is in units of pi, as everywhere in :mod:`brushstroke.renderer.pt`.
 """
