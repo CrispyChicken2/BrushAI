@@ -2,6 +2,7 @@
 and training time. Protocol: ``docs/experiments/pt_reproduction.md``.
 
     python -m scripts.exp_pt_table2 run      # GPU, idle machine; official code from `pt_reference_study fetch`
+    python -m scripts.exp_pt_table2 training # re-measure the training step alone on the GPU
     python -m scripts.exp_pt_table2 report   # markdown table from docs/experiments/data/pt_reproduction/table2.json
 """
 
@@ -9,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import statistics
 import sys
 import time
@@ -104,9 +106,16 @@ def run() -> dict[str, object]:
     result["optim_seconds"] = optim
     result["optim_strokes"] = 2037
 
+    result["training"] = training_times()
+    dump("table2", result)
+    return result
+
+
+def training_times() -> dict[str, float]:
+    """Training time per step and in total of our pipeline (alone on the GPU) and of the official code."""
     profile = profile_step(TrainConfig(), steps=50, warmup=10)
     rows = list(csv.DictReader(OFFICIAL_TRAIN_LOG.open(encoding="utf-8")))
-    result["training"] = {
+    result: dict[str, float] = {
         "ours_step_ms": profile["step"],
         "ours_hours": profile["step"] * STEPS / 3.6e6,
         "official_code_hours_retrain": float(rows[-1]["elapsed_s"]) / 3600,
@@ -115,13 +124,18 @@ def run() -> dict[str, object]:
         * 1000,
     }
     if OFFICIAL_SPEED.exists():
-        import json
-
         speed = json.loads(OFFICIAL_SPEED.read_text(encoding="utf-8"))
-        result["training"]["official_code_step_ms_t010"] = speed["step_ms"]  # type: ignore[index]
-        result["training"]["official_code_hours_t010"] = speed["hours_for_56320_steps"]  # type: ignore[index]
-    dump("table2", result)
+        result["official_code_step_ms_t010"] = speed["step_ms"]
+        result["official_code_hours_t010"] = speed["hours_for_56320_steps"]
     return result
+
+
+def retime_training() -> None:
+    """Re-measure the training speed only (run with an idle GPU) and update ``table2.json``."""
+    data = load("table2")
+    data["training"] = training_times()
+    dump("table2", data)
+    print(data["training"])
 
 
 def report() -> None:
@@ -169,9 +183,9 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
-    parser.add_argument("stage", choices=["run", "report"])
+    parser.add_argument("stage", choices=["run", "training", "report"])
     args = parser.parse_args(argv)
-    run() if args.stage == "run" else report()
+    {"run": run, "training": retime_training, "report": report}[args.stage]()
 
 
 if __name__ == "__main__":

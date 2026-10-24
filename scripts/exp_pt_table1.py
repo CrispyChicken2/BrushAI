@@ -78,6 +78,17 @@ OPTIM_STROKES = (
 WORK = Path("outputs/pt_reproduction")
 
 
+def _finished(path: Path, group: str) -> bool:
+    """A training checkpoint is evaluated only once the run is complete (``latest.pt`` is also written
+    during the run)."""
+    if not path.exists():
+        return False
+    if group == "official":
+        return True
+    steps = 112_640 if group == "ours_long" else 56_320
+    return load_pt_model(path)[1]["step"] == steps
+
+
 def _stored(name: str) -> dict[str, dict[str, object]]:
     try:
         return load(name)  # type: ignore[no-any-return]
@@ -98,7 +109,7 @@ def strokes() -> None:
     store = _stored("table1_strokes")
     for group, items in GROUPS.items():
         for key, path in items:
-            if not path.exists() or key in store.get(group, {}):
+            if not _finished(path, group) or key in store.get(group, {}):
                 continue
             net, info = load_pt_model(path, device)
             store.setdefault(group, {})[key] = {
@@ -155,7 +166,7 @@ def real() -> None:
     store = _stored("table1_real")
     for group, items in GROUPS.items():
         for key, path in items:
-            if not path.exists() or key in store.get(group, {}):
+            if not _finished(path, group) or key in store.get(group, {}):
                 continue
             net, _ = load_pt_model(path, device)
             rows = {}
@@ -293,7 +304,7 @@ def build_ablation_table(real_data: dict, stroke_data: dict) -> str:
     cols = ("L_pixel (real)", "L_pcpt (real)", "L_pixel (strokes)", "D_L1", "D_W")
     lines = [
         "| model | " + " | ".join(cols) + " |",
-        "|---|---|---|---|---|",
+        "|---|---|---|---|---|---|",
     ]
     ours: dict[str, list[float]] = {}
     sets = {"full": "ours"} | {label: f"abl_{name}" for name, label in ABLATIONS.items()}
@@ -320,7 +331,7 @@ def build_ablation_table(real_data: dict, stroke_data: dict) -> str:
         "Effect of removing a term (ablated / full; > 1 = worse):",
         "",
         "| removed term | " + " | ".join(cols) + " |",
-        "|---|---|---|---|---|",
+        "|---|---|---|---|---|---|",
     ]
     if "full" in ours:
         for label in (name for name in ABLATIONS.values() if name in ours):
