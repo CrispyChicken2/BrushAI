@@ -200,3 +200,22 @@ def test_ablation_table_reports_effects_against_the_full_model() -> None:
     assert "paper 1.45, ours 1.82" in table  # real L_pixel: 0.081/0.056 and 0.1/0.055
     assert "w/o D_L1" not in table.split("Effect of removing")[1]  # no run for the other terms
     assert "n/a" in exp_pt_table1.build_stroke_table({"ours": stroke["ours"]}).splitlines()[2]
+
+
+def test_real_stage_skips_runs_already_stored(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``real`` evaluates only the runs missing from ``table1_real.json``."""
+    stored = {"ours": {"seed0": {"mona_lisa": {"l_pixel": 0.1}}}}
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        raise AssertionError("a stored run was evaluated again")
+
+    monkeypatch.setattr(exp_pt_table1, "GROUPS", {"ours": [("seed0", Path("x.pt"))]})
+    monkeypatch.setattr(exp_pt_table1, "_stored", lambda name: stored)
+    monkeypatch.setattr(exp_pt_table1, "_finished", lambda path, group: True)
+    monkeypatch.setattr(exp_pt_table1, "get_device", lambda name: torch.device("cpu"))
+    monkeypatch.setattr(exp_pt_table1, "load_pt_brushes", lambda *a, **k: torch.zeros(1))
+    monkeypatch.setattr(exp_pt_table1, "_images", lambda device: {"mona_lisa": torch.zeros(1)})
+    monkeypatch.setattr(exp_pt_table1, "load_pt_model", forbidden)
+    monkeypatch.setattr(exp_pt_table1, "paint", forbidden)
+    monkeypatch.setattr(exp_pt_table1, "dump", forbidden)
+    exp_pt_table1.real()

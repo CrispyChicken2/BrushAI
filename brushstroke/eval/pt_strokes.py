@@ -97,7 +97,8 @@ def network_scores(
     abs_w: bool = False,
 ) -> dict[str, float]:
     """Stroke metrics of a network on ``data`` (eval mode); ``abs_h`` / ``abs_w`` replace ``h`` /
-    ``w`` by their absolute value (the renderer is blind to the sign of either)."""
+    ``w`` by their absolute value (a diagnostic of the parameter convention: the fold changes the
+    rendered strokes, it is not an exact symmetry of the renderer)."""
     net.eval()
     scores = StrokeScores()
     for batch in data:

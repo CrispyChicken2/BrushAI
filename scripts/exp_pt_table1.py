@@ -167,7 +167,7 @@ def real() -> None:
     store = _stored("table1_real")
     for group, items in GROUPS.items():
         for key, path in items:
-            if not _finished(path, group) or "abs_wh" in store.get(group, {}).get(key, {}):
+            if not _finished(path, group) or key in store.get(group, {}):
                 continue
             net, _ = load_pt_model(path, device)
             rows = {}
@@ -356,8 +356,9 @@ def build_ablation_table(real_data: dict, stroke_data: dict) -> str:
 
 
 def build_symmetry_table(stroke_data: dict) -> str:
-    """D_L1 per seed with the sign of ``h`` folded, then of ``w`` and ``h``: the renderer (and
-    ``D_W``) cannot see these signs, only ``D_L1`` pins the parameter convention."""
+    """D_L1 per seed with the sign of ``h`` folded, then of ``w`` and ``h``: the raw
+    predictions of the outlier runs paint as well as the full model, so a high ``D_L1`` is a different
+    parameter convention; the fold is a diagnostic (it changes the rendered strokes)."""
     lines = [
         "| model | seed 0 | seed 1 | seed 2 |",
         "|---|---|---|---|",
@@ -392,7 +393,7 @@ def report() -> None:
             build_stroke_table(stroke_data),
             "**T1c, loss ablations** (official recipe, `|h|`, mean ± std over seeds):",
             build_ablation_table(real_data, stroke_data),
-            "**D_L1 per seed, `|h|` -> `|w|`, `|h|`** (the sign of `w` and `h` is invisible to the renderer and to `D_W`; `w < 0` = share of matched strokes with a negative width, raw):",
+            "**D_L1 per seed, `|h|` -> `|w|`, `|h|`** (the raw predictions of the outlier runs paint as well as the full model, so their high D_L1 is a different parameter convention; the `|w|`, `|h|` fold is a diagnostic, it changes the rendered strokes and is not an exact symmetry of the renderer; `w < 0` = share of matched strokes with a negative width, raw):",
             build_symmetry_table(stroke_data),
         ]
     )
