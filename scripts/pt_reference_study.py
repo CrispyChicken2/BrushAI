@@ -31,10 +31,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import ssl
 import sys
+import tempfile
 import time
 import types
 import urllib.request
@@ -183,6 +185,52 @@ def reference() -> list[dict[str, object]]:
         json.dumps({"parameters": params, "rows": rows}, indent=1), encoding="utf-8"
     )
     return rows
+
+
+def official_paint(
+    image_path: str | Path, model_path: str | Path | None = None
+) -> tuple[torch.Tensor, list[tuple[int, int]]]:
+    """Run the official ``inference.py:main`` (parallel mode) and return its painting as a float
+    ``(3, H, W)`` tensor (the official script saves ``(x * 255).astype(uint8)``, which truncates)
+    together with the number of painted strokes of each layer.
+
+    The official code uses CUDA when available. Requires ``fetch`` (third-party code, outside git).
+    """
+    root = ROOT.resolve()
+    folder = root / "inference"
+    saved_path, cwd = list(sys.path), Path.cwd()
+    sys.path.insert(0, str(folder))
+    os.chdir(folder)  # the official script opens brush/*.png relative to its directory
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "pt_official_inference_run", folder / "inference.py"
+        )
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        captured: dict[str, torch.Tensor] = {}
+        counts: list[tuple[int, int]] = []
+        original = module.param2img_parallel
+
+        def counting(param, decision, meta_brushes, cur_canvas):  # type: ignore[no-untyped-def]
+            counts.append((int(decision.shape[1]), int(decision.sum())))
+            return original(param, decision, meta_brushes, cur_canvas)
+
+        module.param2img_parallel = counting
+        module.save_img = lambda img, path: captured.__setitem__("img", img.detach().cpu().clone())
+        with tempfile.TemporaryDirectory() as tmp:
+            module.main(
+                str(Path(image_path).resolve()),
+                str(Path(model_path).resolve() if model_path else root / "model.pth"),
+                tmp,
+                serial=False,
+            )
+    finally:
+        sys.path[:] = saved_path
+        os.chdir(cwd)
+        for name in ("network", "morphology"):
+            sys.modules.pop(name, None)
+    return captured["img"], counts
 
 
 def _official_model(gpu: bool) -> object:
