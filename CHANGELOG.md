@@ -2,6 +2,13 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-017] Paint Transformer loss ablations: ordering of the terms and per-term verdicts
+
+- The four ablation trainings (3 seeds each) and their evaluation were done in T-016; T-017 adds the rules (written before the script),
+  `scripts/exp_pt_ablation_verdict.py` (`report`, no GPU) and the section "T-017" of `docs/experiments/pt_reproduction.md`.
+- Verdicts: `L_pixel` matters (3 of 5 columns), `D_W` partly (2 of 5), `D_L1` and `D_bce` not reproduced; removing `D_bce` even improves the
+  real-image pixel metrics (x0.95, significant). Kendall tau with the paper's ordering +0.33; the paper's effects are 1.2 to 1.7, ours 1.0 to 1.15.
+
 ## [T-016] Paint Transformer reproduction experiment and gap analysis
 
 - Correction to T-013 and T-014: the 38 ms training step was not reproduced. Re-measured alone on an idle GPU: 94 ms per step
