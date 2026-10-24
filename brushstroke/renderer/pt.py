@@ -127,6 +127,7 @@ def pt_param2stroke(
     brushes: torch.Tensor,
     mode: str = "pt_infer",
     morphology: bool = True,
+    brush_size: tuple[int, int] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Foreground colours and alpha maps of strokes (the official ``param2stroke``).
 
@@ -140,6 +141,9 @@ def pt_param2stroke(
         morphology: apply the 3 x 3 dilation of the foreground and erosion of the alpha (the
         official code applies
             them right after ``param2stroke``).
+        brush_size: ``pt_infer`` only: size ``(h, w)`` the brush images are nearest-resized to
+            before the warp (default: the render size, as the official code, which renders in
+            windows: the multi-scale pipeline resizes the brush to the *window* it paints in).
 
     Returns:
         ``(foreground, alpha)``, both ``(M, 3, H, W)``.
@@ -156,7 +160,8 @@ def pt_param2stroke(
     index[h <= w] = 1  # horizontal image
     grid = pt_warp_grid(param, height, width)
     if mode == "pt_infer":
-        resized = F.interpolate(brushes, (height, width))  # nearest, as the official default
+        # nearest, as the official default
+        resized = F.interpolate(brushes, brush_size or (height, width))
         warped = F.grid_sample(resized[index], grid, align_corners=False)
         alpha = (warped > 0).float().repeat(1, 3, 1, 1)
         foreground = warped.repeat(1, 3, 1, 1) * colour
