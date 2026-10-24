@@ -59,7 +59,7 @@ box), bristles along x (horizontal) or y (vertical). So a PT stroke's box `w x h
 | colour | `brush_gray * colour`, then 3 x 3 **dilation** | flat colour, alpha carries texture | **PT mode: foreground image = dilate(sampled gray * colour)**, composited with the binary alpha |
 | opacity | none | `a` | `a = 1`, ignored in PT mode |
 | initial canvas | black | white by default (`canvas` argument) | pass `canvas=[0, 0, 0]` (supported) |
-| rendering extent | each stroke is rendered inside a patch window (32 x 32 in training, 64 x 64 windows in inference) and clipped to it | full canvas | equivalent except for clipping at the window border (strokes extending more than 16 px beyond their 32 px patch at layer resolution are cut in PT); window clipping can be added in the T-015 adapter |
+| rendering extent | each stroke is rendered inside a patch window (32 x 32 in training; in inference twice the patch size on the full-resolution canvas, 64 x 64 px at the finest layers, see section 6) and clipped to it | full canvas | equivalent except for clipping at the window border (strokes extending more than 16 px beyond their 32 px patch at layer resolution are cut in PT); window clipping can be added in the T-015 adapter |
 | compositing order | per layer: 4 phases (even/even, odd/odd, odd/even, even/odd windows), within a phase strokes `0..7` in index order | index order of the `StrokeSequence` | the adapter orders strokes as (layer, phase, stroke index, patch raster order) so the full-canvas compositing equals PT's |
 | brush texture resampling | meta brush nearest-resized to the window then bilinear warped (inference); direct bilinear from 394 px (training) | bank masks (64 x 128) warped bilinearly | small texture differences; irrelevant for training-parity if the brush images are loaded at 394 px |
 
@@ -135,11 +135,10 @@ Per training step with batch size `B` (64 in `train.sh`):
 ## 6. Inference [P §3.5, Algorithm 1; C inference/inference.py:main, param2img_parallel / param2img_serial]
 
 1. `K = max(ceil(log2(max(H, W) / 32)), 0)` [P Eq. 14; C]; for 512 x 512, **K = 4** (the paper's default).
-2. Image zero-padded (black) to `32 * 2^K` square. For layers `l = 0..K`: target and current canvas are resized to `32 * 2^l` with `F.interpolate` default mode (**nearest**),
-   cut into non-overlapping 32 x 32 patches (`2^l x 2^l` of them), the model predicts 8 strokes per patch, colours are sampled from the target patch at the predicted centres,
-   strokes with `Sign(logit) = 1` are rendered; the layer result stays at **its own resolution** and is nearest-upsampled by the next layer. So coarse strokes are painted at low
-   resolution and nearest-upsampled (blocky edges at 512 px).
-3. **Rendering windows:** stroke parameters are re-expressed in 64 px windows (patch + 16 px margin); windows are rendered in **four phases** (even-y/even-x, odd/odd, odd/even, even/odd window
+2. Image zero-padded (black) to `32 * 2^K` square. The painting `final_result` lives at the **full padded resolution** (`32 * 2^K`, 512 px for K = 4) from the first layer on. For layers `l = 0..K` the target and the current canvas are resized to `32 * 2^l`
+   with `F.interpolate` default mode (**nearest**) *only to feed the network*, cut into non-overlapping 32 x 32 patches (`2^l x 2^l` of them), the model predicts 8 strokes per patch, colours are sampled from the target patch at the predicted centres,
+   strokes with `Sign(logit) = 1` are painted onto the full-resolution `final_result`. (An earlier version of this note said that each layer stays at its own resolution and is nearest-upsampled by the next one: wrong, corrected in T-015, section 14.)
+3. **Rendering windows:** stroke parameters are re-expressed in windows of twice the patch size (`2 * 512 / 2^l` px on the full-resolution canvas: 1024 px at layer 0, 64 px at layer 4 and in the shifted layer; patch + half a patch of margin on each side); windows are rendered in **four phases** (even-y/even-x, odd/odd, odd/even, even/odd window
    indices; windows of one phase do not overlap), inside a phase strokes `0..7` in order [C param2img_*].
 4. **Extra final layer (shifted by half a patch):** after layer `K`, one more pass at 512 px with the image and canvas padded by 16 px so that patches straddle the previous patch borders (17 x 17 = 289
    patches, 2,312 strokes) [C main, after the loop; `has_border=True` in the serial mode]. [P Algorithm 1 does not describe it.] **Quirk:** in this pass the confidences are *not* binarized
@@ -323,3 +322,51 @@ peak VRAM 851 vs 651 MiB. **Default: fp32** (no speed gain, parity not proven ov
 **Short GPU run** (`schedule.max_steps=3000`, fp32): validation total 68.7 at step 0 -> 5.5 (500) -> 4.9 (3000); curve in `docs/media/pt_train_curve.png`. Peak VRAM **851 MiB** (allocated, ours) against 6.2 GB measured on the same GPU for the official code in `trainspeed`
 (which keeps an unfold-based morphology and per-sample tensors; the 3.6 GB quoted in section 5 came from the earlier measurement, whose protocol differs). Test: `test_gpu_smoke_run_decreases_the_validation_loss` (300 steps, slow + gpu).
 Note that at lr 1e-4 and 3000 steps the model is far from converged (the full schedule is 56,320 steps), and that the BCE term (weight 10, pos_weight 10) dominates the total at that stage.
+
+## 14. Multi-scale inference (T-015)
+
+**Code:** `brushstroke/stroke_model/inference.py` (`paint`, `paint_layer`, `PTInferenceConfig`, `PaintPTConfig`, `load_pt_model`), `brushstroke/stroke_model/pt_sequence.py` (`layers_to_sequence`, `replay_sequence`, `window_geometry`),
+`brushstroke/stroke_model/refine.py` (`RefineConfig`, `refine_patch_strokes`); `scripts/paint_pt.py` + `configs/paint_pt.yaml`; tests `tests/test_pt_inference.py`; measurements `scripts/pt_inference_study.py` and `docs/experiments/pt_inference.md`.
+`python -m scripts.paint_pt --config configs/paint_pt.yaml --input img --out dir --checkpoint outputs/pt_long/seed2/latest.pt [refine.enabled=true ...]` writes `sequence.npz`, `final.png`, `variants/final_{official,gated}.png`, `progress/layer_XX.png`, `target.png`,
+`config.resolved.yaml` and `metrics.json` (like `paint_optim`). `--checkpoint` takes a training checkpoint or the released `model.pth`; both are read with `torch.load(weights_only=True)` (the numpy RNG globals of the training checkpoints are allowlisted, any other object is refused).
+
+**Procedure** (section 6, now reproduced exactly): `K = max(ceil(log2(max(H, W) / 32)), 0)`; black centred padding to `32 * 2^K`; for each layer `l = 0..K` the target and the painting are nearest-resized to `32 * 2^l` for the network, cut into `2^l x 2^l` patches, 8 strokes
+per patch, colour sampled at the predicted centre, strokes with `logit > 0` painted by `paint_layer` on the **full-resolution canvas** in four window phases (windows of `2 * S / 2^l` px, even/even, odd/odd, odd/even, even/odd, strokes `0..7` in order, clipped to the window,
+the brush nearest-resized to the window side before the warp). Then the shifted final layer (patches offset by half a patch, 17 x 17 for K = 4, canvas and target padded by 16 px), whose strokes the official code paints **whatever their confidence** (`decision.bool()` on the raw logits).
+Both variants are always computed (`PTResult.canvas` = `official`, `PTResult.canvas_gated` = only `logit > 0`; the final-layer predictions depend only on the canvas after layer K, so the gated painting is the official one minus the forced strokes);
+`inference.final_layer` selects which one is exported to the `StrokeSequence`.
+
+**Corrections to the T-010 note found while matching the official code.**
+- The painting is **not** kept at the resolution of each layer: the strokes of every layer are painted on the full-resolution canvas (`final_result` starts as `zeros_like(padded image)`); the layer only sets the size of the windows (1024 px at layer 0 on a 512 px canvas, 64 px from layer 4 on)
+  and of the brush image (nearest-resized to the window). Section 6 was corrected.
+- For an odd grid (the 17 x 17 shifted layer) the official `param2img_parallel` re-assembles the canvas from window blocks plus margin strips copied from slightly misaligned slices; this only touches the 16 px border that is cropped afterwards (our painter equals the official one on the retained area, checked
+  on the intermediate canvases). It is not reproduced, since it never reaches the output.
+- The network must follow the official memory layout to be **bit-identical**: with the same `.contiguous()` calls as the official `forward` the attention kernels give exactly the official outputs (before, the outputs differed by one or two ulps on real patches, enough to flip a binary stroke decision and to move the
+  final image by up to 0.3). `PaintTransformer.forward` was changed accordingly (the T-012 tests are unchanged).
+- Brush choice: the official rule `h > w` compares fractions, which is the same as comparing pixels on a square canvas (all official windows are square). For a non-square image the same stroke would pick the other brush in an `H x W` render; `pt_param2stroke(select_by_pixels=True)` (used by `render_pt` and by the replay)
+  compares pixel sizes. The direct function keeps the official rule by default (T-011 parity tests).
+
+**Parity with the official code (the key test).** The official weights loaded in our network, our `paint` against the **float** output of the official `inference.py:main` (the script saves `(x * 255).astype(uint8)`; `scripts.pt_reference_study.official_paint` captures the float tensor):
+maximum absolute difference **0.0** (bit-identical, same device) on the five evaluation images at 512 x 512 (target <= 1/255) and on Mona Lisa at 1024 x 1024 (K = 5, 18,835 strokes), with identical stroke counts in every layer. `tests/test_pt_inference.py` repeats it on a 256 x 256
+and a non-square 160 x 224 image (padding). Table in `docs/experiments/pt_inference.md`.
+
+**Adapter to `StrokeSequence`** (`layers_to_sequence`). Strokes are ordered by (layer, phase, stroke index, patch raster order inside the phase): the order of the official renderer (and of its `serial` mode). Parameters are in the renderer convention, as fractions of the **unpadded** image
+(`x = (S x_c - pad_x) / W`, `w = S w_c / W`, ... where `x_c` is the position in the padded square from `patch_to_canvas`, `a = 1`), `scale_level` = layer (`K + 1` = shifted final layer), `patch_id` = `row * n + col` in the layer grid, `source` = `paint_transformer`, or `paint_transformer_forced`
+for final-layer strokes painted although `logit <= 0` (filtering them gives the gated variant exactly). The background is black (`(0, 0, 0)`), render with `RenderConfig(mode="pt")`. Strokes whose bounding disc lies entirely outside the image (possible only with padding or in the shifted layer, whose centres can be up to 16 px outside) are dropped (`meta["dropped_invisible"]`);
+`meta` also stores the padded size, the layer count, the patch size, the variant, `abs_h`, the refinement flag, the runtime and the VRAM.
+
+**`|h|`.** The T-014 finding (the losses do not constrain the sign of `h`): with `abs_h` (default) the height is replaced by its absolute value right after the prediction, before the colour sampling, the painting and the export, so that the canvas the network sees at the next layer, the painted canvas and the
+sequence are consistent. It is the identity for the official weights and for the T-014 seeds 1 and 2 (the statistic `negative_h_fraction` of `metrics.json` is 0 on all the images of the study). With `abs_h: false` negative heights are kept (and mirror the brush). Tests: a predictor that returns negative heights gives the same canvas and the
+same parameters as one that returns their absolute values, and no negative height ever reaches the sequence.
+
+**Re-rendering the sequence.** `StrokeSequence.render` (`RenderConfig(mode="pt")`) draws every stroke at the final resolution with the brush resized to the canvas and no window clipping: the same strokes but a different texture sampling, so it is close to the pipeline canvas (mean absolute difference about 0.004 to 0.011, i.e. 1 to 3 levels of 255,
+see `docs/experiments/pt_inference.md`) but not equal. `replay_sequence(seq, brushes)` re-renders a sequence made by `paint` **as the pipeline painted it** (brush resized to the window of the stroke, strokes clipped to that window with the morphology applied inside the window, one extra pixel of canvas around the image so that the morphology of the border pixels sees the stroke
+beyond it): it equals the pipeline canvas up to the float rounding of the parameter round trip (mean absolute difference about 1e-6; at most a few pixels of an image differ by more than 1/255, where an alpha threshold flips). It needs the `scale_level`/`patch_id` tags and the meta entries and is meant for checks and faithful animations of PT strokes;
+generic consumers use `StrokeSequence.render`.
+
+**Per-patch refinement** (`refine.enabled`, off by default). The strokes predicted for every patch of a layer are optimized for `iters` steps (Adam, lr 0.05, cosine decay to 10 %, on the sigmoid-reparameterized parameters of the M1 baseline, `brushstroke.baselines.optim`) on the pixel loss the network was trained on:
+L1 between the target patch and the canvas patch with the 8 strokes painted over it, in the training rendering (`pt_train`: the binarized brush is warped bilinearly, so the stroke edges have a gradient with respect to the geometry; the inference alpha is binary and has none). The decisions are kept, the shape and the colour change; a patch keeps its refined strokes only if its patch loss
+decreased (`keep_if_better`). All the patches of a layer are optimized in one batch (they are independent), after the layer's prediction and before painting, so that the next layers see the refined canvas. The proxy is not exactly the inference rendering (32 px patches, strokes clipped at the patch border, soft alpha, brush not resized to the window),
+which is why the effect on the final image is measured (`docs/experiments/pt_inference.md`).
+
+**Cost** (RTX 5070, 512 x 512, five images, median of 5 runs after warm-up): about 0.23 s per image and 1.05 GB of allocated memory at peak (the layer-0 window is 1024 x 1024 px) for both models; the refinement adds about 10 s (100 iterations per layer). The official code measured 0.5-0.9 s (loading included) and 2.3 GB in T-010.

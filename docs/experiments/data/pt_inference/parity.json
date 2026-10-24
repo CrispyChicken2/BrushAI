@@ -1,0 +1,160 @@
+[
+ {
+  "image": "mona_lisa",
+  "size": 512,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "pixels_over_1_255": 0,
+  "png_max_abs_diff": 0,
+  "strokes_official_code": 4376,
+  "strokes_ours": 4376,
+  "layers_official_code": [
+   8,
+   32,
+   125,
+   450,
+   1449,
+   2312
+  ],
+  "layers_ours": [
+   8,
+   32,
+   125,
+   450,
+   1449,
+   2312
+  ]
+ },
+ {
+  "image": "starry_night",
+  "size": 512,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "pixels_over_1_255": 0,
+  "png_max_abs_diff": 0,
+  "strokes_official_code": 4991,
+  "strokes_ours": 4991,
+  "layers_official_code": [
+   8,
+   32,
+   128,
+   511,
+   2000,
+   2312
+  ],
+  "layers_ours": [
+   8,
+   32,
+   128,
+   511,
+   2000,
+   2312
+  ]
+ },
+ {
+  "image": "great_wave",
+  "size": 512,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "pixels_over_1_255": 0,
+  "png_max_abs_diff": 0,
+  "strokes_official_code": 4330,
+  "strokes_ours": 4330,
+  "layers_official_code": [
+   8,
+   31,
+   113,
+   416,
+   1450,
+   2312
+  ],
+  "layers_ours": [
+   8,
+   31,
+   113,
+   416,
+   1450,
+   2312
+  ]
+ },
+ {
+  "image": "pearl_earring",
+  "size": 512,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "pixels_over_1_255": 0,
+  "png_max_abs_diff": 0,
+  "strokes_official_code": 3787,
+  "strokes_ours": 3787,
+  "layers_official_code": [
+   8,
+   28,
+   98,
+   320,
+   1021,
+   2312
+  ],
+  "layers_ours": [
+   8,
+   28,
+   98,
+   320,
+   1021,
+   2312
+  ]
+ },
+ {
+  "image": "earth_apollo17",
+  "size": 512,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "pixels_over_1_255": 0,
+  "png_max_abs_diff": 0,
+  "strokes_official_code": 4194,
+  "strokes_ours": 4194,
+  "layers_official_code": [
+   8,
+   32,
+   113,
+   395,
+   1334,
+   2312
+  ],
+  "layers_ours": [
+   8,
+   32,
+   113,
+   395,
+   1334,
+   2312
+  ]
+ },
+ {
+  "image": "mona_lisa",
+  "size": 1024,
+  "max_abs_diff": 0.0,
+  "mean_abs_diff": 0.0,
+  "pixels_over_1_255": 0,
+  "png_max_abs_diff": 0,
+  "strokes_official_code": 18835,
+  "strokes_ours": 18835,
+  "layers_official_code": [
+   8,
+   32,
+   128,
+   509,
+   2002,
+   7444,
+   8712
+  ],
+  "layers_ours": [
+   8,
+   32,
+   128,
+   509,
+   2002,
+   7444,
+   8712
+  ]
+ }
+]

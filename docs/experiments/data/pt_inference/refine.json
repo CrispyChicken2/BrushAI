@@ -1,0 +1,596 @@
+[
+ {
+  "model": "official weights",
+  "image": "mona_lisa",
+  "setting": "off",
+  "runtime_seconds": 0.47063399996841326,
+  "peak_vram_mb": 1046.80908203125,
+  "strokes": 4376,
+  "metrics": {
+   "l1": 0.043155234307050705,
+   "psnr": 24.335919928886014,
+   "ssim": 0.44923868775367737,
+   "lpips_vgg": 0.6535563468933105,
+   "lpips_alex": 0.6211940050125122
+  },
+  "refine_layers": []
+ },
+ {
+  "model": "official weights",
+  "image": "mona_lisa",
+  "setting": "default (100 it, lr 0.05)",
+  "runtime_seconds": 10.579172099998686,
+  "peak_vram_mb": 1161.06005859375,
+  "strokes": 4278,
+  "metrics": {
+   "l1": 0.03219805657863617,
+   "psnr": 26.986615850862933,
+   "ssim": 0.5224247574806213,
+   "lpips_vgg": 0.621224045753479,
+   "lpips_alex": 0.5501578450202942
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.18988168239593506,
+    "loss_after": 0.09952044486999512,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.09638047218322754,
+    "loss_after": 0.07768839597702026,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.06822824478149414,
+    "loss_after": 0.054753437638282776,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.051471903920173645,
+    "loss_after": 0.0426970049738884,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.0418795645236969,
+    "loss_after": 0.036466509103775024,
+    "patches_kept": 0.98828125
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.031896598637104034,
+    "loss_after": 0.028104383498430252,
+    "patches_kept": 0.996539831161499
+   }
+  ]
+ },
+ {
+  "model": "official weights",
+  "image": "great_wave",
+  "setting": "off",
+  "runtime_seconds": 0.2295179000357166,
+  "peak_vram_mb": 1161.88818359375,
+  "strokes": 4330,
+  "metrics": {
+   "l1": 0.0994940847158432,
+   "psnr": 15.52744749300765,
+   "ssim": 0.4211985170841217,
+   "lpips_vgg": 0.5699061155319214,
+   "lpips_alex": 0.5082403421401978
+  },
+  "refine_layers": []
+ },
+ {
+  "model": "official weights",
+  "image": "great_wave",
+  "setting": "default (100 it, lr 0.05)",
+  "runtime_seconds": 10.830452100024559,
+  "peak_vram_mb": 1161.48974609375,
+  "strokes": 4261,
+  "metrics": {
+   "l1": 0.0716669112443924,
+   "psnr": 17.233544578836824,
+   "ssim": 0.4945710301399231,
+   "lpips_vgg": 0.5424800515174866,
+   "lpips_alex": 0.4597621262073517
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.32955482602119446,
+    "loss_after": 0.2202245444059372,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.17324203252792358,
+    "loss_after": 0.1348017156124115,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.13175228238105774,
+    "loss_after": 0.11257125437259674,
+    "patches_kept": 0.9375
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.11420169472694397,
+    "loss_after": 0.09942680597305298,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.093404620885849,
+    "loss_after": 0.08133687824010849,
+    "patches_kept": 0.90625
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.06969955563545227,
+    "loss_after": 0.062455784529447556,
+    "patches_kept": 0.9896194338798523
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "mona_lisa",
+  "setting": "off",
+  "runtime_seconds": 0.260737499978859,
+  "peak_vram_mb": 1164.92822265625,
+  "strokes": 4618,
+  "metrics": {
+   "l1": 0.04302841052412987,
+   "psnr": 24.23165754750546,
+   "ssim": 0.4512593746185303,
+   "lpips_vgg": 0.6571142673492432,
+   "lpips_alex": 0.6133642196655273
+  },
+  "refine_layers": []
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "mona_lisa",
+  "setting": "default (100 it, lr 0.05)",
+  "runtime_seconds": 10.46737030002987,
+  "peak_vram_mb": 1164.42431640625,
+  "strokes": 4522,
+  "metrics": {
+   "l1": 0.03139938414096832,
+   "psnr": 27.17980513660666,
+   "ssim": 0.529945969581604,
+   "lpips_vgg": 0.6105563640594482,
+   "lpips_alex": 0.5325025916099548
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.2159619778394699,
+    "loss_after": 0.11236801743507385,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.0995999351143837,
+    "loss_after": 0.07324192672967911,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.06736470758914948,
+    "loss_after": 0.05266673117876053,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.05058398097753525,
+    "loss_after": 0.04187939316034317,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.04122399166226387,
+    "loss_after": 0.035087525844573975,
+    "patches_kept": 0.97265625
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.0321020670235157,
+    "loss_after": 0.027348490431904793,
+    "patches_kept": 0.996539831161499
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "mona_lisa",
+  "setting": "colour fixed",
+  "runtime_seconds": 10.164595499983989,
+  "peak_vram_mb": 1164.57275390625,
+  "strokes": 4539,
+  "metrics": {
+   "l1": 0.03604365140199661,
+   "psnr": 26.169824302202677,
+   "ssim": 0.5055024027824402,
+   "lpips_vgg": 0.6321963667869568,
+   "lpips_alex": 0.5638052821159363
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.2159619778394699,
+    "loss_after": 0.1402464210987091,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.11755887418985367,
+    "loss_after": 0.09186786413192749,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.07359421253204346,
+    "loss_after": 0.05967935919761658,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.05322708934545517,
+    "loss_after": 0.04691895842552185,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.04454657435417175,
+    "loss_after": 0.04006069526076317,
+    "patches_kept": 0.96484375
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.03477248549461365,
+    "loss_after": 0.03137807548046112,
+    "patches_kept": 0.9930796027183533
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "mona_lisa",
+  "setting": "short (30 it, lr 0.02)",
+  "runtime_seconds": 3.23216820001835,
+  "peak_vram_mb": 1164.43212890625,
+  "strokes": 4559,
+  "metrics": {
+   "l1": 0.034679114818573,
+   "psnr": 26.075155354766835,
+   "ssim": 0.49983805418014526,
+   "lpips_vgg": 0.6352913975715637,
+   "lpips_alex": 0.5739562511444092
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.2159619778394699,
+    "loss_after": 0.19965538382530212,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.14627772569656372,
+    "loss_after": 0.12787364423274994,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.08743637800216675,
+    "loss_after": 0.07699288427829742,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.06012100726366043,
+    "loss_after": 0.05360042303800583,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.04686613380908966,
+    "loss_after": 0.042141664773225784,
+    "patches_kept": 0.97265625
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.03422665223479271,
+    "loss_after": 0.030643321573734283,
+    "patches_kept": 1.0
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "mona_lisa",
+  "setting": "long (300 it, lr 0.05)",
+  "runtime_seconds": 29.002207199984696,
+  "peak_vram_mb": 1164.88525390625,
+  "strokes": 4504,
+  "metrics": {
+   "l1": 0.030193611979484558,
+   "psnr": 27.540889896508432,
+   "ssim": 0.5437827706336975,
+   "lpips_vgg": 0.6013326644897461,
+   "lpips_alex": 0.5067291259765625
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.2159619778394699,
+    "loss_after": 0.10064410418272018,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.09720897674560547,
+    "loss_after": 0.06789296120405197,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.0660933181643486,
+    "loss_after": 0.04959319904446602,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.04881022870540619,
+    "loss_after": 0.03868166357278824,
+    "patches_kept": 0.984375
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.03984508663415909,
+    "loss_after": 0.03301393240690231,
+    "patches_kept": 0.96484375
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.031092138960957527,
+    "loss_after": 0.026176130399107933,
+    "patches_kept": 1.0
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "great_wave",
+  "setting": "off",
+  "runtime_seconds": 0.22924640000564978,
+  "peak_vram_mb": 1164.40869140625,
+  "strokes": 4368,
+  "metrics": {
+   "l1": 0.11157099902629852,
+   "psnr": 14.627700803659149,
+   "ssim": 0.3897806704044342,
+   "lpips_vgg": 0.5852816104888916,
+   "lpips_alex": 0.5294852256774902
+  },
+  "refine_layers": []
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "great_wave",
+  "setting": "default (100 it, lr 0.05)",
+  "runtime_seconds": 10.095969799964223,
+  "peak_vram_mb": 1164.05322265625,
+  "strokes": 4296,
+  "metrics": {
+   "l1": 0.07238289713859558,
+   "psnr": 17.18410746098658,
+   "ssim": 0.4887700080871582,
+   "lpips_vgg": 0.5434067249298096,
+   "lpips_alex": 0.4662197530269623
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.5210219621658325,
+    "loss_after": 0.18876612186431885,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.1672452986240387,
+    "loss_after": 0.14280004799365997,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.14531807601451874,
+    "loss_after": 0.12247033417224884,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.12314605712890625,
+    "loss_after": 0.10071788728237152,
+    "patches_kept": 0.90625
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.09931589663028717,
+    "loss_after": 0.08122844249010086,
+    "patches_kept": 0.875
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.07722877711057663,
+    "loss_after": 0.06272374838590622,
+    "patches_kept": 0.996539831161499
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "great_wave",
+  "setting": "colour fixed",
+  "runtime_seconds": 10.602149799990002,
+  "peak_vram_mb": 1164.40869140625,
+  "strokes": 4310,
+  "metrics": {
+   "l1": 0.08825111389160156,
+   "psnr": 16.67186604061287,
+   "ssim": 0.4649072587490082,
+   "lpips_vgg": 0.5550544261932373,
+   "lpips_alex": 0.48130398988723755
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.5210219621658325,
+    "loss_after": 0.2360692024230957,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.18999069929122925,
+    "loss_after": 0.15901044011116028,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.15722346305847168,
+    "loss_after": 0.13600265979766846,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.13479574024677277,
+    "loss_after": 0.11865159124135971,
+    "patches_kept": 0.921875
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.11264428496360779,
+    "loss_after": 0.09725143015384674,
+    "patches_kept": 0.86328125
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.08758710324764252,
+    "loss_after": 0.07583122700452805,
+    "patches_kept": 1.0
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "great_wave",
+  "setting": "short (30 it, lr 0.02)",
+  "runtime_seconds": 3.3589027000125498,
+  "peak_vram_mb": 1164.05322265625,
+  "strokes": 4312,
+  "metrics": {
+   "l1": 0.0912947878241539,
+   "psnr": 15.74926792872082,
+   "ssim": 0.4351698160171509,
+   "lpips_vgg": 0.5647668242454529,
+   "lpips_alex": 0.5005407333374023
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.5210219621658325,
+    "loss_after": 0.45385560393333435,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.251314252614975,
+    "loss_after": 0.21737869083881378,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.17847028374671936,
+    "loss_after": 0.16406361758708954,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.1507367491722107,
+    "loss_after": 0.1383504718542099,
+    "patches_kept": 0.9375
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.12026481330394745,
+    "loss_after": 0.1085909754037857,
+    "patches_kept": 0.875
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.08934395760297775,
+    "loss_after": 0.07989334315061569,
+    "patches_kept": 0.9930796027183533
+   }
+  ]
+ },
+ {
+  "model": "T-014 seed 2",
+  "image": "great_wave",
+  "setting": "long (300 it, lr 0.05)",
+  "runtime_seconds": 29.64950100000715,
+  "peak_vram_mb": 1164.40869140625,
+  "strokes": 4292,
+  "metrics": {
+   "l1": 0.06870418787002563,
+   "psnr": 17.348223836479576,
+   "ssim": 0.5105012655258179,
+   "lpips_vgg": 0.5235759019851685,
+   "lpips_alex": 0.4174489974975586
+  },
+  "refine_layers": [
+   {
+    "level": 0.0,
+    "loss_before": 0.5210219621658325,
+    "loss_after": 0.15294566750526428,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 1.0,
+    "loss_before": 0.1592530906200409,
+    "loss_after": 0.1360732913017273,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 2.0,
+    "loss_before": 0.14033184945583344,
+    "loss_after": 0.11067146807909012,
+    "patches_kept": 1.0
+   },
+   {
+    "level": 3.0,
+    "loss_before": 0.1165701225399971,
+    "loss_after": 0.09130441397428513,
+    "patches_kept": 0.921875
+   },
+   {
+    "level": 4.0,
+    "loss_before": 0.09423378109931946,
+    "loss_after": 0.0755244791507721,
+    "patches_kept": 0.859375
+   },
+   {
+    "level": 5.0,
+    "loss_before": 0.07468405365943909,
+    "loss_after": 0.05906066298484802,
+    "patches_kept": 1.0
+   }
+  ]
+ }
+]
