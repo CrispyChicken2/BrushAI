@@ -1,0 +1,52 @@
+seed: 0
+deterministic: false
+device: auto
+output_dir: outputs/pt_long/seed0
+brush_dir: data/raw/pt_brush
+batch_size: 64
+precision: fp32
+log_every: 25
+checkpoint_every: 2000
+resume: auto
+tensorboard: false
+model:
+  strokes: 8
+  hidden_dim: 256
+  heads: 8
+  enc_layers: 3
+  dec_layers: 3
+  dropout: 0.1
+  patch_size: 32
+  colour_mode: sampled
+loss:
+  preset: official
+  lambda_pixel: 10.0
+  lambda_gt: 1.0
+  lambda_w: 10.0
+  lambda_decision: 10.0
+  pos_weight: 10.0
+  matching_cost: logit
+  matcher: auto
+synthetic:
+  patch_size: 32
+  strokes_per_patch: 8
+  low: 0.2
+  span: 0.5
+  iou_threshold: 0.75
+optim:
+  lr: 0.0001
+  beta1: 0.5
+  beta2: 0.999
+  weight_decay: 0.0
+  grad_clip: 0.0
+schedule:
+  steps_per_epoch: 256
+  n_epochs: 400
+  n_epochs_decay: 40
+  decay_every: 5
+  decay_gamma: 0.3
+  max_steps: 0
+val:
+  seed: 12345
+  batches: 8
+  every: 1000
