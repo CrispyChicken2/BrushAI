@@ -42,7 +42,7 @@ def _sync(device: torch.device) -> None:
         torch.cuda.synchronize()
 
 
-def _make_optimizer(name: str, params: list[dict[str, object]], lr: float) -> torch.optim.Optimizer:
+def make_optimizer(name: str, params: list[dict[str, object]], lr: float) -> torch.optim.Optimizer:
     if name == "rmsprop":
         return torch.optim.RMSprop(params, lr=lr)
     if name == "adam":
@@ -144,7 +144,7 @@ def paint_optim(
         if cfg.finetune_all and params.shape[0] > 0:
             prev_raw = unconstrained_from_params(params[None]).to(dev).requires_grad_()
             groups.append({"params": [prev_raw], "lr": cfg.lr * cfg.finetune_lr_factor})
-        opt = _make_optimizer(cfg.optimizer, groups, cfg.lr)
+        opt = make_optimizer(cfg.optimizer, groups, cfg.lr)
         base_lrs = [float(g["lr"]) for g in groups]  # type: ignore[arg-type]
 
         total = m + (params.shape[0] if prev_raw is not None else 0)
@@ -286,7 +286,7 @@ def _final_pass(
     n = params.shape[0]
     base_lr = cfg.lr * cfg.final_pass_lr_factor
     raw = unconstrained_from_params(params[None]).to(dev).requires_grad_()
-    opt = _make_optimizer(cfg.optimizer, [{"params": [raw], "lr": base_lr}], base_lr)
+    opt = make_optimizer(cfg.optimizer, [{"params": [raw], "lr": base_lr}], base_lr)
     use_ckpt = n * h * w * BYTES_PER_STROKE_PIXEL > cfg.checkpoint_bytes
     rcfg = dataclasses.replace(render_cfg, use_checkpoint=use_ckpt or render_cfg.use_checkpoint)
     idx = brush_idx.to(dev)[None]

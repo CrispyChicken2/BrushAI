@@ -127,6 +127,8 @@ def pt_param2stroke(
     brushes: torch.Tensor,
     mode: str = "pt_infer",
     morphology: bool = True,
+    brush_size: tuple[int, int] | None = None,
+    select_by_pixels: bool = False,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Foreground colours and alpha maps of strokes (the official ``param2stroke``).
 
@@ -140,6 +142,13 @@ def pt_param2stroke(
         morphology: apply the 3 x 3 dilation of the foreground and erosion of the alpha (the
         official code applies
             them right after ``param2stroke``).
+        brush_size: ``pt_infer`` only: size ``(h, w)`` the brush images are nearest-resized to
+            before the warp (default: the render size, as the official code, which renders in
+            windows: the multi-scale pipeline resizes the brush to the *window* it paints in).
+        select_by_pixels: choose the vertical brush when the stroke is taller than wide *in
+            pixels* (``h * H > w * W``). The official rule compares the fractions (``h > w``), which
+            is the same on a square canvas (the official windows are always square) but not on a
+            ``H != W`` canvas, where ``w`` and ``h`` are fractions of different sides.
 
     Returns:
         ``(foreground, alpha)``, both ``(M, 3, H, W)``.
@@ -152,11 +161,13 @@ def pt_param2stroke(
     w, h = param[:, 2], param[:, 3]
     colour = param[:, 5:8].unsqueeze(-1).unsqueeze(-1)  # (M, 3, 1, 1)
     index = torch.full((b,), -1, device=param.device, dtype=torch.long)
-    index[h > w] = 0  # vertical image
-    index[h <= w] = 1  # horizontal image
+    tall = h * height > w * width if select_by_pixels else h > w
+    index[tall] = 0  # vertical image
+    index[~tall] = 1  # horizontal image
     grid = pt_warp_grid(param, height, width)
     if mode == "pt_infer":
-        resized = F.interpolate(brushes, (height, width))  # nearest, as the official default
+        # nearest, as the official default
+        resized = F.interpolate(brushes, brush_size or (height, width))
         warped = F.grid_sample(resized[index], grid, align_corners=False)
         alpha = (warped > 0).float().repeat(1, 3, 1, 1)
         foreground = warped.repeat(1, 3, 1, 1) * colour
@@ -247,7 +258,12 @@ def render_pt_progressive(
         while done < target:
             end = min(done + chunk_size, target)
             fg, al = pt_param2stroke(
-                params[:, done:end].reshape(-1, NUM_PT_PARAMS), height, width, brushes, mode
+                params[:, done:end].reshape(-1, NUM_PT_PARAMS),
+                height,
+                width,
+                brushes,
+                mode,
+                select_by_pixels=True,
             )
             fg = fg.view(b, end - done, 3, height, width)
             al = al.view(b, end - done, 3, height, width)

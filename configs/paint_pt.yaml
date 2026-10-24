@@ -1,0 +1,37 @@
+# Paint Transformer multi-scale inference (T-015): loaded into
+# brushstroke.stroke_model.inference.PaintPTConfig by scripts/paint_pt.py.
+seed: 0
+device: auto
+output_dir: outputs/pt
+checkpoint: outputs/pt_long/seed2/latest.pt   # T-014 selected checkpoint (or the released model.pth)
+height: 512            # centre-crop + resize of the input (0 = keep the native size)
+width: 512
+
+inference:
+  patch_size: 32
+  final_layer: official      # variant exported to sequence.npz: official (all strokes) | gated (logit > 0)
+  abs_h: true                # |h| right after the prediction (identity for checkpoints with h > 0)
+  brush_dir: data/raw/pt_brush
+  max_patches_per_batch: 0   # 0 = all the patches of a layer in one batch
+  drop_invisible: true       # drop strokes entirely outside the (padded) image
+
+refine:                      # per-patch optimization of the predicted strokes (off by default)
+  enabled: false
+  levels: []                 # layers refined (empty = all, the shifted final layer included)
+  iters: 100
+  lr: 0.05
+  lr_final_frac: 0.1
+  optimizer: adam
+  optimize_colour: true
+  keep_if_better: true
+
+render:                      # how the exported sequence is re-rendered (pt = official brushes)
+  mode: pt
+  pt_alpha: pt_infer
+  pt_brush_dir: data/raw/pt_brush
+  chunk_size: 16
+  use_checkpoint: false
+  brush_seed: 0
+  dtype: auto
+  sampler: grid_sample
+  min_size: 0.001

@@ -134,9 +134,14 @@ class PaintTransformer(nn.Module):
             ],
             dim=-1,
         )
-        tokens = pos_embed.flatten(0, 1).unsqueeze(1) + feat_conv.flatten(2).permute(2, 0, 1)
-        queries = self.query_pos.unsqueeze(1).repeat(1, b, 1)
-        hidden = self.transformer(tokens, queries).permute(1, 0, 2)
+        # contiguous() calls as in the official forward: the memory layout changes the reduction
+        # order of the attention kernels, hence the last bits of the outputs (T-015 parity)
+        tokens = (
+            pos_embed.flatten(0, 1).unsqueeze(1)
+            + feat_conv.flatten(2).permute(2, 0, 1).contiguous()
+        )
+        queries = self.query_pos.unsqueeze(1).contiguous().repeat(1, b, 1)
+        hidden = self.transformer(tokens, queries).permute(1, 0, 2).contiguous()
         return self.linear_param(hidden), self.linear_decider(hidden)
 
     @staticmethod
