@@ -30,6 +30,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 COLOUR_MODES = ("sampled", "predicted")
+CONVENTIONS = ("raw", "positive")
 
 
 @dataclass
@@ -46,6 +47,8 @@ class PTModelConfig:
     colour_mode: str = (
         "sampled"  # sampled (official code) | predicted (paper description, +3 outputs)
     )
+    # raw (official: w, h, theta as predicted) | positive (T-019: w, h > 0, theta in [0, 1))
+    convention: str = "raw"
 
 
 class SignWithSigmoidGrad(torch.autograd.Function):
@@ -87,6 +90,8 @@ class PaintTransformer(nn.Module):
         cfg = cfg or PTModelConfig()
         if cfg.colour_mode not in COLOUR_MODES:
             raise ValueError(f"colour_mode must be one of {COLOUR_MODES}, got {cfg.colour_mode!r}")
+        if cfg.convention not in CONVENTIONS:
+            raise ValueError(f"convention must be one of {CONVENTIONS}, got {cfg.convention!r}")
         if cfg.patch_size % 4 != 0:
             raise ValueError("patch_size must be a multiple of 4")
         self.cfg = cfg
@@ -162,9 +167,25 @@ class PaintTransformer(nn.Module):
         """``(shape (B, N, 5), colour (B, N, 3), decision logits (B, N))`` with the colour of the
         chosen mode."""
         param, decision = self(img, canvas)
+        if self.cfg.convention == "positive":
+            param = positive_convention(param)
         if self.cfg.colour_mode == "sampled":
             return param, self.sample_colour(img, param), decision.squeeze(-1)
         return param[..., :5], param[..., 5:8], decision.squeeze(-1)
+
+
+def positive_convention(param: torch.Tensor) -> torch.Tensor:
+    """Canonical parameterization of the strokes (option A of T-019): ``w = softplus(w_raw) > 0``,
+    ``h = softplus(h_raw) > 0`` and ``theta`` wrapped into ``[0, 1)`` (``theta - floor(theta)``),
+    the convention of the ground-truth strokes. ``x``, ``y`` and any further column are unchanged.
+
+    Args:
+        param: ``(..., >= 5)`` raw predictions ``x, y, w, h, theta, ...``.
+    """
+    out = param.clone()
+    out[..., 2:4] = F.softplus(param[..., 2:4])
+    out[..., 4] = param[..., 4] - torch.floor(param[..., 4])
+    return out
 
 
 def init_official_weights(net: nn.Module, gain: float = 0.02) -> None:

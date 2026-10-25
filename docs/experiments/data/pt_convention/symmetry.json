@@ -1,0 +1,367 @@
+{
+ "strokes": 4000,
+ "size": 64,
+ "pt_train": {
+  "area": 0.09080307930707932,
+  "variants": [
+   {
+    "spec": [
+     1.0,
+     1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.0,
+    "alpha_error_relative": 0.0,
+    "foreground_error": 0.0
+   },
+   {
+    "spec": [
+     1.0,
+     1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 0.027528928592801094,
+    "alpha_error_relative": 0.3031717538833618,
+    "foreground_error": 0.03328077495098114
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.013095108792185783,
+    "alpha_error_relative": 0.14421436190605164,
+    "foreground_error": 0.01693718694150448
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 0.030468842014670372,
+    "alpha_error_relative": 0.3355485498905182,
+    "foreground_error": 0.03409954160451889
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.030468842014670372,
+    "alpha_error_relative": 0.3355485498905182,
+    "foreground_error": 0.03476586192846298
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 0.013095108792185783,
+    "alpha_error_relative": 0.14421436190605164,
+    "foreground_error": 0.016349809244275093
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.027528928592801094,
+    "alpha_error_relative": 0.3031717538833618,
+    "foreground_error": 0.03304401785135269
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 3.30219975808177e-08,
+    "alpha_error_relative": 3.636660608208331e-07,
+    "foreground_error": 0.0030567829962819815
+   },
+   {
+    "spec": [
+     1.0,
+     1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.028402455151081085,
+    "alpha_error_relative": 0.31279176473617554,
+    "foreground_error": 0.035510022193193436
+   },
+   {
+    "spec": [
+     1.0,
+     1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.02840423211455345,
+    "alpha_error_relative": 0.31281134486198425,
+    "foreground_error": 0.03538981080055237
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.027759641408920288,
+    "alpha_error_relative": 0.3057125508785248,
+    "foreground_error": 0.03622860461473465
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.02590717002749443,
+    "alpha_error_relative": 0.28531157970428467,
+    "foreground_error": 0.03191521018743515
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.02590717375278473,
+    "alpha_error_relative": 0.28531160950660706,
+    "foreground_error": 0.0324794240295887
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.027759641408920288,
+    "alpha_error_relative": 0.3057125508785248,
+    "foreground_error": 0.03575357049703598
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.02840423211455345,
+    "alpha_error_relative": 0.31281134486198425,
+    "foreground_error": 0.03555188700556755
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.028402455151081085,
+    "alpha_error_relative": 0.31279176473617554,
+    "foreground_error": 0.03570516034960747
+   }
+  ]
+ },
+ "pt_infer": {
+  "area": 0.09441803395748138,
+  "variants": [
+   {
+    "spec": [
+     1.0,
+     1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.0,
+    "alpha_error_relative": 0.0,
+    "foreground_error": 0.0
+   },
+   {
+    "spec": [
+     1.0,
+     1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 0.03325073421001434,
+    "alpha_error_relative": 0.3521650731563568,
+    "foreground_error": 0.03794272243976593
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.011906555853784084,
+    "alpha_error_relative": 0.1261046826839447,
+    "foreground_error": 0.01526130922138691
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 0.03637933358550072,
+    "alpha_error_relative": 0.3853006958961487,
+    "foreground_error": 0.03946014493703842
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.03642743080854416,
+    "alpha_error_relative": 0.38581010699272156,
+    "foreground_error": 0.04024628922343254
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 0.011956421658396721,
+    "alpha_error_relative": 0.12663282454013824,
+    "foreground_error": 0.014683619141578674
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     0.0,
+     false
+    ],
+    "alpha_error": 0.03325445577502251,
+    "alpha_error_relative": 0.35220450162887573,
+    "foreground_error": 0.037655942142009735
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     1.0,
+     false
+    ],
+    "alpha_error": 4.846191586693749e-05,
+    "alpha_error_relative": 0.0005132696824148297,
+    "foreground_error": 0.0031450288370251656
+   },
+   {
+    "spec": [
+     1.0,
+     1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.03261377289891243,
+    "alpha_error_relative": 0.34541890025138855,
+    "foreground_error": 0.037839021533727646
+   },
+   {
+    "spec": [
+     1.0,
+     1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.032662536948919296,
+    "alpha_error_relative": 0.3459353744983673,
+    "foreground_error": 0.037848617881536484
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.03135565295815468,
+    "alpha_error_relative": 0.33209389448165894,
+    "foreground_error": 0.03781389072537422
+   },
+   {
+    "spec": [
+     1.0,
+     -1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.030342530459165573,
+    "alpha_error_relative": 0.3213637173175812,
+    "foreground_error": 0.03404097259044647
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.030393922701478004,
+    "alpha_error_relative": 0.32190802693367004,
+    "foreground_error": 0.034998733550310135
+   },
+   {
+    "spec": [
+     -1.0,
+     1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.031312502920627594,
+    "alpha_error_relative": 0.33163687586784363,
+    "foreground_error": 0.03715233504772186
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     0.5,
+     true
+    ],
+    "alpha_error": 0.03266321122646332,
+    "alpha_error_relative": 0.34594249725341797,
+    "foreground_error": 0.03800615668296814
+   },
+   {
+    "spec": [
+     -1.0,
+     -1.0,
+     1.5,
+     true
+    ],
+    "alpha_error": 0.03261614963412285,
+    "alpha_error_relative": 0.34544405341148376,
+    "foreground_error": 0.038020145148038864
+   }
+  ]
+ },
+ "unrelated_alpha_error": 0.14244340360164642
+}

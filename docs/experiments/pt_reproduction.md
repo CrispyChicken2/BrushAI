@@ -252,3 +252,16 @@ Seeds: 3 full-model seeds (T-014) and 3 seeds per ablation, official recipe; all
 | `D_bce` | **not reproduced, opposite sign** (0 of 5 worse, 3 of 5 significantly *better*) | real L_pixel x0.95 (0.0690 ± 0.0006 against 0.0726 ± 0.0014), L_pcpt x0.95, stroke L_pixel x0.94, whereas the paper has x1.15 to 1.27. The D_L1 rise (x1.46) is the `w < 0` artefact (x0.98 folded). The model without the confidence term paints 7.88 strokes per synthesized patch against 7.68, but 4,433 strokes on the real images against 4,589, so more strokes does not explain the gain; the mechanism is not investigated (hypothesis: the weight 10 of the confidence term in the official recipe takes capacity from the geometry; untested). |
 
 **Ordering.** Ours (importance = mean ratio over the five columns): `L_pixel` 1.15 ~ `D_L1` 1.14 > `D_W` 1.06 ~ `D_bce` 1.06; with the folded D_L1: `L_pixel` 1.15 > `D_W` 1.06 ~ `D_L1` 1.04 > `D_bce` 0.97. The paper: `D_L1` 1.72 ~ `L_pixel` 1.71 > `D_W` 1.35 > `D_bce` 1.19. Kendall tau +0.33 in both analyses; the most important term is `L_pixel` for us and `D_L1` for the paper (a near tie in the paper: 1.72 against 1.71, so this disagreement is weak); the two agree that `L_pixel` is among the two terms that matter most and that `D_bce` is the least. They disagree on the size of every effect: our importances are 1.0 to 1.15, the paper's 1.2 to 1.7, so the term ranking is far less separated than the paper's, and for `D_L1` the "second most important" rank rests on one seed with the `w < 0` convention (it drops to third once folded). **Conclusion:** the paper's ordering is reproduced only in its coarse form (`L_pixel` important, `D_bce` last); the per-term claim that all four terms matter is reproduced for `L_pixel` only, partly for `D_W`, and not for `D_L1` and `D_bce` in our recipe (the code's loss weights, T-016 gap analysis item 4: the paper-weights variant was not run).
+
+<!-- BEGIN CONVENTION_NOTE -->
+
+**T-019 update of the `D_L1` column (item 3 above).** The convention outliers are real (the classes are derived and verified by rendering in `docs/design/pt_convention.md`): `D_L1` of the full model, stretched recipe, 3 seeds, by equivalence class of the prediction:
+
+| `D_L1` | raw | `\|h\|` fold | exact class | mirror class | rot180 | swap |
+|---|---|---|---|---|---|---|
+| ours, official recipe | 0.1476 ± 0.0836 | 0.1013 ± 0.0035 | 0.1471 ± 0.0828 | 0.1015 ± 0.0039 | 0.0990 ± 0.0044 | 0.0842 ± 0.0028 |
+| ours, stretched recipe | 0.1445 ± 0.0848 | 0.0971 ± 0.0027 | 0.1439 ± 0.0837 | 0.0974 ± 0.0034 | 0.0947 ± 0.0037 | 0.0774 ± 0.0019 |
+
+Details, per-model values and the options that fix the convention: `docs/experiments/pt_training.md`, section T-019.
+
+<!-- END CONVENTION_NOTE -->

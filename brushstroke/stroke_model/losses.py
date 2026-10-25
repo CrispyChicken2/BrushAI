@@ -40,6 +40,7 @@ import torch.nn.functional as F
 from scipy.optimize import linear_sum_assignment
 
 from brushstroke.renderer.pt import pt_composite, pt_param2stroke
+from brushstroke.stroke_model.convention import LEVELS, stroke_l1_sum
 from brushstroke.stroke_model.model import sign_with_sigmoid_grad
 from brushstroke.stroke_model.synthetic import PatchBatch
 
@@ -65,6 +66,11 @@ class PTLossConfig:
     matcher: str = (
         "auto"  # auto | scipy | gpu (exhaustive search on the GPU for N <= 8, same optimum)
     )
+    # T-019 option B: none (official) | exact | mirror | rot180 | swap; the parameter L1 of the loss
+    # and of the matching is the minimum over the equivalence class of the prediction
+    l1_invariance: str = "none"
+    # T-019 option C: weight of relu(-w) + relu(-h) averaged over the predictions; 0 = off
+    lambda_sign: float = 0.0
 
 
 PRESETS: dict[str, dict[str, float | str]] = {
@@ -98,6 +104,8 @@ def resolve_loss_config(cfg: PTLossConfig) -> PTLossConfig:
         raise ValueError(f"preset must be one of {sorted(PRESETS)} or 'custom', got {cfg.preset!r}")
     if resolved.matching_cost not in MATCHING_COSTS or resolved.matcher not in MATCHERS:
         raise ValueError(f"matching_cost in {MATCHING_COSTS} and matcher in {MATCHERS} required")
+    if resolved.l1_invariance not in LEVELS:
+        raise ValueError(f"l1_invariance must be one of {LEVELS}, got {resolved.l1_invariance!r}")
     return resolved
 
 
@@ -233,6 +241,9 @@ class LossOutput:
     decision: torch.Tensor
     rec: torch.Tensor  # (B, 3, P, P) canvas with the predicted strokes painted
     assign: torch.Tensor  # (B, N) matched prediction of each valid GT stroke (-1 otherwise)
+    sign: torch.Tensor | None = (
+        None  # weighted negative-size penalty (included in total; None = off)
+    )
 
 
 class PaintTransformerLoss:
@@ -254,7 +265,7 @@ class PaintTransformerLoss:
     ) -> torch.Tensor:
         """``(B, N, N)`` matching cost between predictions (rows) and ground-truth strokes
         (columns)."""
-        l1 = (pred.unsqueeze(2) - gt.unsqueeze(1)).abs().sum(dim=-1)
+        l1 = stroke_l1_sum(pred.unsqueeze(2), gt.unsqueeze(1), self.cfg.l1_invariance)
         wass = gaussian_w_distance(pred.unsqueeze(2), gt.unsqueeze(1))
         if self.cfg.matching_cost == "logit":
             conf = (1 - logits).unsqueeze(2)  # official: 1 - raw logit
@@ -310,11 +321,20 @@ class PaintTransformerLoss:
         paired_pred, paired_gt = pred_all[bi, pi], gt_all[bi, vi]
         target_decision = torch.zeros_like(logits)
         target_decision[bi, pi] = 1.0
-        gt = F.l1_loss(paired_pred, paired_gt) * cfg.lambda_gt
+        if cfg.l1_invariance == "none":
+            gt = F.l1_loss(paired_pred, paired_gt) * cfg.lambda_gt
+        else:  # mean over the pairs and the parameters of the class-minimal L1
+            invariant = stroke_l1_sum(paired_pred, paired_gt, cfg.l1_invariance)
+            gt = invariant.sum() / paired_pred.numel() * cfg.lambda_gt
         w = gaussian_w_distance(shape[bi, pi], batch.gt_param[bi, vi]).mean() * cfg.lambda_w
         pos_weight = torch.tensor(cfg.pos_weight, device=logits.device, dtype=logits.dtype)
         decision = (
             F.binary_cross_entropy_with_logits(logits, target_decision, pos_weight=pos_weight)
             * cfg.lambda_decision
         )
-        return LossOutput(pixel + gt + w + decision, pixel, gt, w, decision, rec, assign)
+        total = pixel + gt + w + decision
+        sign = None
+        if cfg.lambda_sign > 0:
+            sign = (F.relu(-shape[..., 2]) + F.relu(-shape[..., 3])).mean() * cfg.lambda_sign
+            total = total + sign
+        return LossOutput(total, pixel, gt, w, decision, rec, assign, sign)

@@ -4,6 +4,9 @@
 (parameter L1 over the matched stroke pairs) and ``D_W`` (Gaussian Wasserstein distance over the
 matched pairs), all **unweighted** terms of
 :class:`~brushstroke.stroke_model.losses.PaintTransformerLoss` with the official matching.
+:func:`invariant_l1` is the convention-invariant ``D_L1`` of T-019: the same parameter L1 with the
+minimum taken over the equivalence class of the predicted stroke (classes derived in
+:mod:`brushstroke.stroke_model.convention`; ``exact`` = the strokes that render identically).
 :func:`optim_strokes` is the "Optim" comparison of the paper: the same number of strokes per patch,
 random initialization, gradient descent on the patch L1 (protocol in
 ``docs/experiments/pt_reproduction.md``).
@@ -12,15 +15,22 @@ random initialization, gradient descent on the patch L1 (protocol in
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import torch
 
+from brushstroke.stroke_model.convention import stroke_l1_sum
 from brushstroke.stroke_model.losses import PaintTransformerLoss, PTLossConfig
 from brushstroke.stroke_model.model import PaintTransformer
 from brushstroke.stroke_model.refine import RefineConfig, refine_patch_strokes
 from brushstroke.stroke_model.synthetic import PatchBatch
 
+INVARIANT_LEVELS = (
+    "exact",
+    "mirror",
+    "rot180",
+    "swap",
+)  # keys ``d_l1_<level>`` of the reported D_L1 variants
 CONFIDENT = (
     10.0  # logit given to the strokes of an optimizer (painted), the opposite for the others
 )
@@ -41,6 +51,21 @@ def unweighted_loss(brushes: torch.Tensor) -> PaintTransformerLoss:
     return PaintTransformerLoss(brushes, cfg)
 
 
+def invariant_l1(pred: torch.Tensor, gt: torch.Tensor, level: str = "mirror") -> torch.Tensor:
+    """Convention-invariant parameter L1 of matched strokes, per pair, averaged over the parameters.
+
+    Args:
+        pred, gt: ``(M, >= 5)`` matched strokes ``x, y, w, h, theta`` (``theta`` in units of pi).
+        level: equivalence class of ``pred`` over which the distance is minimized
+            (:data:`brushstroke.stroke_model.convention.LEVELS`); ``none`` = the official ``D_L1``.
+
+    Returns:
+        ``(M,)`` distances; equal for strokes of the same class (``exact``: strokes that render
+        identically; ``mirror``: also the near-mirror ``h -> -h``).
+    """
+    return stroke_l1_sum(pred[..., :5], gt[..., :5], level) / 5
+
+
 @dataclass
 class StrokeScores:
     """Sums over a set of patches (``pixel`` per patch, ``gt``/``w`` per matched pair)."""
@@ -53,6 +78,7 @@ class StrokeScores:
     negative_h: int = 0
     negative_w: int = 0
     painted: int = 0
+    l1_inv: dict[str, float] = field(default_factory=lambda: dict.fromkeys(INVARIANT_LEVELS, 0.0))
 
     def add(
         self,
@@ -73,6 +99,10 @@ class StrokeScores:
         self.w += float(out.w) * pairs
         self.pairs += pairs
         matched = shape[rows, out.assign[rows, cols]]
+        for level in INVARIANT_LEVELS:
+            self.l1_inv[level] += float(
+                invariant_l1(matched, batch.gt_param[rows, cols], level).sum()
+            )
         self.negative_h += int((matched[:, 3] < 0).sum())
         self.negative_w += int((matched[:, 2] < 0).sum())
         self.painted += int((logits > 0).sum())
@@ -82,6 +112,7 @@ class StrokeScores:
             "l_pixel": self.pixel / self.patches,
             "d_l1": self.l1 / self.pairs,
             "d_w": self.w / self.pairs,
+            **{f"d_l1_{level}": self.l1_inv[level] / self.pairs for level in INVARIANT_LEVELS},
             "h_negative": self.negative_h / self.pairs,
             "w_negative": self.negative_w / self.pairs,
             "painted_per_patch": self.painted / self.patches,

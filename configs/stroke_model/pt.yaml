@@ -15,10 +15,13 @@ tensorboard: false       # needs the optional `tensorboard` package
 
 model:
   colour_mode: sampled   # sampled (official code) | predicted
+  convention: raw        # raw (official) | positive (T-019 option A)
 
 loss:
   preset: official       # official | paper_weights | custom (configs/pt/loss_paper.yaml)
   matcher: auto          # auto | scipy | gpu
+  l1_invariance: none    # none (official) | exact | mirror | rot180 | swap (T-019 option B)
+  lambda_sign: 0.0       # T-019 option C: relu(-w) + relu(-h) weight (0 = off)
 
 optim:
   lr: 1.0e-4
