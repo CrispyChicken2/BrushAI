@@ -35,7 +35,9 @@ from brushstroke.stroke_model.train import (
     LOSS_TERMS,
     TrainConfig,
     _Context,
+    evaluate,
     load_checkpoint,
+    make_validation_set,
     save_checkpoint,
 )
 from brushstroke.utils.config import load_config
@@ -183,6 +185,7 @@ def run_loop(
     *,
     keep_checkpoints: bool = True,
     prime: Iterable[tuple[int, float]] = (),
+    val_every: int = 0,
 ) -> dict[str, Any]:
     """Train ``ctx`` for ``max_steps`` (total step count) or until ``AFTER_SPIKE`` steps after the first
     spike, logging every step; writes ``trace.csv``, rotating ``ckpt_<step>.pt`` and ``summary.json``."""
@@ -194,6 +197,7 @@ def run_loop(
     detector.spike = None
     stop_at = max_steps
     ckpts: deque[Path] = deque()
+    val_set = make_validation_set(ctx) if val_every else []
     with (out / "trace.csv").open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=FIELDS)
         writer.writeheader()
@@ -212,6 +216,8 @@ def run_loop(
                 ckpts.append(path)
                 while len(ckpts) > CKPT_KEEP:
                     ckpts.popleft().unlink(missing_ok=True)
+            if val_every and ctx.step % val_every == 0:
+                evaluate(ctx, val_set, mode="running")  # the validation of the T-019 runs
             if ctx.step % 1000 == 0:
                 fh.flush()
                 print(ctx.step, round(row["total"], 3), flush=True)
@@ -276,7 +282,7 @@ def cmd_trace(args: argparse.Namespace) -> None:
     out = ROOT / args.name
     cfg = make_cfg(args.seed, args.convention, out)
     ctx = _Context(cfg)
-    run_loop(ctx, out, args.max_steps)
+    run_loop(ctx, out, args.max_steps, val_every=args.val_every)
 
 
 def last_good_checkpoint(trace: Path, back: int) -> Path:
@@ -378,6 +384,7 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--convention", default="positive", choices=["positive", "raw"])
     t.add_argument("--max-steps", type=int, default=60_000)
+    t.add_argument("--val-every", type=int, default=0, help="run the T-019 validation (running BN)")
     b = sub.add_parser("branch")
     b.add_argument("--name", required=True)
     b.add_argument("--from-trace", required=True)
