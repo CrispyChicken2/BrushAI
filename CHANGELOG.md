@@ -2,6 +2,15 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-021] Paper-weights ablations of the PT loss
+
+- 15 runs (full model + 4 ablations x 3 seeds, official recipe, 56,320 steps) with the paper's loss weights (pos_weight 8, BCE 1,
+  pixel 1, L1 1, W 10) and BCE matching cost, evaluated with the unchanged T-016 protocol. `scripts/exp_pt_paper_weights.py`
+  (`train`, `evaluate`, `report`), tests in `tests/test_pt_paper_weights.py`.
+- Result: 11 of 20 cells in the paper's direction against 7 with the code weights -> hypothesis confirmed by the pre-registered
+  rule, but only 10 vs 8 with the `|h|` or mirror-invariant `D_L1`; per-term verdicts unchanged for 3 of 4 terms; the absolute
+  quality is not better. `docs/experiments/pt_reproduction.md` (section T-021).
+
 ## [T-020] Usable validation curve: BatchNorm statistics of the PT validation
 
 - `val.bn` in `brushstroke/stroke_model/train.py`: `recalibrate` (default; statistics re-estimated on 20 fixed training-distribution

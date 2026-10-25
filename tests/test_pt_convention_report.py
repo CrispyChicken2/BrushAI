@@ -75,3 +75,10 @@ def test_clean_bias_ignores_models_with_negative_signs() -> None:
     store = {"g": {"a": model(3.7, d_l1=0.1), "b": model(3.7, h_neg=1.0, d_l1=0.25)}}
     text = rep.clean_bias(store)
     assert "1 models" in text and "`mirror` 0.0 %" in text
+
+
+def test_clean_bias_ignores_the_t021_groups() -> None:
+    store = {"g": {"a": model(3.7, d_l1=0.1)}}
+    before = rep.clean_bias(store)
+    store["pw_full"] = {"a": model(3.7, d_l1=0.5), "b": model(3.7, d_l1=0.3)}
+    assert rep.clean_bias(store) == before

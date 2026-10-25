@@ -265,3 +265,109 @@ Seeds: 3 full-model seeds (T-014) and 3 seeds per ablation, official recipe; all
 Details, per-model values and the options that fix the convention: `docs/experiments/pt_training.md`, section T-019.
 
 <!-- END CONVENTION_NOTE -->
+
+## T-021: the ablations with the paper's loss weights and matching cost
+
+**Question.** T-016 reproduced only 7 of the 20 cells of the paper's ablation table (Table 1, lower part) with the loss weights of the released code (gap analysis, item 4). Are the paper's numbers due to the paper's weights and matching cost? **Hypothesis H.** With the paper's weights (`lambda_r` = 8 as `pos_weight`, BCE 1, pixel 1, stroke L1 1, Wasserstein 10) and the BCE-based matching cost (the `paper_weights` preset of T-012), more of the 20 cells have the paper's direction than the 7 of the code weights.
+
+### Protocol (fixed before the runs)
+- **Runs**: the full model and the four ablations (`lambda_pixel`, `lambda_gt`, `lambda_w`, `lambda_decision` set to 0), seeds 0, 1, 2 = 15 runs, official recipe (56,320 steps), everything else as T-014/T-016 (`python -m scripts.exp_pt_paper_weights train`, 3 runs in parallel, checkpoints in `outputs/pt_pw/<name>/seed<k>`). The matching cost stays the paper's BCE cost in the ablations (it does not contain `lambda_decision`), so removing `D_bce` removes the term from the loss only. The preset is applied as explicit fields (`loss.preset=custom`) so that a weight can be zeroed.
+- **Convention fix (T-019)**: not used, for comparability with T-016 (same network, same parameterization); the convention outliers are measured (`h < 0`, `w < 0` shares) and the convention-invariant `D_L1` (mirror class, `docs/design/pt_convention.md`) is reported next to the T-016 numbers.
+- **Evaluation**: the T-016 protocol unchanged (5 real images through the inference pipeline; 4,096 synthesized patches with `|h|`; the same five columns, the same tolerances and rules, the T-017 per-term verdict rule), plus the invariant `D_L1`. The code-weights side is the stored T-016 / T-014 measurements (full model: the three official-recipe seeds of T-014, ablations: `outputs/pt_abl`).
+- **Counting rule of "the paper's direction"** (the one that gives 7 of 20 for the code weights in T-016): a cell (term removed x column, 4 x 5) has the paper's direction when the ablated / full ratio, rounded to two decimals, is above 1.00, with `D_L1` having the signs of `w` and `h` folded (`|w|`, `|h|`, the T-016 diagnostic) to neutralize the convention outliers. Secondary counts: the same with the mirror-invariant `D_L1`; the cells that are *significantly* worse (Welch t >= 2.13, the T-017 rule).
+- **Decision rule for H** (primary count, paper weights minus code weights): **confirmed** if at least 3 more cells than the code weights (at least 10 of 20); **refuted** if not more cells (at most 7 of 20); **weak / within noise** for 1 or 2 more. The per-term verdicts (T-017 rule) are reported in addition. A negative or mixed result is reported as such.
+- **Commands**: `python -m scripts.exp_pt_paper_weights {train,evaluate,report}`; `report` rewrites the block below and needs no GPU.
+
+<!-- BEGIN PAPER_WEIGHTS -->
+
+Same protocol as T1c (`\|h\|`, real images and 4,096 synthesized patches, mean over 3 seeds); the *code weights* side is the stored T-016 / T-014 measurement, the *paper weights* side the 15 runs of T-021. Per-run values: `docs/experiments/data/pt_reproduction/` and `docs/experiments/data/pt_convention/eval.json`.
+
+**Absolute values** (mean ± std over seeds; `D_L1` with `\|h\|`; `D_L1 mirror` = mirror-invariant, raw predictions; `h < 0`, `w < 0` = share of matched strokes with a negative sign):
+
+| model | L_pixel (real) | L_pcpt (real) | L_pixel (strokes) | D_L1 | D_W | D_L1 mirror | h < 0 | w < 0 |
+|---|---|---|---|---|---|---|---|---|
+| paper full | 0.056 | 0.807 | 0.042 | 0.083 | 0.018 | | | |
+| code weights full (n = 3) | 0.073 ± 0.001 | 16.532 ± 0.400 | 0.046 ± 0.002 | 0.101 ± 0.003 | 0.024 ± 0.001 | 0.101 ± 0.004 | 33 ± 58 % | 0 ± 0 % |
+| **paper weights** full (n = 3) | 0.077 ± 0.002 | 16.832 ± 0.424 | 0.051 ± 0.001 | 0.132 ± 0.086 | 0.017 ± 0.001 | 0.122 ± 0.069 | 33 ± 58 % | 33 ± 58 % |
+| paper w/o L_pixel | 0.081 | 1.012 | 0.068 | 0.241 | 0.024 | | | |
+| code weights w/o L_pixel (n = 3) | 0.088 ± 0.001 | 19.465 ± 0.517 | 0.066 ± 0.002 | 0.098 ± 0.002 | 0.022 ± 0.001 | 0.098 ± 0.002 | 33 ± 58 % | 0 ± 0 % |
+| **paper weights** w/o L_pixel (n = 3) | 0.081 ± 0.001 | 17.502 ± 0.150 | 0.058 ± 0.004 | 0.129 ± 0.085 | 0.017 ± 0.001 | 0.120 ± 0.070 | 33 ± 58 % | 33 ± 58 % |
+| paper w/o D_L1 | 0.074 | 0.941 | 0.077 | 0.267 | 0.019 | | | |
+| code weights w/o D_L1 (n = 3) | 0.073 ± 0.002 | 16.448 ± 0.506 | 0.045 ± 0.001 | 0.192 ± 0.138 | 0.020 ± 0.004 | 0.119 ± 0.013 | 33 ± 58 % | 33 ± 58 % |
+| **paper weights** w/o D_L1 (n = 3) | 0.080 ± 0.002 | 17.437 ± 0.446 | 0.054 ± 0.000 | 0.256 ± 0.170 | 0.016 ± 0.004 | 0.129 ± 0.044 | 33 ± 58 % | 33 ± 58 % |
+| paper w/o D_W | 0.069 | 0.947 | 0.046 | 0.113 | 0.034 | | | |
+| code weights w/o D_W (n = 3) | 0.070 ± 0.002 | 16.348 ± 0.383 | 0.045 ± 0.000 | 0.110 ± 0.002 | 0.030 ± 0.001 | 0.110 ± 0.002 | 0 ± 0 % | 0 ± 0 % |
+| **paper weights** w/o D_W (n = 3) | 0.076 ± 0.002 | 16.931 ± 0.461 | 0.046 ± 0.002 | 0.094 ± 0.002 | 0.023 ± 0.001 | 0.094 ± 0.002 | 0 ± 0 % | 0 ± 0 % |
+| paper w/o D_bce | 0.071 | 0.928 | 0.052 | 0.093 | 0.021 | | | |
+| code weights w/o D_bce (n = 3) | 0.069 ± 0.001 | 15.777 ± 0.008 | 0.043 ± 0.001 | 0.147 ± 0.086 | 0.024 ± 0.001 | 0.136 ± 0.066 | 67 ± 58 % | 33 ± 58 % |
+| **paper weights** w/o D_bce (n = 3) | 0.078 ± 0.002 | 16.586 ± 0.213 | 0.049 ± 0.002 | 0.124 ± 0.089 | 0.016 ± 0.001 | 0.117 ± 0.075 | 67 ± 58 % | 33 ± 58 % |
+
+**Effect of removing a term** (ablated / full; `*` = significantly worse by the T-017 rule; `D_L1` with `\|w\|`, `\|h\|` folded):
+
+| removed term | weights | L_pixel (real) | L_pcpt (real) | L_pixel (strokes) | D_L1 | D_W | cells in the paper's direction |
+|---|---|---|---|---|---|---|---|
+| w/o L_pixel | paper | 1.45 | 1.25 | 1.62 | 2.90 | 1.33 | 5 / 5 |
+| | code weights | 1.21* | 1.18* | 1.44* | 0.97 | 0.94 | 3 / 5 |
+| | paper weights | 1.05* | 1.04* | 1.14* | 0.96 | 0.96 | 3 / 5 |
+| w/o D_L1 | paper | 1.32 | 1.17 | 1.83 | 3.22 | 1.06 | 5 / 5 |
+| | code weights | 1.00 | 0.99 | 0.98 | 1.40 | 0.83 | 1 / 5 |
+| | paper weights | 1.03 | 1.04 | 1.07* | 2.47 | 0.92 | 4 / 5 |
+| w/o D_W | paper | 1.23 | 1.17 | 1.10 | 1.36 | 1.89 | 5 / 5 |
+| | code weights | 0.97 | 0.99 | 0.97 | 1.08* | 1.26* | 2 / 5 |
+| | paper weights | 0.98 | 1.01 | 0.91 | 1.12* | 1.35* | 3 / 5 |
+| w/o D_bce | paper | 1.27 | 1.15 | 1.24 | 1.12 | 1.17 | 5 / 5 |
+| | code weights | 0.95 | 0.95 | 0.94 | 0.98 | 1.02 | 1 / 5 |
+| | paper weights | 1.01 | 0.99 | 0.97 | 0.90 | 0.90 | 1 / 5 |
+
+**Cells in the paper's direction (of 20)** and cells significantly worse:
+
+| `D_L1` flavour | code weights | paper weights | significantly worse (code / paper) |
+|---|---|---|---|
+| `\|w\|`, `\|h\|` folded (primary, the T-016 counting) | 7 | 11 | 5 / 6 |
+| `\|h\|` (T-016 protocol numbers) | 8 | 10 | 5 / 5 |
+| mirror-invariant (T-019) | 8 | 10 | 6 / 5 |
+
+**Per-term verdicts** (T-017 rule: *matters* = significantly worse on at least 3 of 5 columns; `\|w\|`, `\|h\|` fold):
+
+| removed term | code weights | paper weights | paper |
+|---|---|---|---|
+| w/o L_pixel | matters (3 / 5) | matters (3 / 5) | matters |
+| w/o D_L1 | not reproduced (0 / 5) | partly (1 / 5) | matters |
+| w/o D_W | partly (2 / 5) | partly (2 / 5) | matters |
+| w/o D_bce | not reproduced (0 / 5) | not reproduced (0 / 5) | matters |
+
+**Verdict on H** (decision rule of the protocol, primary count): code weights 7 of 20, paper weights 11 of 20 -> **confirmed**.
+
+<!-- END PAPER_WEIGHTS -->
+
+### T-021 verdicts
+
+**H (the paper's loss weights and BCE matching cost bring more of the 20 cells in the paper's direction): confirmed by the
+pre-registered rule, but narrowly and for a fragile reason.** With the primary count (`|w|`, `|h|` folded) the code weights give
+7 of 20 cells and the paper weights 11 of 20: a difference of 4 (>= 3 required). The two other `D_L1` flavours give 8 -> 10
+(`|h|`, the T-016 protocol numbers) and 8 -> 10 (mirror-invariant), a difference of 2, which the same rule would label
+"weak (within noise)". The verdict therefore depends on the `D_L1` flavour; it is reported as defined before the runs.
+
+What changes, term by term (ratios ablated / full, paper weights vs code weights):
+
+- **w/o L_pixel**: *matters* (3 / 5 significantly worse) in both cases. The effect is smaller with the paper weights
+  (L_pixel real 1.05 vs 1.21), as if the other terms already carried more of the image.
+- **w/o D_L1**: *not reproduced* (0 / 5) -> *partly* (1 / 5). The cell count goes from 1 to 4 of 5, but only one cell is
+  significant and the `D_L1` ratio (2.47) is not a robust effect (large std, 0.256 +- 0.170): seeds 0 and 2 stay at 0.244 / 0.286
+  after the `|w|`, `|h|` fold (seed 1: 0.093), so it is not only a sign flip but the sign **and orientation** convention
+  (offset of `theta`, T-016 item 3). The mirror-invariant ratio (0.129 / 0.122 = 1.06) is itself computed against an
+  inflated reference: the paper-weights full model seed 2 predicts `w < 0` on 100 % of its strokes, which the mirror class
+  does not absorb (mirror `D_L1` 0.201), so 0.122 is above the 0.081-0.082 of the two other seeds.
+- **w/o D_W**: *partly* (2 / 5) in both cases; `D_L1` and `D_W` get worse as in the paper, the image metrics do not.
+- **w/o D_bce**: *not reproduced* (0 / 5) in both cases (1 / 5 cells in the paper's direction, as with the code weights).
+  Note that the BCE matching cost does not contain `lambda_decision`, so the matching is unchanged in this ablation; the
+  summed training loss of these runs (~35) is not comparable (it contains the unweighted BCE).
+
+Honest summary: the paper weights do **not** improve the absolute quality (full model: L_pixel real 0.077 vs 0.073, L_pcpt
+16.8 vs 16.5; `D_W` is better, 0.017 vs 0.024), they leave the per-term verdicts of 3 terms out of 4 unchanged, and they only
+make `w/o D_L1` less wrong. The remaining distance to the paper (verdict "matters" for every term, ratios of 1.1 to 3) is not
+explained by the loss weights or the matching cost alone. The convention fix (T-019) was **not** used, for comparability with
+T-016: sign-flipped seeds (`h < 0` or `w < 0` on 33 to 67 % of the groups' seeds) inflate `D_L1` and its std in both columns
+of the table, and the mirror-invariant `D_L1` shows it. The paper-weights full model is itself flipped on 2 of 3 seeds 
+(seed 0 `h < 0`, seed 2 `w < 0`), which explains its `D_L1` of 0.132 +- 0.086 in the absolute table; every ratio with `D_L1` 
+in this section therefore has a reference that is part noise.
