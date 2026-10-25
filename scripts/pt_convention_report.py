@@ -288,7 +288,8 @@ def clean_bias(store: dict[str, Any]) -> str:
     change them)."""
     clean = [
         v["raw"]
-        for group in store.values()
+        for name, group in store.items()
+        if name not in PW_GROUPS  # the T-021 runs are not part of the T-019 population
         for v in group.values()
         if max(v["raw"]["h_negative"], v["raw"]["w_negative"]) == 0
     ]

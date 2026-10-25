@@ -353,8 +353,11 @@ What changes, term by term (ratios ablated / full, paper weights vs code weights
 - **w/o L_pixel**: *matters* (3 / 5 significantly worse) in both cases. The effect is smaller with the paper weights
   (L_pixel real 1.05 vs 1.21), as if the other terms already carried more of the image.
 - **w/o D_L1**: *not reproduced* (0 / 5) -> *partly* (1 / 5). The cell count goes from 1 to 4 of 5, but only one cell is
-  significant and the `D_L1` ratio (2.47) rests on two seeds with a flipped sign convention (large std, 0.256 +- 0.170): it is
-  the convention outlier, not a robust effect (mirror-invariant ratio: 0.129 / 0.122 = 1.06).
+  significant and the `D_L1` ratio (2.47) is not a robust effect (large std, 0.256 +- 0.170): seeds 0 and 2 stay at 0.244 / 0.286
+  after the `|w|`, `|h|` fold (seed 1: 0.093), so it is not only a sign flip but the sign **and orientation** convention
+  (offset of `theta`, T-016 item 3). The mirror-invariant ratio (0.129 / 0.122 = 1.06) is itself computed against an
+  inflated reference: the paper-weights full model seed 2 predicts `w < 0` on 100 % of its strokes, which the mirror class
+  does not absorb (mirror `D_L1` 0.201), so 0.122 is above the 0.081-0.082 of the two other seeds.
 - **w/o D_W**: *partly* (2 / 5) in both cases; `D_L1` and `D_W` get worse as in the paper, the image metrics do not.
 - **w/o D_bce**: *not reproduced* (0 / 5) in both cases (1 / 5 cells in the paper's direction, as with the code weights).
   Note that the BCE matching cost does not contain `lambda_decision`, so the matching is unchanged in this ablation; the
@@ -365,4 +368,6 @@ Honest summary: the paper weights do **not** improve the absolute quality (full 
 make `w/o D_L1` less wrong. The remaining distance to the paper (verdict "matters" for every term, ratios of 1.1 to 3) is not
 explained by the loss weights or the matching cost alone. The convention fix (T-019) was **not** used, for comparability with
 T-016: sign-flipped seeds (`h < 0` or `w < 0` on 33 to 67 % of the groups' seeds) inflate `D_L1` and its std in both columns
-of the table, and the mirror-invariant `D_L1` shows it.
+of the table, and the mirror-invariant `D_L1` shows it. The paper-weights full model is itself flipped on 2 of 3 seeds 
+(seed 0 `h < 0`, seed 2 `w < 0`), which explains its `D_L1` of 0.132 +- 0.086 in the absolute table; every ratio with `D_L1` 
+in this section therefore has a reference that is part noise.
