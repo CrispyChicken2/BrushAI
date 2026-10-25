@@ -7,14 +7,15 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 019 [T-019] PT: constrain the sign of h, 3 seeds (M2, P2)
 - [ ] 020 [T-020] PT: BN recalibration for a usable validation curve (M2, P2)
+- [ ] 021 [T-021] PT: ablations with the paper loss weights, 3 seeds (M2, P2)
 - [ ] M3 Evaluation harness + baseline numbers (3 baselines)
 - [ ] M4 Contribution : allocation sémantique puis ordre pictural, ablations complètes
 - [ ] M5 Front-end SDXL + app Gradio + HF Space
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
+- [~] 019 [T-019] PT: fix (w,h,theta) convention + invariant D_L1 (M2, P2)
 
 ## Fait
 - [x] 018 [T-018] M2 demo and gate review (M2) (c4dc730)
