@@ -34,7 +34,7 @@ def with_bn(cfg, mode: str):  # type: ignore[no-untyped-def]
 
 
 def trained_context(tmp_path: Path, steps: int = 4) -> _Context:
-    """A context whose network took a few steps, so that running stats and weights are non-trivial."""
+    """A context whose network took a few steps (non-trivial running statistics and weights)."""
     ctx = _Context(with_bn(tiny_config(tmp_path), "running"))
     for _ in range(steps):
         ctx.train_step(ctx.generator.sample(ctx.cfg.batch_size, ctx.data_rng))
@@ -47,9 +47,11 @@ def test_the_mode_is_validated(tmp_path: Path) -> None:
         _Context(with_bn(tiny_config(tmp_path), "nope"))
 
 
-def test_the_default_mode_is_the_former_behaviour(tmp_path: Path) -> None:
+def test_the_default_mode_is_recalibration_and_running_is_the_former_behaviour(
+    tmp_path: Path,
+) -> None:
     cfg = tiny_config(tmp_path)
-    assert cfg.val.bn == "running"
+    assert cfg.val.bn == "recalibrate" and cfg.val.bn_batches == 20
     ctx = _Context(cfg)
     assert validation_network(ctx, "running") is ctx.net
 

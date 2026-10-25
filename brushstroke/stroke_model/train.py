@@ -90,12 +90,12 @@ class ValConfig:
     seed: int = 12345
     batches: int = 8
     every: int = 1000  # steps; 0 = only at the start and the end
-    # BatchNorm statistics used to score the validation set (T-020, design note section "BatchNorm
-    # in validation"): running = the running averages of training (eval mode; they can lag behind
+    # BatchNorm statistics used to score the validation set (T-020, pt_bn_validation.md):
+    # running = the running averages of training (eval mode; they can lag behind
     # the weights and make isolated spikes), recalibrate = statistics re-estimated on
     # `bn_batches` fixed batches of the training distribution, batch = the statistics of each
     # validation batch. The last two work on a copy of the network.
-    bn: str = "running"
+    bn: str = "recalibrate"
     bn_batches: int = 20
     bn_seed: int = 54321  # seed of the calibration batches (a stream apart from the training one)
 
