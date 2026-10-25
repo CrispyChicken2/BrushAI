@@ -265,3 +265,15 @@ Seeds: 3 full-model seeds (T-014) and 3 seeds per ablation, official recipe; all
 Details, per-model values and the options that fix the convention: `docs/experiments/pt_training.md`, section T-019.
 
 <!-- END CONVENTION_NOTE -->
+
+## T-021: the ablations with the paper's loss weights and matching cost
+
+**Question.** T-016 reproduced only 7 of the 20 cells of the paper's ablation table (Table 1, lower part) with the loss weights of the released code (gap analysis, item 4). Are the paper's numbers due to the paper's weights and matching cost? **Hypothesis H.** With the paper's weights (`lambda_r` = 8 as `pos_weight`, BCE 1, pixel 1, stroke L1 1, Wasserstein 10) and the BCE-based matching cost (the `paper_weights` preset of T-012), more of the 20 cells have the paper's direction than the 7 of the code weights.
+
+### Protocol (fixed before the runs)
+- **Runs**: the full model and the four ablations (`lambda_pixel`, `lambda_gt`, `lambda_w`, `lambda_decision` set to 0), seeds 0, 1, 2 = 15 runs, official recipe (56,320 steps), everything else as T-014/T-016 (`python -m scripts.exp_pt_paper_weights train`, 3 runs in parallel, checkpoints in `outputs/pt_pw/<name>/seed<k>`). The matching cost stays the paper's BCE cost in the ablations (it does not contain `lambda_decision`), so removing `D_bce` removes the term from the loss only. The preset is applied as explicit fields (`loss.preset=custom`) so that a weight can be zeroed.
+- **Convention fix (T-019)**: not used, for comparability with T-016 (same network, same parameterization); the convention outliers are measured (`h < 0`, `w < 0` shares) and the convention-invariant `D_L1` (mirror class, `docs/design/pt_convention.md`) is reported next to the T-016 numbers.
+- **Evaluation**: the T-016 protocol unchanged (5 real images through the inference pipeline; 4,096 synthesized patches with `|h|`; the same five columns, the same tolerances and rules, the T-017 per-term verdict rule), plus the invariant `D_L1`. The code-weights side is the stored T-016 / T-014 measurements (full model: the three official-recipe seeds of T-014, ablations: `outputs/pt_abl`).
+- **Counting rule of "the paper's direction"** (the one that gives 7 of 20 for the code weights in T-016): a cell (term removed x column, 4 x 5) has the paper's direction when the ablated / full ratio, rounded to two decimals, is above 1.00, with `D_L1` having the signs of `w` and `h` folded (`|w|`, `|h|`, the T-016 diagnostic) to neutralize the convention outliers. Secondary counts: the same with the mirror-invariant `D_L1`; the cells that are *significantly* worse (Welch t >= 2.13, the T-017 rule).
+- **Decision rule for H** (primary count, paper weights minus code weights): **confirmed** if at least 3 more cells than the code weights (at least 10 of 20); **refuted** if not more cells (at most 7 of 20); **weak / within noise** for 1 or 2 more. The per-term verdicts (T-017 rule) are reported in addition. A negative or mixed result is reported as such.
+- **Commands**: `python -m scripts.exp_pt_paper_weights {train,evaluate,report}`; `report` rewrites the block below and needs no GPU.

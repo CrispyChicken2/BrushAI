@@ -40,6 +40,8 @@ from scripts.pt_repro_common import (
     PAPER_ABLATIONS,
     PAPER_REAL,
     PAPER_STROKES,
+    PW_GROUPS,
+    PW_ROOT,
     dump,
     fmt_ms,
     load,
@@ -65,6 +67,10 @@ GROUPS = {  # group -> list of (key, checkpoint)
             (f"seed{s}", Path(f"outputs/pt_abl/{name}/seed{s}/latest.pt")) for s in SEEDS
         ]
         for name in ABLATIONS
+    },
+    **{  # T-021: the same runs with the paper's loss weights
+        group: [(f"seed{s}", PW_ROOT / name / f"seed{s}" / "latest.pt") for s in SEEDS]
+        for group, name in PW_GROUPS.items()
     },
 }
 OPTIM_STROKES = (

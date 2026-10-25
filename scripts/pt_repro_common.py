@@ -28,6 +28,11 @@ PAPER_ABLATIONS = {  # real L_pixel, real L_pcpt, stroke L_pixel, D_L1, D_W
     "w/o D_W": (0.069, 0.947, 0.046, 0.113, 0.034),
     "w/o D_bce": (0.071, 0.928, 0.052, 0.093, 0.021),
 }
+# T-021: the ablations re-run with the paper's loss weights; group "pw_full" / "pw_abl_<term>",
+# checkpoints outputs/pt_pw/<name>/seed<k>/latest.pt (name "full" = no term removed)
+PW_ROOT = Path("outputs/pt_pw")
+PW_TERMS = ("no_pixel", "no_dl1", "no_dw", "no_dbce")
+PW_GROUPS = {"pw_full": "full", **{f"pw_abl_{t}": t for t in PW_TERMS}}  # group -> run name
 PAPER_TIME = {  # seconds at 128 / 256 / 512
     "PT": (0.055, 0.124, 0.304),
     "RL": (0.242, 0.266, 0.322),

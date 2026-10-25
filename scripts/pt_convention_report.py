@@ -28,7 +28,7 @@ from brushstroke.stroke_model.losses import PaintTransformerLoss, PTLossConfig
 from brushstroke.stroke_model.synthetic import SyntheticConfig, SyntheticStrokeGenerator
 from brushstroke.utils.device import get_device
 from scripts.exp_pt_ablation_verdict import T_CRITICAL, welch_t
-from scripts.pt_repro_common import fmt_ms, mean_std, write_block
+from scripts.pt_repro_common import PW_GROUPS, PW_ROOT, fmt_ms, mean_std, write_block
 
 DATA = Path("docs/experiments/data/pt_convention")
 DOC_TRAINING = Path("docs/experiments/pt_training.md")
@@ -74,6 +74,11 @@ def groups() -> dict[str, list[tuple[str, Path, int | None]]]:
     for name in ABLATIONS:
         out[f"abl_{name}"] = [
             (f"seed{s}", Path(f"outputs/pt_abl/{name}/seed{s}/latest.pt"), STEPS["official"])
+            for s in SEEDS
+        ]
+    for group, name in PW_GROUPS.items():  # T-021
+        out[group] = [
+            (f"seed{s}", PW_ROOT / name / f"seed{s}" / "latest.pt", STEPS["official"])
             for s in SEEDS
         ]
     for option in OPTIONS:
