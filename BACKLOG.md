@@ -7,12 +7,14 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] M3 Evaluation harness + baseline numbers (3 baselines)
+- [ ] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2)
+- [ ] M3 suite : tickets T-024.. à écrire après la note de protocole T-022
 - [ ] M4 Contribution : allocation sémantique puis ordre pictural, ablations complètes
 - [ ] M5 Front-end SDXL + app Gradio + HF Space
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
+- [~] 022 [T-022] M3 plan and evaluation protocol design note (M3)
 
 ## Fait
 - [x] 021 [T-021] PT: ablations with the paper loss weights, 3 seeds (M2, P2) (a9283c7)
