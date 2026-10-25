@@ -13,9 +13,9 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 021 [T-021] PT: ablations with the paper loss weights, 3 seeds (M2, P2)
 
 ## Fait
+- [x] 021 [T-021] PT: ablations with the paper loss weights, 3 seeds (M2, P2) (a9283c7)
 - [x] 020 [T-020] PT: BN recalibration for a usable validation curve (M2, P2) (feb3ef5)
 - [x] 019 [T-019] PT: fix (w,h,theta) convention + invariant D_L1 (M2, P2) (f13de29)
 - [x] 018 [T-018] M2 demo and gate review (M2) (c4dc730)
