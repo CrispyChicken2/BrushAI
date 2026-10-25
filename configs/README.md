@@ -11,7 +11,7 @@ Files: `default.yaml` (run settings, `brushstroke.config.RunConfig`) and `baseli
 checksums) and `baseline_t005.yaml` (frozen T-005 settings, so the sweep stays reproducible after the defaults changed).
 
 `stroke_model/pt.yaml` is the training configuration of the Paint Transformer (`scripts/train_pt.py`): the official schedule,
-the validation set, precision, resume and the loss preset.
+the validation set and its BatchNorm statistics (`val.bn`: `recalibrate` by default, T-020), precision, resume and the loss preset.
 
 The stroke-convention options of T-019 are off in the default configs (the official behaviour): `model.convention` (`raw` | `positive`),
 `loss.l1_invariance` (`none` | `exact` | `mirror` | `rot180` | `swap`) and `loss.lambda_sign` (0 = off). They are set in

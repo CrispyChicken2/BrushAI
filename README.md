@@ -323,6 +323,12 @@ It needs the official brush images (`python -m scripts.fetch_pt_brushes`). The o
 committed): `train.csv` and `val.csv` (losses, the held-out validation set, step times, peak VRAM), `latest.pt`, `summary.json`
 and the resolved config. `resume=auto` continues from `latest.pt`; a resumed run is bit-identical to an uninterrupted one on CPU.
 
+The validation curve uses recalibrated BatchNorm statistics by default (`val.bn: recalibrate`, T-020): the spikes that the running
+statistics produced are mostly gone (the curve's standard deviation fell from 0.30 to 0.20 on a diagnostic run), and training is
+unaffected because the validation works on a copy of the network. The earlier runs of `val.csv` use the running statistics and are
+not comparable point by point. **Training on the GPU is not bitwise reproducible**, even with `deterministic: true`: two identical
+400-step runs gave different weights (the cause is not found), so the bit-level claims above hold on the CPU only.
+
 Speed on an RTX 5070 with batch 64: T-013 measured 38 ms per step, but the reproduction study (T-016) re-measured **94 ms per step**
 alone on an idle GPU, twice, and did not find the cause. At 94 ms the official schedule takes about 1.5 hours (the official code
 takes 3.7 to 8.7 hours on the same GPU). Peak VRAM is about 0.85 GB in fp32. Three seeds of the official schedule took 83 minutes each when three
