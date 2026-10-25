@@ -7,16 +7,16 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2)
 - [ ] M3 suite : tickets T-024.. à écrire après la note de protocole T-022
 - [ ] M4 Contribution : allocation sémantique puis ordre pictural, ablations complètes
 - [ ] M5 Front-end SDXL + app Gradio + HF Space
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 022 [T-022] M3 plan and evaluation protocol design note (M3)
+- [~] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2)
 
 ## Fait
+- [x] 022 [T-022] M3 plan and evaluation protocol design note (M3) (b904fcd)
 - [x] 021 [T-021] PT: ablations with the paper loss weights, 3 seeds (M2, P2) (a9283c7)
 - [x] 020 [T-020] PT: BN recalibration for a usable validation curve (M2, P2) (feb3ef5)
 - [x] 019 [T-019] PT: fix (w,h,theta) convention + invariant D_L1 (M2, P2) (f13de29)
