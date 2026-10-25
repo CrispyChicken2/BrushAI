@@ -21,6 +21,7 @@ Entry points, run from the repo root: `python -m scripts.<name>` or `python scri
 | `exp_pt_table2` | Table 2 (inference and training time): stages `run`, `training` (re-times the training step), `report` regenerates its block from the stored JSON, no GPU (T-016) |
 | `exp_pt_ablations` | the 12 loss-ablation trainings (4 terms x 3 seeds, 56,320 steps each, `--parallel` runs share the GPU); needs the GPU (T-016) |
 | `exp_pt_convention` | stroke-convention study (T-019): `symmetry` (equivalence classes, verified by rendering), `train` (options A, B, C; the stretched recipe for the best one), `evaluate`, and `report` (no GPU), which regenerates the T-019 blocks of `docs/experiments/pt_training.md` and of `pt_reproduction.md` |
+| `exp_pt_bn_validation` | validation BatchNorm diagnostic (T-020): `run` (8000 steps, every mode scored in one run), `bitwise` (weights identical across modes, CPU), `report` (block of `pt_training.md`) |
 | `pt_convention_report` | the module behind the T-019 report (same output; `report` needs no GPU) (T-019) |
 | `exp_pt_ablation_verdict` | per-term verdicts and the ordering of the loss terms against the paper, from the stored ablation evaluations; `report` rewrites the `ABLATION_VERDICT` block of `docs/experiments/pt_reproduction.md`, no GPU (T-017) |
 | `exp_pt_figures` | Figures 5 to 7 of the paper on our models; runs the models, so it needs a GPU and the checkpoints in `outputs/` (T-016) |

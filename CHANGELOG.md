@@ -2,6 +2,14 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-020] Usable validation curve: BatchNorm statistics of the PT validation
+
+- `val.bn` in `brushstroke/stroke_model/train.py`: `recalibrate` (default; statistics re-estimated on 20 fixed training-distribution
+  batches, on a copy of the network, dropout off), `batch`, or `running` (the former behaviour). The training state and stream are
+  untouched (tests: same weights for the three modes, bitwise resume with `recalibrate`).
+- 8000-step diagnostic: curve std 0.30 -> 0.20, residual to the local median 0.22 -> 0.08, spikes above 0.3: 10 -> 2 of 71.
+  `docs/design/pt_bn_validation.md`, `scripts/exp_pt_bn_validation.py`, `docs/experiments/pt_training.md` (section T-020).
+
 ## [T-019] Paint Transformer stroke convention: equivalence classes, invariant D_L1 and three options
 
 - Equivalence classes of the renderer derived and verified by rendering: `(w, h, theta + 1) = (-w, -h, theta)` is exact; the mirror

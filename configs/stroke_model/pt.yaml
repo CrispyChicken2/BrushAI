@@ -42,3 +42,6 @@ val:
   seed: 12345
   batches: 8             # 8 x 64 = 512 fixed held-out patches
   every: 1000
+  bn: recalibrate        # recalibrate | running | batch: BatchNorm statistics of the validation (T-020)
+  bn_batches: 20         # recalibrate: number of calibration batches of the training distribution
+  bn_seed: 54321         # recalibrate: seed of the calibration batches (own stream)

@@ -15,6 +15,7 @@ The training stream is determined by ``seed``; the validation set by ``val.seed`
 
 from __future__ import annotations
 
+import copy
 import csv
 import json
 import random
@@ -45,6 +46,7 @@ from brushstroke.utils.seed import seed_everything
 
 LOSS_TERMS = ("total", "pixel", "gt", "w", "decision")
 PRECISIONS = ("fp32", "bf16")
+BN_MODES = ("running", "recalibrate", "batch")
 
 
 @dataclass
@@ -88,6 +90,14 @@ class ValConfig:
     seed: int = 12345
     batches: int = 8
     every: int = 1000  # steps; 0 = only at the start and the end
+    # BatchNorm statistics used to score the validation set (T-020, pt_bn_validation.md):
+    # running = the running averages of training (eval mode; they can lag behind
+    # the weights and make isolated spikes), recalibrate = statistics re-estimated on
+    # `bn_batches` fixed batches of the training distribution, batch = the statistics of each
+    # validation batch. The last two work on a copy of the network.
+    bn: str = "recalibrate"
+    bn_batches: int = 20
+    bn_seed: int = 54321  # seed of the calibration batches (a stream apart from the training one)
 
 
 @dataclass
@@ -119,6 +129,8 @@ class _Context:
     def __init__(self, cfg: TrainConfig) -> None:
         if cfg.precision not in PRECISIONS:
             raise ValueError(f"precision must be one of {PRECISIONS}, got {cfg.precision!r}")
+        if cfg.val.bn not in BN_MODES:
+            raise ValueError(f"val.bn must be one of {BN_MODES}, got {cfg.val.bn!r}")
         if cfg.batch_size % 4 != 0:
             raise ValueError("batch_size must be a multiple of 4 (synthetic data)")
         self.cfg = cfg
@@ -140,11 +152,14 @@ class _Context:
         self.scheduler = LambdaLR(self.optimizer, cfg.schedule.lr_factor)
         self.step = 0
 
-    def forward(self, batch: PatchBatch) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Network predictions in fp32 (autocast of the network only when ``precision: bf16``)."""
+    def forward(
+        self, batch: PatchBatch, net: PaintTransformer | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Network predictions in fp32 (autocast of the network only when ``precision: bf16``);
+        ``net`` replaces the training network (a validation copy)."""
         enabled = self.cfg.precision == "bf16"
         with torch.autocast(self.device.type, dtype=torch.bfloat16, enabled=enabled):
-            shape, colour, logits = self.net.strokes(batch.target, batch.canvas)
+            shape, colour, logits = (net or self.net).strokes(batch.target, batch.canvas)
         return shape.float(), colour.float(), logits.float()
 
     def train_step(self, batch: PatchBatch) -> dict[str, float]:
@@ -170,15 +185,74 @@ def make_validation_set(ctx: _Context) -> list[PatchBatch]:
     return [ctx.generator.sample(ctx.cfg.batch_size, rng) for _ in range(ctx.cfg.val.batches)]
 
 
+def make_calibration_set(ctx: _Context) -> list[PatchBatch]:
+    """``val.bn_batches`` fixed batches of the training distribution for the BatchNorm
+    recalibration, a function of ``val.bn_seed`` only: neither the training stream nor any global
+    random state is consumed."""
+    v = ctx.cfg.val
+    rng = torch.Generator(device=ctx.device).manual_seed(v.bn_seed)
+    return [ctx.generator.sample(ctx.cfg.batch_size, rng) for _ in range(v.bn_batches)]
+
+
+def _batch_norms(net: torch.nn.Module) -> list[torch.nn.modules.batchnorm._BatchNorm]:
+    return [m for m in net.modules() if isinstance(m, torch.nn.modules.batchnorm._BatchNorm)]
+
+
 @torch.no_grad()
-def evaluate(ctx: _Context, batches: list[PatchBatch]) -> dict[str, float]:
-    """Mean loss terms over the validation batches (eval mode) and the mean absolute error of the
-    number of confident strokes (``logit > 0``) against the number of valid ground-truth strokes."""
-    was_training = ctx.net.training
+def validation_network(
+    ctx: _Context, mode: str, calibration: list[PatchBatch] | None = None
+) -> PaintTransformer:
+    """The network scored on the validation set, in eval mode.
+
+    ``running``: the training network itself. ``recalibrate`` and ``batch``: a deep copy (the
+    training state, running statistics included, is never touched) in which only the BatchNorm
+    layers use batch statistics (dropout stays off); ``recalibrate`` first resets them and
+    averages the statistics of the ``calibration`` batches (cumulative average, ``momentum=None``)
+    and then uses those averages, ``batch`` uses the statistics of each batch it is applied to.
+    """
+    if mode not in BN_MODES:
+        raise ValueError(f"mode must be one of {BN_MODES}, got {mode!r}")
     ctx.net.eval()
+    if mode == "running":
+        return ctx.net
+    net = copy.deepcopy(ctx.net).eval()
+    norms = _batch_norms(net)
+    if mode == "batch":
+        for m in norms:
+            m.train()
+            m.track_running_stats = False  # normalize with the batch, update nothing
+        return net
+    if not calibration:
+        raise ValueError("mode 'recalibrate' needs calibration batches")
+    for m in norms:
+        m.reset_running_stats()
+        m.momentum = None  # cumulative moving average over the calibration batches
+        m.train()
+    for batch in calibration:
+        ctx.forward(batch, net)
+    for m in norms:
+        m.eval()
+    return net
+
+
+@torch.no_grad()
+def evaluate(
+    ctx: _Context,
+    batches: list[PatchBatch],
+    mode: str | None = None,
+    calibration: list[PatchBatch] | None = None,
+) -> dict[str, float]:
+    """Mean loss terms over the validation batches (eval mode, BatchNorm as ``mode``, default
+    ``val.bn``) and the mean absolute error of the number of confident strokes (``logit > 0``)
+    against the number of valid ground-truth strokes."""
+    was_training = ctx.net.training
+    mode = mode or ctx.cfg.val.bn
+    if mode == "recalibrate" and calibration is None:
+        calibration = make_calibration_set(ctx)
+    net = validation_network(ctx, mode, calibration)
     sums = dict.fromkeys((*LOSS_TERMS, "count_error"), 0.0)
     for batch in batches:
-        shape, colour, logits = ctx.forward(batch)
+        shape, colour, logits = ctx.forward(batch, net)
         out = ctx.loss(shape, colour, logits, batch)
         for k in LOSS_TERMS:
             sums[k] += float(getattr(out, k))
@@ -304,6 +378,7 @@ def train(cfg: TrainConfig) -> dict[str, Any]:
     )
     val_log = _CsvLog(out / "val.csv", ["step", *LOSS_TERMS, "count_error"], keep)
     val_set = make_validation_set(ctx)
+    calibration = make_calibration_set(ctx) if cfg.val.bn == "recalibrate" else None
     last_step = min(cfg.schedule.total_steps, cfg.schedule.max_steps or cfg.schedule.total_steps)
     sch = cfg.schedule
     reset_peak_vram()
@@ -312,7 +387,7 @@ def train(cfg: TrainConfig) -> dict[str, Any]:
     window_start = time.perf_counter()
 
     def validate(tb: Any) -> None:
-        metrics = evaluate(ctx, val_set)
+        metrics = evaluate(ctx, val_set, calibration=calibration)
         val_log.write({"step": ctx.step, **metrics})
         history.append({"step": float(ctx.step), **metrics})
         if tb is not None:
