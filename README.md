@@ -4,7 +4,9 @@ Neural stroke-based painting: turn a text prompt or an image into a painting mad
 of brush strokes, replayed as a stroke-by-stroke animation. The research focus is semantic-aware stroke
 allocation, painterly stroke ordering and an "anytime quality" metric.
 
-**Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)).** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
+**Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)); M3 (evaluation harness and baseline
+numbers) is planned, with its evaluation protocol fixed in advance in [docs/design/evaluation.md](docs/design/evaluation.md) and its plan in
+[docs/plan/M3.md](docs/plan/M3.md). No M3 code or run exists yet.** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is reviewed at its gate, and the closing decision is the chef's: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
