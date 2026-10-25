@@ -30,6 +30,7 @@ extend-exclude = [".venv"]
 "scripts/exp_pt_ablation_verdict.py" = ["E501"]  # long table strings
 "scripts/make_m2_demos.py" = ["E501"]  # long table strings
 "scripts/exp_pt_bn_validation.py" = ["E501"]  # long table strings
+"scripts/exp_pt_paper_weights.py" = ["E501"]  # long table strings
 "scripts/exp_pt_figures.py" = ["E501"]  # long docstring lines
 "scripts/pt_repro_common.py" = ["E501"]  # paper numbers
 "scripts/exp_pt_convention.py" = ["E501"]  # long table strings and docstring lines

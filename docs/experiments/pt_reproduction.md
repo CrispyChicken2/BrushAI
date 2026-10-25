@@ -277,3 +277,56 @@ Details, per-model values and the options that fix the convention: `docs/experim
 - **Counting rule of "the paper's direction"** (the one that gives 7 of 20 for the code weights in T-016): a cell (term removed x column, 4 x 5) has the paper's direction when the ablated / full ratio, rounded to two decimals, is above 1.00, with `D_L1` having the signs of `w` and `h` folded (`|w|`, `|h|`, the T-016 diagnostic) to neutralize the convention outliers. Secondary counts: the same with the mirror-invariant `D_L1`; the cells that are *significantly* worse (Welch t >= 2.13, the T-017 rule).
 - **Decision rule for H** (primary count, paper weights minus code weights): **confirmed** if at least 3 more cells than the code weights (at least 10 of 20); **refuted** if not more cells (at most 7 of 20); **weak / within noise** for 1 or 2 more. The per-term verdicts (T-017 rule) are reported in addition. A negative or mixed result is reported as such.
 - **Commands**: `python -m scripts.exp_pt_paper_weights {train,evaluate,report}`; `report` rewrites the block below and needs no GPU.
+
+<!-- BEGIN PAPER_WEIGHTS -->
+
+Same protocol as T1c (`|h|`, real images and 4,096 synthesized patches, mean over 3 seeds); the *code weights* side is the stored T-016 / T-014 measurement, the *paper weights* side the 15 runs of T-021. Per-run values: `docs/experiments/data/pt_reproduction/` and `docs/experiments/data/pt_convention/eval.json`.
+
+**Absolute values** (mean ± std over seeds; `D_L1` with `|h|`; `D_L1 mirror` = mirror-invariant, raw predictions; `h < 0`, `w < 0` = share of matched strokes with a negative sign):
+
+| model | L_pixel (real) | L_pcpt (real) | L_pixel (strokes) | D_L1 | D_W | D_L1 mirror | h < 0 | w < 0 |
+|---|---|---|---|---|---|---|---|---|
+| paper full | 0.056 | 0.807 | 0.042 | 0.083 | 0.018 | | | |
+| code weights full (n = 3) | 0.073 ± 0.001 | 16.532 ± 0.400 | 0.046 ± 0.002 | 0.101 ± 0.003 | 0.024 ± 0.001 | 0.101 ± 0.004 | 33 ± 58 % | 0 ± 0 % |
+| paper w/o L_pixel | 0.081 | 1.012 | 0.068 | 0.241 | 0.024 | | | |
+| code weights w/o L_pixel (n = 3) | 0.088 ± 0.001 | 19.465 ± 0.517 | 0.066 ± 0.002 | 0.098 ± 0.002 | 0.022 ± 0.001 | 0.098 ± 0.002 | 33 ± 58 % | 0 ± 0 % |
+| paper w/o D_L1 | 0.074 | 0.941 | 0.077 | 0.267 | 0.019 | | | |
+| code weights w/o D_L1 (n = 3) | 0.073 ± 0.002 | 16.448 ± 0.506 | 0.045 ± 0.001 | 0.192 ± 0.138 | 0.020 ± 0.004 | 0.119 ± 0.013 | 33 ± 58 % | 33 ± 58 % |
+| paper w/o D_W | 0.069 | 0.947 | 0.046 | 0.113 | 0.034 | | | |
+| code weights w/o D_W (n = 3) | 0.070 ± 0.002 | 16.348 ± 0.383 | 0.045 ± 0.000 | 0.110 ± 0.002 | 0.030 ± 0.001 | 0.110 ± 0.002 | 0 ± 0 % | 0 ± 0 % |
+| paper w/o D_bce | 0.071 | 0.928 | 0.052 | 0.093 | 0.021 | | | |
+| code weights w/o D_bce (n = 3) | 0.069 ± 0.001 | 15.777 ± 0.008 | 0.043 ± 0.001 | 0.147 ± 0.086 | 0.024 ± 0.001 | 0.136 ± 0.066 | 67 ± 58 % | 33 ± 58 % |
+
+**Effect of removing a term** (ablated / full; `*` = significantly worse by the T-017 rule; `D_L1` with `|w|`, `|h|` folded):
+
+| removed term | weights | L_pixel (real) | L_pcpt (real) | L_pixel (strokes) | D_L1 | D_W | cells in the paper's direction |
+|---|---|---|---|---|---|---|---|
+| w/o L_pixel | paper | 1.45 | 1.25 | 1.62 | 2.90 | 1.33 | 5 / 5 |
+| | code weights | 1.21* | 1.18* | 1.44* | 0.97 | 0.94 | 3 / 5 |
+| w/o D_L1 | paper | 1.32 | 1.17 | 1.83 | 3.22 | 1.06 | 5 / 5 |
+| | code weights | 1.00 | 0.99 | 0.98 | 1.40 | 0.83 | 1 / 5 |
+| w/o D_W | paper | 1.23 | 1.17 | 1.10 | 1.36 | 1.89 | 5 / 5 |
+| | code weights | 0.97 | 0.99 | 0.97 | 1.08* | 1.26* | 2 / 5 |
+| w/o D_bce | paper | 1.27 | 1.15 | 1.24 | 1.12 | 1.17 | 5 / 5 |
+| | code weights | 0.95 | 0.95 | 0.94 | 0.98 | 1.02 | 1 / 5 |
+
+**Cells in the paper's direction (of 20)** and cells significantly worse:
+
+| `D_L1` flavour | code weights | paper weights | significantly worse (code / paper) |
+|---|---|---|---|
+| `|w|`, `|h|` folded (primary, the T-016 counting) | 7 | 0 | 5 / 0 |
+| `|h|` (T-016 protocol numbers) | 8 | 0 | 5 / 0 |
+| mirror-invariant (T-019) | 8 | 0 | 6 / 0 |
+
+**Per-term verdicts** (T-017 rule: *matters* = significantly worse on at least 3 of 5 columns; `|w|`, `|h|` fold):
+
+| removed term | code weights | paper weights | paper |
+|---|---|---|---|
+| w/o L_pixel | matters (3 / 5) | n/a | matters |
+| w/o D_L1 | not reproduced (0 / 5) | n/a | matters |
+| w/o D_W | partly (2 / 5) | n/a | matters |
+| w/o D_bce | not reproduced (0 / 5) | n/a | matters |
+
+*Incomplete: not every paper-weights group is evaluated yet.*
+
+<!-- END PAPER_WEIGHTS -->
