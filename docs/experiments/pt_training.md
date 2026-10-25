@@ -167,7 +167,7 @@ Mean absolute alpha difference between the stroke and each parameter variant, 40
 | ablation w/o dw (T-016) | 1.7 % | 1.7 % | 1.7 % | 1.7 % | 2.1 % | 0.6 % |
 | ablation w/o dbce (T-016) | 61.6 % | 58.5 % | 43.7 % | 48.3 % | 5.4 % | 4.0 % |
 
-Bias of the invariant metric on the 12 models with no negative `w` or `h` (mean decrease of `D_L1` relative to the raw value; a level that lowers clean models also lowers wrong ones for the wrong reason): `exact` 0.0 %, `mirror` 0.1 %, `rot180` 2.6 %, `swap` 16.8 %.
+Bias of the invariant metric on the 22 models with no negative `w` or `h` (mean decrease of `D_L1` relative to the raw value; a level that lowers clean models also lowers wrong ones for the wrong reason): `exact` 0.0 %, `mirror` 0.1 %, `rot180` 3.2 %, `swap` 17.4 %.
 
 Rule (H2 holds at a level): coefficient of variation across seeds at most 5 % and at least 3 times lower than the raw `D_L1`'s.
 
@@ -176,4 +176,49 @@ Rule (H2 holds at a level): coefficient of variation across seeds at most 5 % an
 - `rot180`: T-014 groups both within the rule (yes, yes); ablation groups 1 / 4.
 - `swap`: T-014 groups both within the rule (yes, yes); ablation groups 3 / 4.
 
+### H1: the three options, official recipe (56,320 steps), 3 seeds
+
+| option | total (raw) | total (`\|h\|`) | total (invariant L1) | invariant total vs baseline | h < 0 | w < 0 | outlier seeds |
+|---|---|---|---|---|---|---|---|
+| baseline (T-014) | 3.814 ± 0.119 | 3.771 ± 0.047 | 3.767 ± 0.042 | - | 33.3 ± 57.7 % | 0.0 ± 0.0 % | 1 / 3 |
+| A: positive `w`, `h` (softplus), `theta` wrapped | 3.753 ± 0.042 | 3.753 ± 0.042 | 3.753 ± 0.042 | -0.015 (t = -0.43) | 0.0 ± 0.0 % | 0.0 ± 0.0 % | 0 / 3 |
+| B: class-invariant L1 and matching (mirror class) | 3.891 ± 0.134 | 3.844 ± 0.135 | 3.756 ± 0.028 | -0.011 (t = -0.39) | 33.3 ± 57.7 % | 33.3 ± 57.7 % | 2 / 3 |
+| C: penalty `relu(-w) + relu(-h)` (weight 10) | 3.754 ± 0.008 | 3.754 ± 0.008 | 3.753 ± 0.007 | -0.014 (t = -0.57) | 0.0 ± 0.0 % | 0.0 ± 0.0 % | 0 / 3 |
+
+Stroke metrics of the same models:
+
+| model | L_pixel | D_L1 | D_L1 exact | D_L1 mirror | D_L1 rot180 | D_L1 swap | D_W | h < 0 | w < 0 | outlier seeds |
+|---|---|---|---|---|---|---|---|---|---|---|
+| baseline, raw | 0.0458 ± 0.0011 | 0.1476 ± 0.0836 | 0.1471 ± 0.0828 | 0.1015 ± 0.0039 | 0.0990 ± 0.0044 | 0.0842 ± 0.0028 | 0.0237 ± 0.0009 | 33.3 ± 57.7 % | 0.0 ± 0.0 % | 1 / 3 |
+| A: positive `w`, `h` (softplus), `theta` wrapped | 0.0451 ± 0.0002 | 0.0997 ± 0.0011 | 0.0997 ± 0.0011 | 0.0996 ± 0.0011 | 0.0972 ± 0.0014 | 0.0828 ± 0.0009 | 0.0230 ± 0.0002 | 0.0 ± 0.0 % | 0.0 ± 0.0 % | 0 / 3 |
+| B: class-invariant L1 and matching (mirror class) | 0.0461 ± 0.0007 | 0.2553 ± 0.1581 | 0.2013 ± 0.0883 | 0.1052 ± 0.0080 | 0.1010 ± 0.0055 | 0.0820 ± 0.0041 | 0.0212 ± 0.0042 | 33.3 ± 57.7 % | 33.3 ± 57.7 % | 2 / 3 |
+| C: penalty `relu(-w) + relu(-h)` (weight 10) | 0.0457 ± 0.0006 | 0.0998 ± 0.0006 | 0.0998 ± 0.0006 | 0.0998 ± 0.0006 | 0.0975 ± 0.0007 | 0.0830 ± 0.0007 | 0.0230 ± 0.0005 | 0.0 ± 0.0 % | 0.0 ± 0.0 % | 0 / 3 |
+
+- **A: positive `w`, `h` (softplus), `theta` wrapped**: 0 / 3 outlier seeds; invariant total -0.015 vs baseline (Welch t = -0.43, critical 2.13): not worse; **H1 met**.
+- **B: class-invariant L1 and matching (mirror class)**: 2 / 3 outlier seeds; invariant total -0.011 vs baseline (Welch t = -0.39, critical 2.13): not worse; **H1 not met**.
+- **C: penalty `relu(-w) + relu(-h)` (weight 10)**: 0 / 3 outlier seeds; invariant total -0.014 vs baseline (Welch t = -0.57, critical 2.13): not worse; **H1 met**.
+
+### Stretched recipe (112,640 steps) for the best option (A: positive `w`, `h` (softplus), `theta` wrapped)
+
+| option | total (raw) | total (`\|h\|`) | total (invariant L1) | invariant total vs baseline | h < 0 | w < 0 | outlier seeds |
+|---|---|---|---|---|---|---|---|
+| baseline (T-014, stretched) | 3.602 ± 0.092 | 3.560 ± 0.021 | 3.556 ± 0.014 | - | 33.3 ± 57.7 % | 0.0 ± 0.0 % | 1 / 3 |
+| A: positive `w`, `h` (softplus), `theta` wrapped | 7.379 ± 3.325 | 7.379 ± 3.325 | 7.379 ± 3.325 | +3.822 (t = +1.99) | 0.0 ± 0.0 % | 0.0 ± 0.0 % | 0 / 3 |
+
+Stroke metrics of the same models:
+
+| model | L_pixel | D_L1 | D_L1 exact | D_L1 mirror | D_L1 rot180 | D_L1 swap | D_W | h < 0 | w < 0 | outlier seeds |
+|---|---|---|---|---|---|---|---|---|---|---|
+| baseline, raw | 0.0417 ± 0.0002 | 0.1445 ± 0.0848 | 0.1439 ± 0.0837 | 0.0974 ± 0.0034 | 0.0947 ± 0.0037 | 0.0774 ± 0.0019 | 0.0220 ± 0.0009 | 33.3 ± 57.7 % | 0.0 ± 0.0 % | 1 / 3 |
+| A: positive `w`, `h` (softplus), `theta` wrapped | 0.0872 ± 0.0402 | 0.1492 ± 0.0495 | 0.1492 ± 0.0495 | 0.1486 ± 0.0488 | 0.1364 ± 0.0376 | 0.1151 ± 0.0330 | 0.0575 ± 0.0310 | 0.0 ± 0.0 % | 0.0 ± 0.0 % | 0 / 3 |
+
+- **A: positive `w`, `h` (softplus), `theta` wrapped** (stretched): 0 / 3 outlier seeds; invariant total +3.822 vs baseline (t = +1.99): not worse; **H1 met**.
+
 <!-- END CONVENTION -->
+
+### Findings (T-019)
+- **The classes.** Exactly equivalent for the renderer: `theta` mod 2 and `(w, h, theta + 1) = (-w, -h, theta)` (alpha error 0 with the training brushes, 5e-5 with the inference ones). The mirror class (`h -> -h`) is *not* exact: 14.4 % of the stroke area differs. The Gaussian `D_W` is blind to the whole swap class, so only the parameter L1 prefers the ground-truth convention.
+- **H2 (invariant `D_L1`): holds at the `mirror`, `rot180` and `swap` levels for both T-014 groups, not at `exact`** (the T-014 outlier seed uses the mirror, not the exact class). `mirror` is the primary level: its bias on clean models is 0.1 %, against 3.2 % (`rot180`) and 17.4 % (`swap`), which lower clean models too. The clean-bias column was added after a first look at the numbers, not pre-registered.
+- **H1, official recipe: met by A and C, not by B.** A and C: 0 / 3 outlier seeds, invariant total 3.753 against 3.767 (baseline), t = -0.43 and -0.57, so no quality cost and no gain beyond noise (3 seeds). B keeps the sign free by design (the invariant L1 removes the penalty): 2 / 3 seeds end with negative signs (one `h < 0`, one `w < 0`), its raw `D_L1` is 0.255 but its invariant total is as good as the others. Best option by the pre-registered rule: **A** (3.7526 against C's 3.7533, a difference far inside the seed noise; A is also the only one that makes the convention hold by construction).
+- **Negative result, stretched recipe: option A is unstable.** Seeds 0 and 1 degrade in the second half of the run (total from about 4.2 to about 6.1 and 6.8 in the training log, held-out invariant total 9.5 and 9.0, `L_pixel` 0.110, all 8 strokes of every patch painted), seed 2 behaves (3.549, better than the baseline's 3.556 +- 0.014). The pre-registered Welch rule reads t = +1.99 < 2.13, hence "not worse" and **H1 met on paper**; this is the test's lack of power on a bimodal 3-seed outcome, not evidence of equivalence. Our verdict: **A does not hold on the stretched recipe** (2 / 3 divergent seeds against 0 / 3 for the baseline). The cause was not investigated (candidates: the softplus floor on `w`, `h` giving vanishing gradients for small strokes, the unbounded `theta - floor(theta)` jump in the matching cost, the constant learning rate of 1e-4 over 400 epochs). The other options were not run stretched (protocol: best option only), so whether C is stable there is unknown.
+- **Practical outcome.** The invariant `D_L1` (mirror level) is what to report from now on. For training, A or C remove the convention outliers on the official recipe; on the stretched recipe none of the options is validated.
