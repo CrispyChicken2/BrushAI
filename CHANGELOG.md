@@ -2,6 +2,15 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-022] M3 plan and evaluation protocol
+
+- `docs/design/evaluation.md`: the evaluation protocol, fixed before any M3 run: 100-image eval set (40 Met Open Access CC0 paintings, 30 CC0/PD
+  photographs, 30 SDXL images from 30 fixed prompts) with a 10-image dev split; LPIPS-Alex as the held-out headline metric; anytime AUC@B on 15
+  fixed checkpoints normalized per image by the blank-canvas LPIPS; saliency-weighted LPIPS with InSPyReNet as evaluation saliency and an explicit
+  circularity rule for M4; strokes-to-target with a dev-fixed threshold; paired Wilcoxon statistics with effect sizes and Holm families; the producer
+  interface; the Learning to Paint data policy (Met CC0 subset) and check strategy. Measured: LPIPS range, VRAM and time at 512x512.
+- `docs/plan/M3.md`: the M3 plan with justified refinements (prefix protocol: 47 h instead of about 190 h for the optimization baseline).
+
 ## [T-021] Paper-weights ablations of the PT loss
 
 - 15 runs (full model + 4 ablations x 3 seeds, official recipe, 56,320 steps) with the paper's loss weights (pos_weight 8, BCE 1,
