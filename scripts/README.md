@@ -20,6 +20,8 @@ Entry points, run from the repo root: `python -m scripts.<name>` or `python scri
 | `exp_pt_table1` | Table 1 of the Paint Transformer reproduction: stages `strokes`, `real`, `optim`; `report` regenerates the table block of `docs/experiments/pt_reproduction.md` from the stored JSON, no GPU (T-016) |
 | `exp_pt_table2` | Table 2 (inference and training time): stages `run`, `training` (re-times the training step), `report` regenerates its block from the stored JSON, no GPU (T-016) |
 | `exp_pt_ablations` | the 12 loss-ablation trainings (4 terms x 3 seeds, 56,320 steps each, `--parallel` runs share the GPU); needs the GPU (T-016) |
+| `exp_pt_convention` | stroke-convention study (T-019): `symmetry` (equivalence classes, verified by rendering), `train` (options A, B, C; the stretched recipe for the best one), `evaluate`, and `report` (no GPU), which regenerates the T-019 blocks of `docs/experiments/pt_training.md` and of `pt_reproduction.md` |
+| `pt_convention_report` | the module behind the T-019 report (same output; `report` needs no GPU) (T-019) |
 | `exp_pt_ablation_verdict` | per-term verdicts and the ordering of the loss terms against the paper, from the stored ablation evaluations; `report` rewrites the `ABLATION_VERDICT` block of `docs/experiments/pt_reproduction.md`, no GPU (T-017) |
 | `exp_pt_figures` | Figures 5 to 7 of the paper on our models; runs the models, so it needs a GPU and the checkpoints in `outputs/` (T-016) |
 | `pt_training_report` | evaluate, archive and regenerate the tables and figures of the Paint Transformer training runs from the stored logs (`report` needs no GPU) (T-014) |

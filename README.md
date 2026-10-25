@@ -13,7 +13,8 @@ training pipeline (T-013) are in place, three full training runs have been done 
 [docs/experiments/pt_training.md](docs/experiments/pt_training.md)), and the multi-scale inference pipeline reproduces the official
 inference exactly with the official weights (T-015, see [Painting with the Paint Transformer](#painting-with-the-paint-transformer-m2)),
 and the reproduction study (T-016) checks the paper's results: the ablation and real-image claims are mostly not reproduced (see
-[Reproducing the Paint Transformer results](#reproducing-the-paint-transformer-results-m2)).
+[Reproducing the Paint Transformer results](#reproducing-the-paint-transformer-results-m2)), and the stroke-convention study (T-019)
+gives an invariant metric and options that are off by default (see [Training the Paint Transformer](#training-the-paint-transformer-m2)).
 Documentation index: [docs/README.md](docs/README.md).
 Changes per ticket: [CHANGELOG.md](CHANGELOG.md).
 
@@ -336,8 +337,17 @@ in [docs/experiments/pt_training.md](docs/experiments/pt_training.md); the table
 
 **Use `|h|`, not `h`, downstream.** Seed 0 learned a negative stroke height for every stroke (the loss and the renderer accept
 it, so nothing penalises it), and its loss is higher partly for that reason (with `|h|` it is still the highest of the three seeds). The checkpoint selected for the next steps
-(`outputs/pt_long/seed2/latest.pt`) has no such sign problem. Code that reads the predicted height must take `|h|`
-until a sign-fixing option is tested (a proposed ticket). Checkpoints are kept outside the repository.
+(`outputs/pt_long/seed2/latest.pt`) has no such sign problem. Code that reads the predicted height must take `|h|`.
+Checkpoints are kept outside the repository.
+
+**Convention options (T-019, off by default).** The sign and the angle of the stroke parameters have equivalent forms: a stroke with
+`(w, h, theta + 1)` is the stroke `(-w, -h, theta)`, exactly; the mirror `h -> -h` is only an approximation (it changes about 14 % of the
+stroke area). Three options are behind flags: `model.convention=positive` (A, softplus on `w` and `h`), `loss.l1_invariance=mirror` (B)
+and `loss.lambda_sign=10` (C, a penalty on negative sizes). On the official recipe, A and C remove the outlier seeds at no cost to the
+held-out loss. On the stretched recipe, A is unstable: two of three seeds diverge in the second half of training, so no option is
+validated there. The metric to report from now on is the mirror-invariant `D_L1`
+([docs/experiments/pt_training.md](docs/experiments/pt_training.md), section T-019; the design is in
+[docs/design/pt_convention.md](docs/design/pt_convention.md)). Regenerate with `.venv\Scripts\python -m scripts.exp_pt_convention report` (no GPU).
 
 Hugging Face upload is prepared but not run: `scripts/upload_pt_to_hub.py` builds the staging folder with the weights, the
 config hash and a model card (MIT), and only uploads with `--push`.
@@ -397,8 +407,9 @@ The reproduction study (T-016) fixed its protocol before running anything; the r
 | Figure 6 | **partly**: only the pixel-loss ablation is visibly worse |
 
 Two caveats set the scale of these numbers. The absolute value of the perceptual loss depends on a layer choice that the paper does
-not publish, so only orderings and ratios are compared. Some models predict negative stroke parameters, and the results use the
-`|h|` fold, which is a diagnostic rather than an exact symmetry. The conclusion for the project, on our five images: a good
+not publish, so only orderings and ratios are compared. Some models predict negative stroke parameters; the convention study (T-019)
+found that the `|h|` fold alone is a diagnostic rather than an exact symmetry, and that the mirror-invariant `D_L1` is the metric to
+read. The conclusion for the project, on our five images: a good
 optimization baseline beats the Paint Transformer on fidelity, and the argument for the Paint Transformer is speed.
 
 The two tables regenerate from the stored data with no GPU:

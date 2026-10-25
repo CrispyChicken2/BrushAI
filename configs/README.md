@@ -13,6 +13,10 @@ checksums) and `baseline_t005.yaml` (frozen T-005 settings, so the sweep stays r
 `stroke_model/pt.yaml` is the training configuration of the Paint Transformer (`scripts/train_pt.py`): the official schedule,
 the validation set, precision, resume and the loss preset.
 
+The stroke-convention options of T-019 are off in the default configs (the official behaviour): `model.convention` (`raw` | `positive`),
+`loss.l1_invariance` (`none` | `exact` | `mirror` | `rot180` | `swap`) and `loss.lambda_sign` (0 = off). They are set in
+`configs/pt/model.yaml`, `configs/pt/loss_official.yaml` and `configs/stroke_model/pt.yaml`.
+
 `pt/` holds the Paint Transformer configs: `model.yaml` (the architecture, `brushstroke.stroke_model.PTModelConfig`),
 `loss_official.yaml` and `loss_paper.yaml` (the two loss presets, `PTLossConfig`), and `brushes.yaml`, the manifest of the
 official brush images (URLs at a pinned commit, licence, SHA-256), read by `scripts/fetch_pt_brushes.py`. The PT-compatible rendering mode is switched in `default.yaml` (`render.mode: pt`).
