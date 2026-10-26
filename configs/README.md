@@ -29,4 +29,6 @@ baseline and animation defaults and only sets the seed, the image, `cudnn_determ
 
 `eval/` holds the evaluation set's configuration (T-024, T-034): `eval_set.yaml` (the manifest of the 100 images, with licence strings,
 SHA-256 of the files and of the prepared pixels, and the dev flag), `sdxl_prompts.yaml` (the 30 SDXL prompts and seeds) and
-`curation_rejections.yaml` (the images rejected by hand, with the reason).
+`curation_rejections.yaml` (the images rejected by hand, with the reason). `saliency.yaml` pins the evaluation saliency model
+(InSPyReNet: the code commit, the checkpoint SHA-256 and the normalisation of its maps) used by `scripts/fetch_inspyrenet.py` and
+`scripts/compute_saliency.py` (T-025).
