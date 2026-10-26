@@ -512,7 +512,8 @@ def test_fetch_reports_a_changed_source_instead_of_crashing(tmp_path: Path) -> N
     im = EvalImage(
         id="t2", category="photo", stratum="photo_scene", source="commons", dev=False,
         licence=ds.LICENCES[1], retrieved="2026-10-26", sha256="0" * 64, prepared_sha256="1" * 64,
-        url="https://example.org/t2.jpg", page_url="https://example.org/t2", crop_box=[10, 10, 900, 900],
+        url="https://example.org/t2.jpg", page_url="https://example.org/t2",
+        crop_box=[10, 10, 900, 900],
     )  # fmt: skip
     status = fetch.fetch_one(im, tmp_path, None)
     assert status.startswith("SHA-256 MISMATCH") and "outside" in status
