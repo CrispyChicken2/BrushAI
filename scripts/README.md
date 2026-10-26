@@ -24,7 +24,7 @@ Entry points, run from the repo root: `python -m scripts.<name>` or `python scri
 | `exp_pt_bn_validation` | validation BatchNorm diagnostic (T-020): `run` (8000 steps, every mode scored in one run), `bitwise` (weights identical across modes, CPU), `report` (block of `pt_training.md`) |
 | `pt_convention_report` | the module behind the T-019 report (same output; `report` needs no GPU) (T-019) |
 | `exp_pt_paper_weights` | the five ablations with the paper's loss weights and BCE matching cost (T-021): `train` (15 runs), `evaluate`, `report` (block of `pt_reproduction.md`, no GPU) |
-| `exp_pt_instability` | instability of convention option A on the stretched recipe (T-023): `trace` (per-step diagnostics), `branch` (single-factor reruns), `report` (block `T023` of `pt_training.md`) |
+| `exp_pt_instability` | instability of convention option A on the stretched recipe (T-023): `trace` (per-step diagnostics), `branch` (single-factor reruns), `report` (block `T023` of `pt_training.md`; needs the per-run `train.csv`, `trace.csv` and `summary.json` of the runs in `outputs/`, which are not in git, so it does not regenerate from the repository alone) |
 | `exp_pt_ablation_verdict` | per-term verdicts and the ordering of the loss terms against the paper, from the stored ablation evaluations; `report` rewrites the `ABLATION_VERDICT` block of `docs/experiments/pt_reproduction.md`, no GPU (T-017) |
 | `exp_pt_figures` | Figures 5 to 7 of the paper on our models; runs the models, so it needs a GPU and the checkpoints in `outputs/` (T-016) |
 | `pt_training_report` | evaluate, archive and regenerate the tables and figures of the Paint Transformer training runs from the stored logs (`report` needs no GPU) (T-014) |

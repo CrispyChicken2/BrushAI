@@ -352,8 +352,10 @@ Checkpoints are kept outside the repository.
 `(w, h, theta + 1)` is the stroke `(-w, -h, theta)`, exactly; the mirror `h -> -h` is only an approximation (it changes about 14 % of the
 stroke area). Three options are behind flags: `model.convention=positive` (A, softplus on `w` and `h`), `loss.l1_invariance=mirror` (B)
 and `loss.lambda_sign=10` (C, a penalty on negative sizes). On the official recipe, A and C remove the outlier seeds at no cost to the
-held-out loss. On the stretched recipe, A is unstable: two of three seeds diverge in the second half of training, so no option is
-validated there. The metric to report from now on is the mirror-invariant `D_L1`
+held-out loss. On the stretched recipe, A degraded in two of the three runs of T-019 (their transformer encoder collapses to a
+nearly constant output in the second half of training). The follow-up (T-023) did not reproduce it in nine further option-A runs,
+and the cause is not found: the degradation is rare or depends on a condition that was not recorded. No option is validated on the
+stretched recipe. The metric to report from now on is the mirror-invariant `D_L1`
 ([docs/experiments/pt_training.md](docs/experiments/pt_training.md), section T-019; the design is in
 [docs/design/pt_convention.md](docs/design/pt_convention.md)). Regenerate with `.venv\Scripts\python -m scripts.exp_pt_convention report` (no GPU).
 
