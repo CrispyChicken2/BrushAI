@@ -1,0 +1,45 @@
+model: InSPyReNet (Kim et al., ACCV 2022), SwinB backbone, trained on DUTS-TR only (config InSPyReNet_SwinB)
+code:
+  repo: https://github.com/plemeri/InSPyReNet
+  commit: 692ad8a5774cf95ef615a730d5070aad18f6b160
+  licence: 'MIT (LICENSE file of the commit, SHA-256 below; GitHub licence API: MIT)'
+  files:
+    LICENSE: 220779c333587f5cd4c8c00124bdf318d59bc41ccbb3058e81cc54f404c2fdb1
+    configs/InSPyReNet_SwinB.yaml: 30a72150ff12a04093b0725edc93aa069c2dacfeb48a9634e29e76208332f074
+    lib/InSPyReNet.py: eeaec3a3aaa91df69e7d37719aecaa6b01973214244639f60a7b8f82718b7a09
+    lib/__init__.py: 95b6af6015dcd936a2303ff1bf5c7f325ea3dc4786feb8d882b4120797e0ba08
+    lib/backbones/Res2Net_v1b.py: 1cc617de3b25820342175cdaf5b8fdbf6ce904b0af0ccfa151db287f6c4664e5
+    lib/backbones/SwinTransformer.py: 3f34c79b148ad6c9eee586b06699ab9ad5cf716f2df0c0e046e615b795a25a40
+    lib/modules/attention_module.py: 757884cb176d073b00a6bba51839c4bd778981215cff767c8a62fa5e230ce14b
+    lib/modules/context_module.py: b5b612e4d86848a3e69b66d89effcc8698e434d6f50270595605c1d42cb844d4
+    lib/modules/decoder_module.py: a6c99bfdfed9cefd4184662b4a093d179e6a0c805d92ad21122ebaf95e05ee20
+    lib/modules/layers.py: 9c92db14ba7c8b98c0fa399d76f63a7bd68f5d53214fa2a290c636a978d0c4d9
+    lib/optim/__init__.py: d08dcd1aae53134651d5e584358bdf296c70962b889c185a8d252b91517b4676
+    lib/optim/losses.py: 67718c754cca52dbff63ed5d247e5b583be6e393e8117c8d6b3b1f7c6f13bfff
+    lib/optim/scheduler.py: 0973018d169976f16303b8fc615454cff801019f396812407476e8c021df9931
+    utils/__init__.py: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    utils/misc.py: 10dbe035925198d335304ee0d419143107c59645e7d4a1250ff4c61f4f028624
+checkpoint:
+  file: swinb_duts_tr.pth
+  bytes: 367526592
+  sha256: 6a35253650457b2d87d8704b08e19d90aef58da081456c18ac77cd357addfaee
+  sources:
+    google_drive_id: 1k5hNJImgEgSmz-ZeJEEb_dVkrOnswVMq
+    model_zoo: https://github.com/plemeri/InSPyReNet/blob/main/docs/model_zoo.md (row SwinB, DUTS-TR, config InSPyReNet_SwinB)
+  licence: no licence is stated for the checkpoints (model zoo page, README and LICENSE cover the code); fetched, hash pinned, used as a measuring
+    instrument, never redistributed, never committed
+inference:
+  base_size:
+  - 384
+  - 384
+  threshold: 512
+  mean:
+  - 0.485
+  - 0.456
+  - 0.406
+  std:
+  - 0.229
+  - 0.224
+  - 0.225
+  note: '512 px targets are below the pyramid threshold: the model sees the 384 px bilinear resize, its output is min-max normalized by the model
+    and resized to 512 with align_corners=True; TF32 off'

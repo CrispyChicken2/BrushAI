@@ -2,6 +2,11 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-025] Evaluation saliency maps
+
+- `brushstroke/eval/saliency.py`: spectral-residual control (Hou and Zhang 2007) and the pinned InSPyReNet SwinB (DUTS-TR) wrapper; `configs/eval/saliency.yaml` pins the code commit, 15 file hashes and the checkpoint SHA-256; `scripts/fetch_inspyrenet.py`, `scripts/compute_saliency.py` (maps of the 100 eval images in `outputs/saliency`, recorded hashes in `docs/experiments/data/saliency/saliency_maps.json`, `--verify`, sanity sheet `docs/experiments/saliency_sanity.png`).
+- Measured: 95 ms per image, 692 MB VRAM, bitwise deterministic. Licence recorded (no licence for the checkpoint: fetched, never redistributed); `tests/test_circularity.py` enforces that InSPyReNet is reserved for evaluation. Amendment in `docs/design/evaluation.md`, data card updated.
+
 ## [T-034] Evaluation set: audit and last review fixes
 
 - `scripts/audit_eval_set.py`: every machine-checkable protocol rule on every prepared image (borders with one definition, near-duplicates and same-scene pairs, photographer caps, strata, dev/test, sources, control characters, people detector, colour), report in `docs/experiments/data/eval_set/audit.json` (0 violations); `docs/experiments/data/eval_set/visual_audit.md`: one line per image after a look at all 100.
