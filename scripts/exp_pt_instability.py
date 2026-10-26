@@ -2,13 +2,15 @@
 
     python -m scripts.exp_pt_instability trace  --name A_s0 --seed 0 [--convention positive]
         # option A (or raw) on the stretched recipe, every step logged with gradient/Adam/activation
-        # diagnostics, rotating checkpoints, stops 600 steps after the first loss spike
+        # diagnostics, rotating checkpoints (the last 12,000 steps, frozen by an early alert), stops 600
+        # steps after the first loss spike
     python -m scripts.exp_pt_instability branch --name ctl1 --from-trace A_s0 --steps 6000 --data-seed 1 [factor flags]
-        # resume from the checkpoint ~2000 steps before the spike, change ONE factor, record spikes
+        # resume from the checkpoint --back steps before the early alert, change ONE factor, record alerts and spikes
     python -m scripts.exp_pt_instability report
         # tables and figure -> docs/experiments/pt_training.md (block T023)
 
-A *spike* is a jump of the 100-step mean total loss above 1.25 x the median of the previous 1000 steps
+An *alert* is a rise of the 100-step mean total loss by more than 4 standard deviations of the previous 2000 steps
+(it fires at the onset of an excursion); a *spike* is a jump of the 100-step mean total loss above 1.25 x the median of the previous 1000 steps
 (the scan used on the stored T-019 logs). The training step is the one of ``brushstroke.stroke_model.train``
 plus diagnostics (tested to produce the identical weights). Data: ``docs/experiments/data/pt_instability/``.
 """
@@ -44,9 +46,13 @@ from brushstroke.utils.config import load_config
 
 ROOT = Path("outputs/pt_instab")
 CONFIG = Path("configs/stroke_model/pt.yaml")
-STRETCHED = ["schedule.n_epochs=400"]  # the stretched recipe: lr 1e-4 for 102,400 steps
+STRETCHED = ["schedule.n_epochs=400", "schedule.n_epochs_decay=40"]  # the T-019 stretched recipe
 SPIKE_FACTOR, SPIKE_WINDOW, SPIKE_BASE, SPIKE_WARMUP = 1.25, 100, 1000, 5000
-AFTER_SPIKE, CKPT_EVERY, CKPT_KEEP = 600, 500, 8
+AFTER_SPIKE, CKPT_EVERY, CKPT_KEEP = 600, 500, 24  # 24 x 500: the 12,000 steps before an alert
+# early alert: the 100-step mean of the total loss is more than ALERT_Z standard deviations above the
+# median of the previous 2000 steps. It fires at the onset of an excursion, thousands of steps before
+# the 1.25x rule of the spike (seed 1 of T-019: 31,175 against 35,625), and freezes the checkpoint rotation.
+ALERT_Z, ALERT_BASE, ALERT_HOLD = 4.0, 2000, 4000
 GROUPS = ("cnn", "tr_enc", "tr_dec", "head", "embed")
 
 
@@ -87,6 +93,28 @@ class SpikeDetector:
             self.base.append(mean)
         if hit:
             self.spike = step
+        return hit
+
+
+class AlertDetector:
+    """Online early alert: z-score of the 100-step mean total against the previous ``ALERT_BASE`` steps
+    (100-step means sampled every 25 steps). ``update`` returns True when the score exceeds ``ALERT_Z``."""
+
+    def __init__(self) -> None:
+        self.totals: deque[float] = deque(maxlen=SPIKE_WINDOW)
+        self.base: deque[float] = deque(maxlen=ALERT_BASE // 25)
+
+    def update(self, step: int, total: float) -> bool:
+        self.totals.append(total)
+        if len(self.totals) < SPIKE_WINDOW:
+            return False
+        mean = sum(self.totals) / SPIKE_WINDOW
+        hit = False
+        if step > SPIKE_WARMUP and len(self.base) == self.base.maxlen:
+            spread = statistics.pstdev(self.base)
+            hit = spread > 0 and (mean - statistics.median(self.base)) / spread > ALERT_Z
+        if step % 25 == 0:
+            self.base.append(mean)
         return hit
 
 
@@ -191,10 +219,13 @@ def run_loop(
     spike, logging every step; writes ``trace.csv``, rotating ``ckpt_<step>.pt`` and ``summary.json``."""
     out.mkdir(parents=True, exist_ok=True)
     tap = Tap(ctx.net)
-    detector = SpikeDetector()
+    detector, alarm = SpikeDetector(), AlertDetector()
     for step, total in prime:  # the losses before the start of a branch, for the reference level
         detector.update(step, total)
+        alarm.update(step, total)
     detector.spike = None
+    alerts: list[int] = []
+    alert_at: int | None = None  # the alert in force: the checkpoint rotation is frozen
     stop_at = max_steps
     ckpts: deque[Path] = deque()
     val_set = make_validation_set(ctx) if val_every else []
@@ -206,11 +237,18 @@ def run_loop(
             lr = float(ctx.scheduler.get_last_lr()[0])
             row = traced_step(ctx, batch, tap)
             writer.writerow({"step": ctx.step, "lr": lr, **row})
+            if alarm.update(ctx.step, row["total"]) and alert_at is None:
+                alert_at = ctx.step
+                alerts.append(ctx.step)
+                print(f"alert at step {ctx.step}", flush=True)
+            if alert_at is not None and detector.spike is None and ctx.step - alert_at > ALERT_HOLD:
+                alert_at = None  # no spike followed: resume the rotation
             if detector.update(ctx.step, row["total"]):
                 stop_at = min(stop_at, ctx.step + AFTER_SPIKE)
                 fh.flush()
                 print(f"spike at step {ctx.step}", flush=True)
-            if keep_checkpoints and ctx.step % CKPT_EVERY == 0 and detector.spike is None:
+            frozen = alert_at is not None or detector.spike is not None
+            if keep_checkpoints and ctx.step % CKPT_EVERY == 0 and not frozen:
                 path = out / f"ckpt_{ctx.step}.pt"
                 save_checkpoint(ctx, path)
                 ckpts.append(path)
@@ -221,7 +259,13 @@ def run_loop(
             if ctx.step % 1000 == 0:
                 fh.flush()
                 print(ctx.step, round(row["total"], 3), flush=True)
-    summary = {"steps": ctx.step, "spike": detector.spike, "convention": ctx.cfg.model.convention}
+    summary = {
+        "steps": ctx.step,
+        "spike": detector.spike,
+        "alert": alert_at if detector.spike is not None else None,
+        "alerts": alerts,
+        "convention": ctx.cfg.model.convention,
+    }
     (out / "summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
     return summary
 
@@ -286,14 +330,16 @@ def cmd_trace(args: argparse.Namespace) -> None:
 
 
 def last_good_checkpoint(trace: Path, back: int) -> Path:
-    """The checkpoint at least ``back`` steps before the spike of ``trace`` (the rotating ones kept)."""
-    spike = json.loads((trace / "summary.json").read_text(encoding="utf-8"))["spike"]
+    """The checkpoint at least ``back`` steps before the alert that preceded the spike of ``trace`` (the
+    spike itself for a summary without alert): the rotation keeps the 12,000 steps before the alert."""
+    info = json.loads((trace / "summary.json").read_text(encoding="utf-8"))
+    spike = info.get("alert") or info["spike"]
     if spike is None:
         raise SystemExit(f"{trace} has no spike")
     steps = sorted(int(p.stem.split("_")[1]) for p in trace.glob("ckpt_*.pt"))
     ok = [s for s in steps if s <= spike - back]
     if not ok:
-        raise SystemExit(f"no checkpoint {back} steps before the spike {spike} in {trace}")
+        raise SystemExit(f"no checkpoint {back} steps before the alert/spike {spike} in {trace}")
     return trace / f"ckpt_{ok[-1]}.pt"
 
 
@@ -334,7 +380,10 @@ def cmd_branch(args: argparse.Namespace) -> None:
         _NUMPY_STATE_GLOBALS
     ):  # our own checkpoint, never a full unpickle
         state = torch.load(ckpt, map_location="cpu", weights_only=True)
-    cfg = make_cfg(state["config"]["seed"], state["config"]["model"]["convention"], out)
+    convention = state["config"]["model"]["convention"]
+    if convention != "positive" and (args.wh, args.theta) != ("softplus", "wrap"):
+        raise SystemExit("--wh and --theta change the positive parameterization: the parent is raw")
+    cfg = make_cfg(state["config"]["seed"], convention, out)
     if args.grad_clip:
         cfg.optim.grad_clip = args.grad_clip
     ctx = _Context(cfg)
@@ -422,6 +471,69 @@ def scan_spikes(step: Any, total: Any, every: int) -> list[int]:
     return hits
 
 
+TERMS = ("total", "pixel", "gt", "w", "decision")
+
+
+def z_scores(step: Any, x: Any, every: int) -> Any:
+    """Score of each 100-step mean of ``x`` against the median and standard deviation of the previous
+    ``ALERT_BASE`` steps (NaN before). ``x`` is logged every ``every`` steps."""
+    import numpy as np
+
+    k, base = SPIKE_WINDOW // every, ALERT_BASE // every
+    sm = np.convolve(x, np.ones(k) / k, mode="valid")
+    z = np.full(len(sm), np.nan)
+    for i in range(base, len(sm)):
+        ref = sm[i - base : i]
+        if ref.std() > 0:
+            z[i] = (sm[i] - np.median(ref)) / ref.std()
+    return step[k - 1 :], z
+
+
+def scan_alerts(step: Any, total: Any, every: int, upto: int = 10**9) -> list[int]:
+    """The early alerts (``z > ALERT_Z``, at least 1500 steps apart) of a log, before ``upto``."""
+    st, z = z_scores(step, total, every)
+    hits: list[int] = []
+    for s, v in zip(st, z, strict=True):
+        if SPIKE_WARMUP < s <= upto and v > ALERT_Z and (not hits or s - hits[-1] > 1500):
+            hits.append(int(s))
+    return hits
+
+
+def departure(a: Any, b: Any, every: int = 25, threshold: float = 0.1) -> int | None:
+    """First step (after 10,000) where the 100-step mean total of run ``a`` exceeds the one of the
+    same-seed rerun ``b`` by ``threshold`` (the largest difference of the first 20,000 steps is 0.05)."""
+    import numpy as np
+
+    n, k = min(len(a["step"]), len(b["step"])), SPIKE_WINDOW // every
+    d = np.convolve(a["total"][:n], np.ones(k) / k, "valid") - np.convolve(
+        b["total"][:n], np.ones(k) / k, "valid"
+    )
+    st = a["step"][k - 1 : n]
+    hit = np.nonzero((d > threshold) & (st > 10_000))[0]
+    return int(st[hit[0]]) if len(hit) else None
+
+
+def first_crossings(log: dict[str, Any], event: int) -> dict[str, int | None]:
+    """For each loss term, the first step within [event - 100, event + 1000] where its score exceeds ``ALERT_Z``."""
+    out: dict[str, int | None] = {}
+    for term in TERMS:
+        st, z = z_scores(log["step"], log[term], 25)
+        window = [
+            int(s)
+            for s, v in zip(st, z, strict=True)
+            if event - 100 <= s <= event + 1000 and v > ALERT_Z
+        ]
+        out[term] = window[0] if window else None
+    return out
+
+
+def _log(path: Path) -> dict[str, Any]:
+    import numpy as np
+
+    rows = list(csv.DictReader(path.open(encoding="utf-8")))
+    return {k: np.array([float(r[k]) for r in rows]) for k in ("step", *TERMS)}
+
+
 def cmd_report() -> None:
     import matplotlib
 
@@ -506,9 +618,37 @@ def cmd_report() -> None:
     ax.legend(fontsize=7)
     fig.tight_layout()
     fig.savefig(FIGURE)
+    onset_lines = [
+        "| T-019 seed | departs from its rerun | first alerts (before 48,000) | first step with score > 4, per term at the first alert (total / pixel / gt / w / decision) | first 1.25x spike |",
+        "|---|---|---|---|---|",
+    ]
+    for seed in (0, 1):
+        a = _log(T19 / f"seed{seed}" / "train.csv")
+        b = _log(ROOT / f"T19_s{seed}" / "train.csv")
+        alerts = scan_alerts(a["step"], a["total"], 25, upto=48_000)
+        cross = first_crossings(a, alerts[0]) if alerts else {}
+        dep = departure(a, b)
+        spikes = out[f"T19_seed{seed}"]["spikes"]
+        out[f"onset_seed{seed}"] = {"departure": dep, "alerts": alerts, "first_crossings": cross}
+        onset_lines.append(
+            f"| {seed} | {dep} | {', '.join(map(str, alerts))} | "
+            + " / ".join(str(cross.get(t)) for t in TERMS)
+            + f" | {spikes[0]} |"
+        )
+    healthy = _log(T19 / "seed2" / "train.csv")
+    quiet = {"T19_seed2": scan_alerts(healthy["step"], healthy["total"], 25, upto=48_000)}
+    for name in REPLICATES:
+        step, total = _column(ROOT / name / "trace.csv", "total")
+        quiet[name] = scan_alerts(step, total, 1)
+    for name in EXACT:
+        step, total = _column(ROOT / name / "train.csv", "total")
+        quiet[name] = scan_alerts(step, total, 25)
+    out["alerts_healthy"] = quiet
     DATA.mkdir(parents=True, exist_ok=True)
     (DATA / "runs.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
-    write_block("T023", chr(10).join(lines), Path("docs/experiments/pt_training.md"))
+    write_block(
+        "T023", chr(10).join([*lines, "", *onset_lines]), Path("docs/experiments/pt_training.md")
+    )
     print(FIGURE, FIGURE.stat().st_size)
 
 
@@ -531,7 +671,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--back",
         type=int,
         default=2000,
-        help="checkpoint at least this many steps before the spike",
+        help="checkpoint at least this many steps before the early alert (up to 11000 are kept)",
     )
     b.add_argument("--steps", type=int, default=6000)
     b.add_argument("--data-seed", type=int, default=1)

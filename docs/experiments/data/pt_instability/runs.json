@@ -85,5 +85,56 @@
  "T19_s1": {
   "scan": [],
   "steps": 48000
+ },
+ "onset_seed0": {
+  "departure": 20900,
+  "alerts": [
+   33175,
+   35475,
+   37425,
+   41900,
+   46825
+  ],
+  "first_crossings": {
+   "total": 33175,
+   "pixel": 33175,
+   "gt": null,
+   "w": 33175,
+   "decision": 33575
+  }
+ },
+ "onset_seed1": {
+  "departure": 31100,
+  "alerts": [
+   31175,
+   35625,
+   38425,
+   41650,
+   45625
+  ],
+  "first_crossings": {
+   "total": 31175,
+   "pixel": 31125,
+   "gt": null,
+   "w": 31175,
+   "decision": 31750
+  }
+ },
+ "alerts_healthy": {
+  "T19_seed2": [],
+  "A_s0": [],
+  "A_s1": [],
+  "A_s2": [],
+  "A_s0v": [],
+  "A_s1v": [],
+  "A_s5": [
+   58735
+  ],
+  "A_s6": [
+   59583
+  ],
+  "R_s0": [],
+  "T19_s0": [],
+  "T19_s1": []
  }
 }

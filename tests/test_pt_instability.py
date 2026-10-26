@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import pytest
@@ -10,7 +11,7 @@ import torch
 
 from brushstroke.stroke_model import model as model_module
 from brushstroke.stroke_model.model import PaintTransformer, PTModelConfig
-from brushstroke.stroke_model.train import _Context
+from brushstroke.stroke_model.train import _Context, save_checkpoint
 from scripts import exp_pt_instability as exp
 from tests.test_pt_train import assert_same_state, needs_brushes, tiny_config
 
@@ -121,3 +122,68 @@ def test_the_branch_parameterizations_and_their_restoration() -> None:
     assert torch.equal(default, original(raw))  # the default branch is option A itself
     with pytest.raises(ValueError):
         exp._positive("nope", "wrap")(raw)
+
+
+def run_alert(totals: list[float]) -> int | None:
+    detector = exp.AlertDetector()
+    for step, total in enumerate(totals, start=1):
+        if detector.update(step, total):
+            return step
+    return None
+
+
+def test_the_alert_fires_at_the_onset_of_a_slow_excursion_long_before_the_spike() -> None:
+    gen = torch.Generator().manual_seed(0)
+    noise = (0.05 * torch.randn(20_000, generator=gen)).tolist()
+    assert run_alert([4.0 + n for n in noise]) is None  # noise only
+    # a ramp of 0.15 per 1000 steps from step 12,000: the 1.25x spike rule needs a rise of 25 %
+    ramp = [4.0 + n + max(0.0, (i - 12_000) * 0.00015) for i, n in enumerate(noise)]
+    alert, spike = run_alert(ramp), run_spike(ramp)
+    assert alert is not None and 12_000 < alert < 13_500
+    assert spike is None or spike > alert + 3000
+
+
+def run_spike(totals: list[float]) -> int | None:
+    return run_detector(totals)
+
+
+@needs_brushes
+def test_an_alert_freezes_the_checkpoint_rotation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class AlertAtThree(exp.AlertDetector):
+        def update(self, step: int, total: float) -> bool:
+            return step == 3
+
+    monkeypatch.setattr(exp, "AlertDetector", AlertAtThree)
+    monkeypatch.setattr(exp, "CKPT_EVERY", 1)
+    monkeypatch.setattr(exp, "CKPT_KEEP", 2)
+    ctx = _Context(tiny_config(tmp_path))
+    out = tmp_path / "trace"
+    summary = exp.run_loop(ctx, out, 6)
+    assert summary["alerts"] == [3] and summary["spike"] is None
+    assert sorted(p.name for p in out.glob("ckpt_*.pt")) == ["ckpt_1.pt", "ckpt_2.pt"]
+
+
+@needs_brushes
+def test_branch_runs_end_to_end_and_refuses_a_raw_parent_with_a_positive_factor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(exp, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        exp, "make_cfg", lambda seed, convention, output, extra=None: tiny_config(output)
+    )
+    parent = tmp_path / "parent"
+    ctx = _Context(tiny_config(parent))
+    exp.run_loop(ctx, parent, 2, keep_checkpoints=False)
+    ckpt = parent / "ckpt_2.pt"
+    save_checkpoint(ctx, ckpt)
+    args = exp.build_parser().parse_args(
+        ["branch", "--name", "b", "--from-trace", "parent", "--ckpt", str(ckpt), "--steps", "2"]
+    )
+    exp.cmd_branch(args)
+    summary = json.loads((tmp_path / "branches" / "b" / "summary.json").read_text(encoding="utf-8"))
+    assert summary["start"] == 2 and summary["steps"] == 4 and summary["factors"]["theta"] == "wrap"
+    args.theta = "none"  # tiny_config is a raw-convention model
+    with pytest.raises(SystemExit):
+        exp.cmd_branch(args)
