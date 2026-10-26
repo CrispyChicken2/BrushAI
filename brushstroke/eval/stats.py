@@ -18,7 +18,7 @@ from scipy import stats
 
 
 def bootstrap_ci(
-    values: Sequence[float],
+    values: Sequence[float] | np.ndarray,
     statistic: str = "mean",
     resamples: int = 10_000,
     seed: int = 22,
@@ -50,7 +50,7 @@ def holm(p_values: Sequence[float]) -> list[float]:
     return [float(a) for a in adjusted]
 
 
-def rank_biserial(differences: Sequence[float]) -> float:
+def rank_biserial(differences: Sequence[float] | np.ndarray) -> float:
     """Matched-pairs rank-biserial correlation (Kerby, 2014): ``(W+ - W-) / (W+ + W-)`` over the non-zero differences.
 
     +1 if every difference is positive, -1 if every one is negative, 0 if the rank sums are equal (or all differences are zero).
@@ -133,7 +133,7 @@ def describe(
     )
 
 
-def per_image_summary(values_by_replicate: Sequence[Sequence[float]]) -> tuple[float, float]:
+def per_image_summary(values_by_replicate: Sequence[float]) -> tuple[float, float]:
     """``(mean over replicates, std over replicates)`` of one image; the std is 0 for a single replicate."""
     v = np.asarray(values_by_replicate, dtype=np.float64)
     return float(v.mean()), float(v.std(ddof=1)) if len(v) > 1 else 0.0
