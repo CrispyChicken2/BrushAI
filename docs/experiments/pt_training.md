@@ -220,7 +220,7 @@ Stroke metrics of the same models:
 - **The classes.** Exactly equivalent for the renderer: `theta` mod 2 and `(w, h, theta + 1) = (-w, -h, theta)` (alpha error 0 with the training brushes, 5e-5 with the inference ones). The mirror class (`h -> -h`) is *not* exact: 14.4 % of the stroke area differs. The Gaussian `D_W` is blind to the whole swap class, so only the parameter L1 prefers the ground-truth convention.
 - **H2 (invariant `D_L1`): holds at the `mirror`, `rot180` and `swap` levels for both T-014 groups, not at `exact`** (the T-014 outlier seed uses the mirror, not the exact class). `mirror` is the primary level: its bias on clean models is 0.1 %, against 3.2 % (`rot180`) and 17.4 % (`swap`), which lower clean models too. The clean-bias column was added after a first look at the numbers, not pre-registered.
 - **H1, official recipe: met by A and C, not by B.** A and C: 0 / 3 outlier seeds, invariant total 3.753 against 3.767 (baseline), t = -0.43 and -0.57, so no quality cost and no gain beyond noise (3 seeds). B keeps the sign free by design (the invariant L1 removes the penalty): 2 / 3 seeds end with negative signs (one `h < 0`, one `w < 0`), its raw `D_L1` is 0.255 but its invariant total is as good as the others. Best option by the pre-registered rule: **A** (3.7526 against C's 3.7533, a difference far inside the seed noise; A is also the only one that makes the convention hold by construction).
-- **Negative result, stretched recipe: option A is unstable.** Seeds 0 and 1 degrade in the second half of the run (total from about 4.2 to about 6.1 and 6.8 in the training log, held-out invariant total 9.5 and 9.0, `L_pixel` 0.110, all 8 strokes of every patch painted), seed 2 behaves (3.549, better than the baseline's 3.556 +- 0.014). The pre-registered Welch rule reads t = +1.99 < 2.13, hence "not worse" and **H1 met on paper**; this is the test's lack of power on a bimodal 3-seed outcome, not evidence of equivalence. Our verdict: **A does not hold on the stretched recipe** (2 / 3 divergent seeds against 0 / 3 for the baseline). The cause was not investigated (candidates: the softplus floor on `w`, `h` giving vanishing gradients for small strokes, the unbounded `theta - floor(theta)` jump in the matching cost, the constant learning rate of 1e-4 over 400 epochs). The other options were not run stretched (protocol: best option only), so whether C is stable there is unknown.
+- **Negative result, stretched recipe: option A is unstable.** Seeds 0 and 1 degrade in the second half of the run (total from about 4.2 to about 6.1 and 6.8 in the training log, held-out invariant total 9.5 and 9.0, `L_pixel` 0.110, all 8 strokes of every patch painted), seed 2 behaves (3.549, better than the baseline's 3.556 +- 0.014). The pre-registered Welch rule reads t = +1.99 < 2.13, hence "not worse" and **H1 met on paper**; this is the test's lack of power on a bimodal 3-seed outcome, not evidence of equivalence. Our verdict: **A does not hold on the stretched recipe** (2 / 3 divergent seeds against 0 / 3 for the baseline). The cause was not found in T-023 (the degradation did not reproduce in 9 replicates; see the T-023 section; candidates: the softplus floor on `w`, `h` giving vanishing gradients for small strokes, the unbounded `theta - floor(theta)` jump in the matching cost, the constant learning rate of 1e-4 over 400 epochs). The other options were not run stretched (protocol: best option only), so whether C is stable there is unknown.
 - **Practical outcome.** The invariant `D_L1` (mirror level) is what to report from now on. For training, A or C remove the convention outliers on the official recipe; on the stretched recipe none of the options is validated.
 
 ## T-020: a usable validation curve (BatchNorm statistics of the validation)
@@ -247,3 +247,58 @@ Diagnostic run of 8000 steps (seed 0, official recipe, validation every 100 step
 - Training weights (40 steps on the CPU, batch 16, SHA-256 of the state dict): `running` d700ab75d5d5497c, `recalibrate` d700ab75d5d5497c, `batch` d700ab75d5d5497c -> **identical**.
 
 <!-- END BN -->
+
+## T-023: late-training degradation of convention option A on the stretched recipe
+
+**Verdict: root cause not found; the degradation did not reproduce.** Option A (`model.convention=positive`) on the stretched recipe (`schedule.n_epochs=400`) degraded in 2 of the 3 T-019 runs and in none of the 9 replicates run here (same seeds 0 and 1, plus seeds 2, 5 and 6; the raw-convention control; and the exact T-019 command re-run for seeds 0 and 1 up to step 48,000). Hypotheses H1 to H4 could therefore not be tested by a causal branch experiment (no checkpoint before a spike could be captured), and no fix is proposed.
+
+![Total loss of the T-019 runs and of the replicates](pt_instability.png)
+
+### Onset, from the stored T-019 logs
+
+- The degradation is an abrupt jump, not a drift: the 100-step mean of the total loss exceeds 1.25 times the median of the previous 1000 steps (rule of `scripts/exp_pt_instability.py`) first at step 37,450 (seed 0) and 35,625 (seed 1), then again about every 10,000 steps (5 and 4 spikes in 112,640 steps). Seed 2 has none. All loss terms (pixel, gt, w, decision) leave their band together within about 100 steps, so no single term moves first at the resolution of the stored log (25 steps); the instrumented replicas that would give per-step gradient and Adam diagnostics never spiked.
+- The same scan finds no spike in the controls of T-019/T-021: option A on the official length (3 seeds) and the raw convention on the stretched recipe (3 seeds), and none in the raw-convention trace here.
+- Final state of the two degraded runs (stored `latest.pt`): the network outputs an input-independent constant for every stroke and patch. The CNN and 1x1-conv activations still vary (std about 0.57) but the `transformer.encoder` output is nearly constant (std 0.008 and 0.0008, against 0.72 for the healthy seed 2): a rank collapse of the transformer encoder. `softplus(w)`, `softplus(h)` are not saturated (about 0.41 and 0.40). Seed 0 has a raw `theta` of about -46.5.
+
+### Replicates (0 spike out of 9)
+
+Same recipe and seeds as T-019, instrumented per step (gradient norm per group, Adam update ratio, `enc_std`, raw `theta`, fraction of `theta` within 0.02 of the wrap boundary). GPU training is not bitwise reproducible, and the replicates share the T-019 data seeds, yet seeds 0 and 1 follow T-019 until about step 25,000 and then stay on a healthy path (total about 4.0 at 45,000 against 4.5 and 4.2 for T-019 on the same steps). In the table, `validation: T-019` means the periodic validation with running BatchNorm statistics that the T-019 runs had; `T19_s*` are runs of the exact `scripts.train_pt` command of T-019 (stopped at 48,000 steps), so the difference with T-019 is not my training loop, nor the validation. The code paths used for training are unchanged since T-019 (the later commits only touch validation and a comment).
+
+If the spike rate were the 2 / 3 seen in T-019, 0 / 9 would have probability (1/3)^9 = 5e-5; pooling the three T-019 runs with the nine replicates, the T-019 outcome (2 spikes in 3 runs) has probability about 0.045 under a common rate (hypergeometric, 2 / 12). So the T-019 failure is either a rare event (rate of the order of 10 to 20 %) or due to a condition of that session that I could not recover (concurrent load, GPU state, driver); the logs do not contain it.
+
+### Verdict per hypothesis
+
+| hypothesis | verdict | evidence |
+|---|---|---|
+| H1: saturation of the positive activation | **not supported** | softplus outputs of the collapsed models are about 0.4, far from the floor; the collapse is in the transformer encoder, not at the head. No causal test (no spike to branch from) |
+| H2: `theta` wrap discontinuity | **not supported, not excluded** | in healthy runs raw `theta` stays within about 1 to 2.5 and at most 6 % of the angles are near the boundary, without damage; the raw -46 of seed 0 appears in the collapsed state, so it is a consequence. No causal test |
+| H3: constant learning rate of the stretched recipe | **not supported** | official and stretched recipes have identical lr for steps < 51,200 and the first spikes are at 35,625 and 37,450; no replicate spikes under the same lr to step 60,000; the raw control and option A on the official length never spike |
+| H4: BatchNorm statistics / numerics | **not supported, not excluded** | the replicates and the exact-command runs use the same fp32 BatchNorm path as T-019 and stay healthy; no causal test |
+
+Other observations: gradient norms of the healthy runs reach 430 to 630 against a median of 40 to 45 (a factor 10 to 15) without any consequence, so a single large gradient is not sufficient to trigger the collapse. The transformer encoder output std of healthy replicates is 0.78 to 0.89.
+
+### What would be needed
+
+A branch from a checkpoint just before a spike, with one factor changed at a time (`--lr-scale`, `--theta none`, `--wh exp`, `--bn-eval`, `--grad-clip`, `--beta1`; implemented and unit-tested in `scripts/exp_pt_instability.py branch`). Capturing one costs on the order of 10 full runs of 60,000 steps at the observed rate. A proposed ticket (P3): run option A stretched with checkpoints kept at every 500 steps over many seeds in the background, then the branch experiments on the first spike; or accept that option A is not validated on the stretched recipe, as stated in T-019 (the official recipe is unaffected).
+
+### Replicate table (generated: `python -m scripts.exp_pt_instability report`)
+
+<!-- BEGIN T023 -->
+
+| run | source | convention | validation | steps | spikes (first) | `enc_std` (min / median) | raw theta max (median / max) |
+|---|---|---|---|---|---|---|---|
+| T-019 seed 0 | stored log | positive | T-019 | 112640 | 5 (37450) | - | - |
+| T-019 seed 1 | stored log | positive | T-019 | 112640 | 4 (35625) | - | - |
+| T-019 seed 2 | stored log | positive | T-019 | 112640 | 0 (-) | - | - |
+| A_s0 | trace (this study) | positive | none | 60000 | 0 (-) | 0.813 / 0.848 | 0.95 / 1.24 |
+| A_s1 | trace (this study) | positive | none | 60000 | 0 (-) | 0.805 / 0.844 | 0.96 / 1.21 |
+| A_s2 | trace (this study) | positive | none | 60000 | 0 (-) | 0.782 / 0.820 | 1.45 / 2.34 |
+| A_s0v | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.814 / 0.849 | 1.18 / 2.45 |
+| A_s1v | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.808 / 0.844 | 0.88 / 1.17 |
+| A_s5 | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.792 / 0.835 | 0.98 / 1.24 |
+| A_s6 | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.778 / 0.819 | 0.79 / 1.32 |
+| R_s0 | trace (this study) | raw | none | 60000 | 0 (-) | 0.817 / 0.850 | 0.85 / 1.24 |
+| T19_s0 | `scripts.train_pt`, T-019 command | positive | T-019 | 48000 | 0 (-) | - | - |
+| T19_s1 | `scripts.train_pt`, T-019 command | positive | T-019 | 48000 | 0 (-) | - | - |
+
+<!-- END T023 -->

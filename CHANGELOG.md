@@ -2,6 +2,11 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-023] Late-training degradation of convention option A (stretched recipe)
+
+- `scripts/exp_pt_instability.py` (+ tests): instrumented training trace (per-step gradient, Adam, encoder-collapse and `theta` diagnostics, rotating checkpoints, spike detector), single-factor branch runner, report.
+- `docs/experiments/pt_training.md` (section T-023): the degradation did not reproduce in 9 replicates (2 / 3 seeds in T-019); root cause not found, H1 to H4 not supported by the evidence available, none tested causally. The default behaviour is unchanged.
+
 ## [T-022] M3 plan and evaluation protocol
 
 - `docs/design/evaluation.md`: the evaluation protocol, fixed before any M3 run: 100-image eval set (40 Met Open Access CC0 paintings, 30 CC0/PD

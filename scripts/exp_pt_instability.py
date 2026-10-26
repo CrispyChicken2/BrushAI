@@ -374,6 +374,144 @@ def factor_dict(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+# ----------------------------------------------------------------------------- report
+
+DATA = Path("docs/experiments/data/pt_instability")
+FIGURE = Path("docs/experiments/pt_instability.png")
+T19 = Path("outputs/pt_conv_long/optA_positive")
+REPLICATES = {  # run -> (convention, validation)
+    "A_s0": ("positive", "none"),
+    "A_s1": ("positive", "none"),
+    "A_s2": ("positive", "none"),
+    "A_s0v": ("positive", "T-019"),
+    "A_s1v": ("positive", "T-019"),
+    "A_s5": ("positive", "T-019"),
+    "A_s6": ("positive", "T-019"),
+    "R_s0": ("raw", "none"),
+}
+EXACT = {
+    "T19_s0": 0,
+    "T19_s1": 1,
+}  # outputs/pt_instab/T19_s*: scripts.train_pt with the T-019 command
+
+
+def _column(path: Path, name: str) -> tuple[Any, Any]:
+    import numpy as np
+
+    rows = list(csv.DictReader(path.open(encoding="utf-8")))
+    return (
+        np.array([float(r["step"]) for r in rows]),
+        np.array([float(r[name]) for r in rows]),
+    )
+
+
+def scan_spikes(step: Any, total: Any, every: int) -> list[int]:
+    """The spike rule on a log sampled every ``every`` steps: 100-step mean above ``SPIKE_FACTOR`` x the
+    median of the previous 1000 steps, at least 3000 steps apart, after ``SPIKE_WARMUP``."""
+    import numpy as np
+
+    k, base = SPIKE_WINDOW // every, SPIKE_BASE // every
+    sm = np.convolve(total, np.ones(k) / k, mode="valid")
+    st = step[k - 1 :]
+    hits: list[int] = []
+    for i in range(base, len(st)):
+        if st[i] <= SPIKE_WARMUP or (hits and st[i] - hits[-1] <= 3000):
+            continue
+        if sm[i] > SPIKE_FACTOR * np.median(sm[i - base : i]):
+            hits.append(int(st[i]))
+    return hits
+
+
+def cmd_report() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    from scripts.pt_repro_common import write_block
+
+    lines = [
+        "| run | source | convention | validation | steps | spikes (first) | `enc_std` (min / median) | raw theta max (median / max) |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    out: dict[str, Any] = {}
+    fig, ax = plt.subplots(figsize=(7, 3.4), dpi=110)
+
+    def smooth(step: Any, total: Any, width: int) -> tuple[Any, Any]:
+        return step[width - 1 :], np.convolve(total, np.ones(width) / width, mode="valid")
+
+    for s in range(3):
+        step, total = _column(T19 / f"seed{s}" / "train.csv", "total")
+        hits = scan_spikes(step, total, 25)
+        out[f"T19_seed{s}"] = {"spikes": hits, "steps": int(step[-1])}
+        lines.append(
+            f"| T-019 seed {s} | stored log | positive | T-019 | {int(step[-1])} | {len(hits)} ({hits[0] if hits else '-'}) | - | - |"
+        )
+        x, y = smooth(step, total, 40)
+        ax.plot(
+            x,
+            y,
+            lw=1.2,
+            color="#c0392b" if hits else "#2c7fb8",
+            label=f"T-019 seed {s}" + (" (spikes)" if hits else ""),
+            zorder=3,
+        )
+    first = True
+    for name, (conv, val) in REPLICATES.items():
+        d = ROOT / name
+        summary = json.loads((d / "summary.json").read_text(encoding="utf-8"))
+        step, total = _column(d / "trace.csv", "total")
+        hits = scan_spikes(step, total, 1)
+        _, enc = _column(d / "trace.csv", "enc_std")
+        _, th = _column(d / "trace.csv", "theta_abs_max")
+        late = step > 30_000
+        out[name] = {
+            "spike": summary["spike"],
+            "scan": hits,
+            "steps": summary["steps"],
+            "enc_std_min": float(enc[late].min()),
+            "theta_abs_max": float(th[late].max()),
+        }
+        lines.append(
+            f"| {name} | trace (this study) | {conv} | {val} | {summary['steps']} | {len(hits)} ({hits[0] if hits else '-'}) | {enc[late].min():.3f} / {np.median(enc[late]):.3f} | {np.median(th[late]):.2f} / {th[late].max():.2f} |"
+        )
+        x, y = smooth(step, total, 1000)
+        ax.plot(
+            x, y, lw=0.8, color="#888888", alpha=0.7, label="replicates (traces)" if first else None
+        )
+        first = False
+    for name, seed in EXACT.items():
+        step, total = _column(ROOT / name / "train.csv", "total")
+        hits = scan_spikes(step, total, 25)
+        out[name] = {"scan": hits, "steps": int(step[-1])}
+        lines.append(
+            f"| {name} | `scripts.train_pt`, T-019 command | positive | T-019 | {int(step[-1])} | {len(hits)} ({hits[0] if hits else '-'}) | - | - |"
+        )
+        x, y = smooth(step, total, 40)
+        ax.plot(
+            x,
+            y,
+            lw=0.8,
+            color="#4daf4a",
+            alpha=0.8,
+            label="exact T-019 command" if seed == 0 else None,
+        )
+    ax.set(
+        xlabel="step",
+        ylabel="total loss (1000-step mean for traces)",
+        ylim=(3.5, 9),
+        title="Option A, stretched recipe: T-019 vs replicates",
+    )
+    ax.legend(fontsize=7)
+    fig.tight_layout()
+    fig.savefig(FIGURE)
+    DATA.mkdir(parents=True, exist_ok=True)
+    (DATA / "runs.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+    write_block("T023", chr(10).join(lines), Path("docs/experiments/pt_training.md"))
+    print(FIGURE, FIGURE.stat().st_size)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
@@ -414,7 +552,7 @@ def main(argv: list[str] | None = None) -> None:
     elif args.stage == "branch":
         cmd_branch(args)
     else:
-        raise SystemExit("report: implemented after the runs")
+        cmd_report()
 
 
 if __name__ == "__main__":
