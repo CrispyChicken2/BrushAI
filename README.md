@@ -5,8 +5,9 @@ of brush strokes, replayed as a stroke-by-stroke animation. The research focus i
 allocation, painterly stroke ordering and an "anytime quality" metric.
 
 **Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)); M3 (evaluation harness and baseline
-numbers) is planned, with its evaluation protocol fixed in advance in [docs/design/evaluation.md](docs/design/evaluation.md) and its plan in
-[docs/plan/M3.md](docs/plan/M3.md). No M3 code or run exists yet.** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
+numbers) is under way: the evaluation protocol is fixed in advance in [docs/design/evaluation.md](docs/design/evaluation.md), its plan
+is [docs/plan/M3.md](docs/plan/M3.md), and the 100-image evaluation set is curated and audited (see [Evaluation set](#evaluation-set-m3)).
+No method has been run on it yet.** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is reviewed at its gate, and the closing decision is the chef's: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
@@ -431,6 +432,20 @@ The two tables regenerate from the stored data with no GPU:
 
 The three figures (`scripts/exp_pt_figures.py`) run the models and need a GPU and the checkpoints in `outputs/`, which are not in the
 repository.
+
+## Evaluation set (M3)
+
+The evaluation set of the M3 protocol ([docs/design/evaluation.md](docs/design/evaluation.md), section 1) has 100 images: 40
+paintings (Metropolitan Museum, CC0), 30 photographs (Met portrait prints, and US federal photographs from Wikimedia Commons whose
+file pages carry a public-domain statement), and 30 images generated with SDXL from fixed prompts and seeds. Ten of them form the
+dev split, used for tuning; the other 90 are the test split of the final tables. The curation fixes the strata, the licence rules,
+the photographer cap, the border and duplicate rules, and excludes any image of a person who may be alive.
+
+The images are fetched and generated, never committed. Every machine-checkable rule is audited on every image
+(`python -m scripts.audit_eval_set`, 0 violations), and every image was also looked at on contact sheets against the rules that need
+eyes; the verdict of each image is in [docs/experiments/data/eval_set/visual_audit.md](docs/experiments/data/eval_set/visual_audit.md).
+The sources, licences and checksums are in [docs/data_sources.md](docs/data_sources.md); the commands to fetch and verify the set are
+listed there.
 
 ## License
 

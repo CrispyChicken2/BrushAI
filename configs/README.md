@@ -26,3 +26,7 @@ variant, `|h|`, and the per-patch refinement (off by default).
 
 `demos/` holds one partial YAML per M1 demo (`m1_portrait.yaml`, `m1_landscape.yaml`, `m1_photo.yaml`). Each inherits the
 baseline and animation defaults and only sets the seed, the image, `cudnn_deterministic: true` and the animation of the demo.
+
+`eval/` holds the evaluation set's configuration (T-024, T-034): `eval_set.yaml` (the manifest of the 100 images, with licence strings,
+SHA-256 of the files and of the prepared pixels, and the dev flag), `sdxl_prompts.yaml` (the 30 SDXL prompts and seeds) and
+`curation_rejections.yaml` (the images rejected by hand, with the reason).
