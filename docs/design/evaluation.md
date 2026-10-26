@@ -463,3 +463,19 @@ Realization of section 4; nothing in the metric changes, the measured facts are 
 
 Affected runs: none.
 
+### 2026-10-26 (T-026, evaluation harness, dev split only, before any test run)
+
+The harness (`brushstroke/eval/{protocol,curves,stats,metrics,producers,runner,report}.py`, `scripts/eval_run.py`, `configs/eval/protocol.yaml`) implements sections 2 to 7. Details the protocol left open, now fixed (no metric changes):
+
+1. **Log-spaced AUC** (3.2): the mean of `q` over `log n` for `n` in `[25, B]` (trapezoid in `log n` divided by `log B - log 25`), divided by `q_ref`. **Late AUC** (3.3): the mean of `q` over `n` in `[250, B]`, divided by `q_ref`. Both are averages, comparable to the linear AUC.
+2. **SW-LPIPS AUC** (4.1): computed like the LPIPS AUC, normalized by the per-image blank-canvas SW-LPIPS (`max` over the black and white canvases, same saliency weights and lambda): image-only, never method-dependent.
+3. **Headline LPIPS-Alex** is the scalar LPIPS; SW-LPIPS uses the spatial map (its mean differs from the scalar by about 2e-6). With a uniform map SW-LPIPS equals LPIPS (test).
+4. **Runtime** (2.3) is the wall clock of `paint()`, which includes the rendering of the prefix canvases; weight loading (`load()`), the metrics and `control()` are outside. VRAM is `max_memory_allocated` and `max_memory_reserved` after a reset. The idle-GPU check uses `nvidia-smi` compute processes; on this Windows driver per-process memory is not reported, so the check is recorded as unavailable (`other_gpu_processes_gb: null`) and the run is idle by operator: nothing else used the GPU during the dev smoke run.
+5. **Reachability**: a method reaches a budget only if every one of its records does; an image enters a statistic only if every replicate has a value; unreachable cells are `n/a (max n = ...)` and excluded from the comparisons.
+6. **Strokes-to-target**: a per-image `n*` is the mean over the replicates (censored replicates counted at 2000); the reached fraction is the share of replicates that cross. The values `tau_500/1000/2000` in `configs/eval/protocol.yaml` are **provisional**: computed by `scripts.eval_run tau` from the dev records of the baselines available now (optimization baseline, Paint Transformer; strongest = the optimization baseline, dev mean LPIPS-Alex at 1000 strokes 0.366 against 0.551): 0.4394, 0.3634, 0.2806. They are re-derived with Learning to Paint (T-030) and frozen before the test run.
+7. **Producers**: the optimization baseline is `configs/baseline_optim.yaml` (2037 strokes, replicate = initialization seed); Paint Transformer is the generic render of its `StrokeSequence` for the three checkpoints `outputs/pt_long/seed{0,1,2}` (replicate = training seed, official final layer, no refinement). The pipeline canvas differs from the sequence render by 0.0065 mean absolute value on the dev images (the control row).
+8. **Exact Wilcoxon and Holm**: with n = 10 images the smallest two-sided exact p is 0.00195; Holm over the F1 family (9 tests when three baselines exist) is therefore reachable but strict, as the protocol caveat says.
+9. **Controls** per image: blank black, blank white, and the target blurred with a Gaussian of sigma 1 px (kernel radius 3 sigma, reflect padding).
+
+Affected runs: none. `docs/experiments/eval_harness_smoke.md` is the dev smoke run (10 dev images, optimization baseline seed 0, Paint Transformer seeds 0 to 2): not a result, a test of the harness.
+

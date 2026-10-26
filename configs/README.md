@@ -32,3 +32,6 @@ SHA-256 of the files and of the prepared pixels, and the dev flag), `sdxl_prompt
 `curation_rejections.yaml` (the images rejected by hand, with the reason). `saliency.yaml` pins the evaluation saliency model
 (InSPyReNet: the code commit, the checkpoint SHA-256 and the normalisation of its maps) used by `scripts/fetch_inspyrenet.py` and
 `scripts/compute_saliency.py` (T-025).
+
+`eval/protocol.yaml` holds the constants of the evaluation protocol (T-026): the 15-checkpoint grid, the budgets, the AUC and SW-LPIPS settings, the
+bootstrap, the producers of the harness (`scripts/eval_run.py`) and the strokes-to-target thresholds `tau` (provisional until Learning to Paint is in).

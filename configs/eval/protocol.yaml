@@ -24,9 +24,9 @@ endpoints: {P1: lpips_alex@1000, P2: auc@2000, P3: sw_lpips@1000}
 # strokes-to-target (section 5): tau = median over the dev images of the LPIPS-Alex the strongest baseline reaches at the
 # budget. Written by `python -m scripts.eval_run tau` from DEV runs only, before any test run.
 tau:
-  status: provisional      # provisional until Learning to Paint (T-030) is in the baselines; final values written before the test run
-  strongest_baseline: null
-  values: {500: null, 1000: null, 2000: null}
+  status: provisional      # from the baselines available on the dev split (optim, pt); final values are written when Learning to Paint (T-030) is in, before the test run
+  strongest_baseline: optim
+  values: {500: 0.4394, 1000: 0.3634, 2000: 0.2806}
 # producers (section 7)
 producers:
   optim:

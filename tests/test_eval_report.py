@@ -111,9 +111,15 @@ def test_strokes_to_target_table_and_the_tau_rule(run_dir: Path) -> None:
     )
     b4 = rp.table_b4(rp.Results(res.records, res.controls, with_tau))
     assert "tau_1000" in b4 and "100 %" in b4 or "%" in b4
-    assert "is not set" in rp.table_b4(
-        res
-    )  # the repository values are not set until a dev run writes them
+    unset = dataclasses.replace(
+        PROTO,
+        tau={
+            "status": "x",
+            "strongest_baseline": None,
+            "values": {500: None, 1000: None, 2000: None},
+        },
+    )
+    assert "is not set" in rp.table_b4(rp.Results(res.records, res.controls, unset))
 
 
 def test_tau_refuses_non_dev_records(run_dir: Path) -> None:
