@@ -1,0 +1,26 @@
+# Visual rejections of the first draw, decided on the contact sheets before any method run (T-024).
+# An image is replaced by the next candidate of the seeded draw. Rules (evaluation.md 1.2): no identifiable living
+# person, no watermark / text block / frame over 5 % of the area, a clear subject, no near-duplicate, colour for
+# the Commons photographs (no sepia tint).
+met_436941: text band (inscription) over 5 % of the area
+met_54211: fragment on a grey mount, grey margins over 5 %
+met_10156: tonal study without a clear subject
+met_13199: gilt frame visible on three edges
+commons_pulling_invasive_species_9444966174: person who may be alive (modern US Fish and Wildlife photograph)
+commons_na_drezini_e_u_petrozavodska_po_murm_zh_d_handcar_20245v: colour-fringe border, duplicate of another view
+commons_little_norway_guide: same sitter as another candidate (near-duplicate subject)
+commons_prokudin_gorskii_12: tiny figure in a landscape, not a portrait
+commons_antique_dress_of_a_peasant_woman_from_olonetskaia_province_p: sepia tint, not a colour photograph
+commons_antique_dress_of_a_peasant_woman_from_the_olonetskaia_provin: sepia tint, not a colour photograph
+commons_1910_1911_02400_02448u_e1: sepia tint, not a colour photograph
+commons_virgin_redwood_864_years_old_1a35447v: text labels over the subject
+# second pass (contact sheets of the draw above, after the black-border trimming and the Met photographs were added)
+met_294515: stereo card, the same sitter tiled six times
+met_261454: decorative red and black mat over 5 % of the area, subject not a clear face or figure
+commons_vegetation_monitoring_9442178075: field workers who may be alive (US Fish and Wildlife photograph)
+commons_prokudin_gorsky_suna_river: tiny figure in a landscape, not a portrait
+commons_little_norway_guide2: same sitter as another candidate (near-duplicate subject)
+commons_thomas_white_two_bar_ranch_7096051473: no animal visible (animal stratum)
+commons_bands_of_s_cattle_on_the_gravelly_range_at_the_foot_of_black: animals too small to be the subject
+commons_a_fourth_of_july_celebration_st_helena_s_island_s_c_adjusted: no clear subject (faces cut by the crop)
+met_51803: album leaf where calligraphy covers about half of the area (inscriptions integral to a work are accepted below a third of the area)

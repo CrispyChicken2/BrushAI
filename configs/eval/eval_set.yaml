@@ -1,0 +1,2240 @@
+protocol: docs/design/evaluation.md section 1 (T-022), curated by scripts/build_eval_set.py (T-024)
+draw_seed: 22
+curated: '2026-10-26'
+size: 512
+preparation: centre crop to a square (or crop_box), Pillow BOX (area) filter to 512x512; prepared_sha256 = SHA-256 of the
+  uint8 RGB pixels
+sdxl:
+  model: stabilityai/stable-diffusion-xl-base-1.0
+  revision: 462165984030d82259a11f4367a4eed129e94a7b
+  licence: 'CreativeML Open RAIL++-M (outputs: Licensor claims no rights; use restrictions do not touch the prompts below)'
+  pipeline: diffusers.StableDiffusionXLPipeline
+  resolution: 1024
+  dtype: float16 (fp16 variant weights)
+  offload: enable_model_cpu_offload
+  scheduler: library default (from the model's scheduler_config.json)
+  steps: library default (50)
+  guidance_scale: library default (5.0)
+  negative_prompt: null
+  refiner: false
+  seed_rule: torch.Generator('cpu').manual_seed(prompt index)
+images:
+- id: met_695496
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: true
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 4548f2c1a3a1a03db393aaa4b9203eec5166a3efee56148a52fb9dc96bb72b94
+  prepared_sha256: aceeba1e0d28b177eb254e61ef8b438a172560ee189c957aa863bd826148b21d
+  title: Bust of a Man (Saint Matthias?)
+  author: Giovanni Battista Piazzetta
+  date: ca. 1715–20
+  page_url: https://www.metmuseum.org/art/collection/search/695496
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP-12393-001.jpg
+  source_id: '695496'
+  subtype: portrait
+  width: 3242
+  height: 3909
+  colour: true
+  crop_box:
+  - 1
+  - 334
+  - 3240
+  - 3573
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_435862
+  category: painting
+  stratum: european_other
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: a2c6a69511bdc2630bede26adb32744a12aceddd3bb82b5d54f0f0e50df3481d
+  prepared_sha256: 28b6815a39072656969437d6ae7576ddbe74340a17e7f00f12d917a98dea0343
+  title: The Route Nationale at Samer
+  author: Jean-Charles Cazin
+  page_url: https://www.metmuseum.org/art/collection/search/435862
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP236347.jpg
+  source_id: '435862'
+  subtype: other
+  width: 3899
+  height: 3364
+  colour: true
+  crop_box:
+  - 270
+  - 2
+  - 3626
+  - 3358
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_748947
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 4f2bd922d429af7c89008f7fcd4936a7042e0f2016a4b5524e9e16acf0a074eb
+  prepared_sha256: 218b1ad62b04c739df3a401333948dcba7f5d966f805f306f0009e7bfceb6ea6
+  title: Ellen Maurice (1578–1626)
+  author: Marcus Gheeraerts the Younger
+  date: '1597'
+  page_url: https://www.metmuseum.org/art/collection/search/748947
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP-16581-001.jpg
+  source_id: '748947'
+  subtype: portrait
+  width: 3305
+  height: 4000
+  colour: true
+  crop_box:
+  - 88
+  - 416
+  - 3252
+  - 3580
+  classification: Paintings
+  medium: Oil on oak
+  department: European Paintings
+- id: met_436642
+  category: painting
+  stratum: european_other
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: b0a027785f3555cff0b25f54ff31899908f7d5bf84518d1b6469ae0dcd0db8f4
+  prepared_sha256: 8b46314b9593ef09d4f2368a8513695ab79f17dd5465e4558b4411d3a56f3881
+  title: The Musician
+  author: Bartholomeus van der Helst
+  date: '1662'
+  page_url: https://www.metmuseum.org/art/collection/search/436642
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP-18251-001.jpg
+  source_id: '436642'
+  subtype: other
+  width: 3234
+  height: 4000
+  colour: true
+  crop_box:
+  - 119
+  - 497
+  - 3130
+  - 3508
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_436262
+  category: painting
+  stratum: european_other
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: be5dcc3b4b3152249302d60850335e2f59be16b9cac688f0896d3ff297fec131
+  prepared_sha256: e049c050dbd09ae4297630e1456b39210369b29d71555cc5ee55220c70d3c9a8
+  title: Virgin and Child with Saint Catherine of Alexandria
+  author: Anthony van Dyck
+  date: ca. 1630
+  page_url: https://www.metmuseum.org/art/collection/search/436262
+  url: https://images.metmuseum.org/CRDImages/ep/original/DT5286.jpg
+  source_id: '436262'
+  subtype: other
+  width: 3113
+  height: 3710
+  colour: true
+  crop_box:
+  - 20
+  - 317
+  - 3094
+  - 3391
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_439977
+  category: painting
+  stratum: european_other
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: ccc9e8353e3b9803a02852cab64e8d8d1dad6711f23af5b91e8b84448e556111
+  prepared_sha256: d62647930daa7458fb52386834ce87a0b30a96154a8c8d2b89accbeb8db90e9d
+  title: Christ Carrying the Cross
+  author: Jan Gossart (called Mabuse)
+  date: ca. 1520–25
+  page_url: https://www.metmuseum.org/art/collection/search/439977
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP368972.jpg
+  source_id: '439977'
+  subtype: other
+  width: 3056
+  height: 3875
+  colour: true
+  crop_box:
+  - 2
+  - 411
+  - 3054
+  - 3463
+  classification: Paintings
+  medium: Oil on oak
+  department: European Paintings
+- id: met_436496
+  category: painting
+  stratum: european_other
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: e518c5da63d7c72697b848e3298c64f3bfdebf77f01de756862576d2bae977b9
+  prepared_sha256: 80bd49ba56df4edb6474f850d82b226669ad0b1ead0a79d7f2966eb52b9e8cdb
+  title: Saint John the Evangelist with Acteus and Eugenius
+  author: Francescuccio Ghissi (Francesco di Cecco Ghissi)
+  date: ca. 1370
+  page_url: https://www.metmuseum.org/art/collection/search/436496
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP375435.jpg
+  source_id: '436496'
+  subtype: other
+  width: 4000
+  height: 3569
+  colour: true
+  crop_box:
+  - 249
+  - 52
+  - 3751
+  - 3554
+  classification: Paintings
+  medium: Tempera on wood, gold ground
+  department: European Paintings
+- id: met_437921
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 2b95f2631ac76af80c42f44e8d73b27711f196a2d5e74df095dc91aaf6d87edb
+  prepared_sha256: 16fede00bfd664bff525311a7962d36ac7f9d1dca84a260559a4ad1b6822359e
+  title: Portrait of a Man
+  author: Abraham de Vries
+  date: '1643'
+  page_url: https://www.metmuseum.org/art/collection/search/437921
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP143188.jpg
+  source_id: '437921'
+  subtype: portrait
+  width: 3119
+  height: 3709
+  colour: true
+  crop_box:
+  - 13
+  - 303
+  - 3111
+  - 3401
+  classification: Paintings
+  medium: Oil on wood
+  department: European Paintings
+- id: met_438545
+  category: painting
+  stratum: european_other
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: f55313e2d5cc8104df83142a0ebda10c5e66459ed9799b971aa8728df41c5336
+  prepared_sha256: 06f64901cb01a082094c6bb3b08985f3a0174f8dc8899c6b692fe9ba57c301cb
+  title: Léon Pallière (1787–1820) in His Room at the Villa Medici, Rome
+  author: Jean Alaux
+  date: '1817'
+  page_url: https://www.metmuseum.org/art/collection/search/438545
+  url: https://images.metmuseum.org/CRDImages/ep/original/DT235903.jpg
+  source_id: '438545'
+  subtype: other
+  width: 2927
+  height: 3722
+  colour: true
+  crop_box:
+  - 4
+  - 399
+  - 2924
+  - 3319
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_436616
+  category: painting
+  stratum: european_other
+  source: met
+  dev: true
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 44697e48ce71de044da6517e8994b15f130de98f6bd717ff91b60d8d7b642755
+  prepared_sha256: 8a8388d666173e224b8c582e135298aaa884f90f8514dde0bd3a970de0858226
+  title: Young Man and Woman in an Inn
+  author: Frans Hals
+  date: '1623'
+  page_url: https://www.metmuseum.org/art/collection/search/436616
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP145899.jpg
+  source_id: '436616'
+  subtype: other
+  width: 2817
+  height: 3722
+  colour: true
+  crop_box:
+  - 19
+  - 477
+  - 2781
+  - 3239
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_437897
+  category: painting
+  stratum: european_other
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 571cd0d3dab0413ebf2e7667e042411730f9afd202dec61b4cb3cfb4c2d201d7
+  prepared_sha256: a33ef680ac92bf781f5fe4fcc7aa198a1b4c2448f7b4404ebfd8a67d7d9dbfb6
+  title: Abraham's Parting from the Family of Lot
+  author: Jan Victors
+  date: ca. 1655–65
+  page_url: https://www.metmuseum.org/art/collection/search/437897
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP143196.jpg
+  source_id: '437897'
+  subtype: other
+  width: 3791
+  height: 3376
+  colour: true
+  crop_box:
+  - 215
+  - 6
+  - 3576
+  - 3367
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_436824
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: e477a6b6fb5c80b869eb207905319fa412ee64a361f3bcfd04cbb0294bf0aae7
+  prepared_sha256: a0de0dab613677dd8a9ee8c1facc3717f4670a4bbd247d5e29bcd0843896bdb4
+  title: Lady Mary Berkeley
+  author: Sir Godfrey Kneller
+  date: ca. 1700
+  page_url: https://www.metmuseum.org/art/collection/search/436824
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP167136.jpg
+  source_id: '436824'
+  subtype: portrait
+  width: 3346
+  height: 3857
+  colour: true
+  crop_box:
+  - 2
+  - 256
+  - 3345
+  - 3599
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_437548
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: bf06740d67837d050860f1ea4fa0f1ea5911850251d82c6b2149c5fb125ae013
+  prepared_sha256: 0ff7e6abbce59176c433dc8e40ab35f2d3034064d2dfe3eb9337e04d7b1d9742
+  title: Mountain Torrent
+  author: Jacob van Ruisdael
+  date: 1670s
+  page_url: https://www.metmuseum.org/art/collection/search/437548
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP123841.jpg
+  source_id: '437548'
+  subtype: landscape
+  width: 3118
+  height: 4000
+  colour: true
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_437990
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 8768f6fbcce5bc8d10594c6f75e6dd05e39e09c3b1fb02257ce2c491654a4116
+  prepared_sha256: a5ee5bc004f96cf2e57ddea9b690ba501db0d096b955969c1cc596fdb70292c4
+  title: Seated Peasant
+  author: Paul Cézanne
+  date: ca. 1892–96
+  page_url: https://www.metmuseum.org/art/collection/search/437990
+  url: https://images.metmuseum.org/CRDImages/ep/original/DT1944.jpg
+  source_id: '437990'
+  subtype: portrait
+  width: 3111
+  height: 3722
+  colour: true
+  crop_box:
+  - 29
+  - 332
+  - 3082
+  - 3385
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_435993
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 8826e418dbde5e0cec62916bf2f80872ec252211d3e3e8633979bbaa44caa97c
+  prepared_sha256: a4c1c98b0af6325bbd099af880981922f6a8a4f1cec2a6739d6dcc537074b7fe
+  title: Marianne Dorothy Harland (1759–1785), Later Mrs. William Dalrymple
+  author: Richard Cosway
+  page_url: https://www.metmuseum.org/art/collection/search/435993
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP-22335-001.jpg
+  source_id: '435993'
+  subtype: portrait
+  width: 4000
+  height: 3134
+  colour: true
+  crop_box:
+  - 466
+  - 40
+  - 3520
+  - 3094
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_436253
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 1cecd5ae66faa3c27f13785c00a26e62d4508b62fa75f3c801a6caec017c3b35
+  prepared_sha256: 86b3603d18eba3213f81a804de3cf231b89dc4c67250d47ce5d9fa1ae9481816
+  title: Lucas van Uffel (died 1637)
+  author: Anthony van Dyck
+  date: ca. 1622
+  page_url: https://www.metmuseum.org/art/collection/search/436253
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP-27908-001.jpg
+  source_id: '436253'
+  subtype: portrait
+  width: 3316
+  height: 4000
+  colour: true
+  crop_box:
+  - 210
+  - 533
+  - 3128
+  - 3451
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_437386
+  category: painting
+  stratum: european_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 7d10ead64725b384ff54a25613b29190fbac99d13bf1b7434697833794d27573
+  prepared_sha256: 030ce6914b14fbb34e09c833f6bb070eeb185125d22798680edd61fccc1a5dbd
+  title: Portrait of a Man, probably a Member of the Van Beresteyn Family
+  author: Rembrandt (Rembrandt van Rijn)
+  date: '1632'
+  page_url: https://www.metmuseum.org/art/collection/search/437386
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP121326.jpg
+  source_id: '437386'
+  subtype: portrait
+  width: 3049
+  height: 3824
+  colour: true
+  crop_box:
+  - 1
+  - 389
+  - 3047
+  - 3435
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_437211
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: a850820e7443885a55816a31f9e64f41e6d8af74ccacd41b8638ca7e87873ade
+  prepared_sha256: bbf0901f3f8cf7894f08529906d748ff0aa74eeb6e8754fa9cee3af8bd530f54
+  title: The Rest on the Flight into Egypt
+  author: Netherlandish (Antwerp) Painters
+  page_url: https://www.metmuseum.org/art/collection/search/437211
+  url: https://images.metmuseum.org/CRDImages/ep/original/LC-29_100_599.jpg
+  source_id: '437211'
+  subtype: landscape
+  width: 4000
+  height: 3313
+  colour: true
+  classification: Paintings
+  medium: Oil on wood
+  department: European Paintings
+- id: met_436025
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 8c3c7d8895444eb66e71571de3f090cbfed0d7cd1557630e7b638a61e37024a9
+  prepared_sha256: 7bb62861daf0ddf07f941a656e0b770c3fd31f50c6f54ac52c5742acc71614bd
+  title: View of Ornans
+  author: Gustave Courbet
+  date: probably mid-1850s
+  page_url: https://www.metmuseum.org/art/collection/search/436025
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP-25139-001.jpg
+  source_id: '436025'
+  subtype: landscape
+  width: 4000
+  height: 3202
+  colour: true
+  crop_box:
+  - 466
+  - 59
+  - 3536
+  - 3129
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_437179
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 43eefcdc34d6673ba5ad118442d59f7d4a2a8b628bf06a9835b4b4c90dff5ccd
+  prepared_sha256: 252b98e50339f426f7ba6d397a4b48639968c3562455efe3cc41fa92b75eab51
+  title: Near Penshurst, Kent
+  author: Patrick Nasmyth
+  date: '1828'
+  page_url: https://www.metmuseum.org/art/collection/search/437179
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP164787.jpg
+  source_id: '437179'
+  subtype: landscape
+  width: 3903
+  height: 2954
+  colour: true
+  crop_box:
+  - 475
+  - 0
+  - 3428
+  - 2953
+  classification: Paintings
+  medium: Oil on wood
+  department: European Paintings
+- id: met_436782
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 506e6a6b2be9bb4dadbf69bc598c6407dbf77890d955ef05ffd996a984f70ad4
+  prepared_sha256: a33e8cf13f7516996c361607d320371e49ed3e22bcff528482762d323e260a56
+  title: Capriccio with St. Paul's and Old London Bridge
+  author: Antonio Joli
+  date: ca. 1745
+  page_url: https://www.metmuseum.org/art/collection/search/436782
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP123834.jpg
+  source_id: '436782'
+  subtype: landscape
+  width: 3863
+  height: 3450
+  colour: true
+  crop_box:
+  - 207
+  - 2
+  - 3653
+  - 3448
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_436183
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: bed0be6c5f9b651b683f2358451d3763c7810416753fe5a6b3b72f21c8a4fc0f
+  prepared_sha256: 64f62676e7584818fc6d7d964843256e46209339e91a8fbc77514e700022d63f
+  title: Departure of the Amazons
+  author: Claude Déruet
+  date: 1620s
+  page_url: https://www.metmuseum.org/art/collection/search/436183
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP318355.jpg
+  source_id: '436183'
+  subtype: landscape
+  width: 3911
+  height: 3015
+  colour: true
+  crop_box:
+  - 450
+  - 5
+  - 3457
+  - 3012
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_436830
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: a0812d4cefb651d6c8e908196f343fc2de5b5c2dc886f1fb4e8af719cc67e52d
+  prepared_sha256: 02a5f6e8e182b76aba4a8b28306683e2b2c18fbdfe48f65ef287edfe0fa8b287
+  title: A Panoramic Landscape with a Country Estate
+  author: Philips Koninck
+  date: ca. 1649
+  page_url: https://www.metmuseum.org/art/collection/search/436830
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP145898.jpg
+  source_id: '436830'
+  subtype: landscape
+  width: 3804
+  height: 3149
+  colour: true
+  crop_box:
+  - 353
+  - 21
+  - 3454
+  - 3122
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_436971
+  category: painting
+  stratum: european_landscape
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 459b1e6b5469976d4ddf1771269f06afa7f45ed6a8b05b71755c8be09ce0a168
+  prepared_sha256: 02bb81d798b6d81c4e64201d1117bd42fee08cfa1d73dbc4e33ea3aa4e584b98
+  title: The Flood Gate
+  author: Emile van Marcke
+  page_url: https://www.metmuseum.org/art/collection/search/436971
+  url: https://images.metmuseum.org/CRDImages/ep/original/DP-23286-001.jpg
+  source_id: '436971'
+  subtype: landscape
+  width: 4000
+  height: 3018
+  colour: true
+  crop_box:
+  - 538
+  - 25
+  - 3471
+  - 2958
+  classification: Paintings
+  medium: Oil on canvas
+  department: European Paintings
+- id: met_72416
+  category: painting
+  stratum: asian
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 02596dfdd9e372d0b295106343072c233857c24f99353bb19a653449c677c65b
+  prepared_sha256: 7a4458bcb4b9c73d1bff7d278d86cf002c1b0145e44f4b9a617a35d04890bffb
+  title: Landscape
+  author: Watanabe Shikō 渡辺始興
+  date: first half of the 18th century
+  page_url: https://www.metmuseum.org/art/collection/search/72416
+  url: https://images.metmuseum.org/CRDImages/as/original/DP112938.jpg
+  source_id: '72416'
+  subtype: painting
+  width: 3611
+  height: 3278
+  colour: true
+  crop_box:
+  - 186
+  - 0
+  - 3425
+  - 3239
+  classification: Paintings
+  medium: Two-panel folding screen; ink on paper
+  department: Asian Art
+- id: met_54318
+  category: painting
+  stratum: asian
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 814ccaf527bf38d2acd2ed2f908639f96e5cc5724158bcb5b5181b95b5ef2f21
+  prepared_sha256: 41d85dc6d270da5476b84c446057215173d7b6847a6e18169700bfe8471e093a
+  title: Kanjo (Court Lady) Seated, and a Tsurikoro Hanging near Her Head
+  author: Totoya Hokkei
+  date: ca. 1825
+  page_url: https://www.metmuseum.org/art/collection/search/54318
+  url: https://images.metmuseum.org/CRDImages/as/original/DP143439.jpg
+  source_id: '54318'
+  subtype: woodblock_print
+  width: 3199
+  height: 3751
+  colour: true
+  classification: Prints
+  medium: Woodblock print (surimono); ink and color on paper
+  department: Asian Art
+- id: met_54196
+  category: painting
+  stratum: asian
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 5eb11344afd8deef7d736fefd710547f4a7016edc36ec92c65bca9967ed6dda2
+  prepared_sha256: ce40ba1270ee9e17b1c229a41d63394a725d75803e21c5b35374702c2ee20867
+  title: Snowy Landscape
+  author: Ishikawa Kazan
+  date: ca. 1820
+  page_url: https://www.metmuseum.org/art/collection/search/54196
+  url: https://images.metmuseum.org/CRDImages/as/original/DP123654.jpg
+  source_id: '54196'
+  subtype: woodblock_print
+  width: 3109
+  height: 3415
+  colour: true
+  classification: Prints
+  medium: Woodblock print (surimono); ink and color on paper
+  department: Asian Art
+- id: met_54675
+  category: painting
+  stratum: asian
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: b9c9960c296dc771cda8796455847d5b25e6342b4031277e0a09c173b0c4d382
+  prepared_sha256: 9c28d456bb248ba02845a982798817486c773d3dcc99de92d7a905a1a06c3f2c
+  title: Bird Catching Fish Among Reeds
+  author: Watanabe Seitei
+  date: ca. 1887
+  page_url: https://www.metmuseum.org/art/collection/search/54675
+  url: https://images.metmuseum.org/CRDImages/as/original/DP211833.jpg
+  source_id: '54675'
+  subtype: painting
+  width: 2951
+  height: 3806
+  colour: true
+  classification: Paintings
+  medium: Album leaf; ink and color on silk
+  department: Asian Art
+- id: met_48980
+  category: painting
+  stratum: asian
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 03b9ed4c5038e04a63966905b08fe959514b592bfb07013c1fcfea4ea2c0eca5
+  prepared_sha256: 349977b87c168674c3f689c57b035ca3c8b1eee5b66be2559d1c726299ba828e
+  title: Spring and Summer Flowers with Bamboo
+  author: unknown
+  date: 18th century
+  page_url: https://www.metmuseum.org/art/collection/search/48980
+  url: https://images.metmuseum.org/CRDImages/as/original/LC-1982_244_17_jps-001.jpg
+  source_id: '48980'
+  subtype: painting
+  width: 4000
+  height: 3076
+  colour: true
+  classification: Paintings
+  medium: Four-panel folding screen; ink and color on paper
+  department: Asian Art
+- id: met_54224
+  category: painting
+  stratum: asian
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 907ae1c3d3fde1a8a646c21eb93df83a5a81d6a625f5c01b7f86f1ff5140682d
+  prepared_sha256: 6ccb3e4daf2f095114ff7efac1b6258c9ed1e0a322beb9d6caf0b9b90aa40234
+  title: Print
+  author: Totoya Hokkei
+  date: 1780–1850
+  page_url: https://www.metmuseum.org/art/collection/search/54224
+  url: https://images.metmuseum.org/CRDImages/as/original/DP144006.jpg
+  source_id: '54224'
+  subtype: woodblock_print
+  width: 1610
+  height: 1830
+  colour: true
+  classification: Prints
+  medium: Woodblock print (surimono); ink and color on paper
+  department: Asian Art
+- id: met_54923
+  category: painting
+  stratum: asian
+  source: met
+  dev: true
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 057ab0a585894dcf0228675b1282822b97065e05e2faf7be4307554c41da364f
+  prepared_sha256: 828f1ce703b4b3f0ab44387b1a5e2de0503862c3356216d3409001f57dbc1aac
+  title: Nanamaro and His Followers Looking at the Moon in China
+  author: Kubo Shunman
+  date: 19th century
+  page_url: https://www.metmuseum.org/art/collection/search/54923
+  url: https://images.metmuseum.org/CRDImages/as/original/DP138263.jpg
+  source_id: '54923'
+  subtype: woodblock_print
+  width: 3443
+  height: 3783
+  colour: true
+  classification: Prints
+  medium: Woodblock print (surimono); ink and color on paper
+  department: Asian Art
+- id: met_51686
+  category: painting
+  stratum: asian
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: aee602943efe3ed6888b3d8fd5dcd523403ec9a7a80c9da721fddc802ce0a94d
+  prepared_sha256: 13db85fdc4a90b606070e5667fb74faa96debc7a6e9e7b5ad5e2f516b05bc15c
+  title: Tartar Officer Carrying Blond Lady
+  author: Unidentified artist
+  date: 19th century
+  page_url: https://www.metmuseum.org/art/collection/search/51686
+  url: https://images.metmuseum.org/CRDImages/as/original/DP159076.jpg
+  source_id: '51686'
+  subtype: painting
+  width: 4000
+  height: 3391
+  colour: true
+  classification: Paintings
+  medium: Album leaf; ink and color on silk
+  department: Asian Art
+- id: met_488147
+  category: painting
+  stratum: other_art
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: f8fc0b2dd91a0121a16ee2b66637e45b2a9cd06267dc0f36360fda43d937c164
+  prepared_sha256: a8706a387e1e44f1de4963a856908f52f283eea595a9c379c08dea1e32902a37
+  title: Still Life
+  author: Ben Benn
+  date: '1941'
+  page_url: https://www.metmuseum.org/art/collection/search/488147
+  url: https://images.metmuseum.org/CRDImages/ma/original/43.47.7 - color.jpg
+  source_id: '488147'
+  subtype: modern
+  width: 2128
+  height: 1637
+  colour: true
+  classification: Paintings
+  medium: Oil on canvas
+  department: Modern and Contemporary Art
+- id: met_488126
+  category: painting
+  stratum: other_art
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: bd27ad98976444e73106c763f010f9a90a2f11a2016beca55d38fde7fa7def49
+  prepared_sha256: 99d70db4de0dbad753a9f5e9c5f1c67d90dcacd215fbd6d8e041bef60e304d47
+  title: '"One Third of a Nation"'
+  author: O. Louis Guglielmi
+  date: '1939'
+  page_url: https://www.metmuseum.org/art/collection/search/488126
+  url: https://images.metmuseum.org/CRDImages/ma/original/DP-42826-001.jpg
+  source_id: '488126'
+  subtype: modern
+  width: 3225
+  height: 4000
+  colour: true
+  crop_box:
+  - 62
+  - 461
+  - 3143
+  - 3542
+  classification: Paintings
+  medium: Oil and tempera on Masonite
+  department: Modern and Contemporary Art
+- id: met_485551
+  category: painting
+  stratum: other_art
+  source: met
+  dev: true
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 26fbb104a56fab5991ccdc061ae2a5880761d791ab7c31d2d7a514c70138d468
+  prepared_sha256: e420518fffe064d40f3930d8828cdd758dd1fda6255763f8c452c00a6fe1ae75
+  title: Self-Portrait
+  author: Umberto Boccioni
+  date: '1905'
+  page_url: https://www.metmuseum.org/art/collection/search/485551
+  url: https://images.metmuseum.org/CRDImages/ma/original/LC-1990_38_4-overall-20240701-01.jpg
+  source_id: '485551'
+  subtype: modern
+  width: 4000
+  height: 3044
+  colour: true
+  classification: Paintings
+  medium: Oil on canvas
+  department: Modern and Contemporary Art
+- id: met_488903
+  category: painting
+  stratum: other_art
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: e22d1fc74fa58c1d8b6470afd1848d26b0eeb9908221cd1525573a0a4f94aa3e
+  prepared_sha256: f78c1761014844aab4819890c5438b1a33a3f3d78a75586aae227c7175193928
+  title: Jeanne Hébuterne
+  author: Amedeo Modigliani
+  date: '1919'
+  page_url: https://www.metmuseum.org/art/collection/search/488903
+  url: https://images.metmuseum.org/CRDImages/ma/original/DT2180.jpg
+  source_id: '488903'
+  subtype: modern
+  width: 3002
+  height: 3719
+  colour: true
+  crop_box:
+  - 21
+  - 385
+  - 2968
+  - 3332
+  classification: Paintings
+  medium: Oil on canvas
+  department: Modern and Contemporary Art
+- id: met_11718
+  category: painting
+  stratum: other_art
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: c6013014475572f69bf66aec9bd11e117e4c7ebc6ab95aa7c2290c44f838c704
+  prepared_sha256: 2b7ae654823d1c17e8f0a11e9c2b416cdf725ec16da449a8b69f3aaf9187c7c4
+  title: Samuel Mifflin
+  author: Charles Willson Peale
+  date: 1777–80
+  page_url: https://www.metmuseum.org/art/collection/search/11718
+  url: https://images.metmuseum.org/CRDImages/ad/original/DT221482.jpg
+  source_id: '11718'
+  subtype: american
+  width: 2992
+  height: 3721
+  colour: true
+  crop_box:
+  - 31
+  - 394
+  - 2959
+  - 3322
+  classification: ''
+  medium: Oil on canvas
+  department: The American Wing
+- id: met_701989
+  category: painting
+  stratum: other_art
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 889c24792982b6a66ca554450172b0844fdcdf617cd286a04ab0fb6f889d19fb
+  prepared_sha256: 82e9e1a1d46686980adcd61186a541e2dbb6a499168a08e719c3cf8074042d1a
+  title: Emma Van Name
+  author: Joshua Johnson
+  date: ca. 1805
+  page_url: https://www.metmuseum.org/art/collection/search/701989
+  url: https://images.metmuseum.org/CRDImages/ad/original/DP-952-001.jpg
+  source_id: '701989'
+  subtype: american
+  width: 3218
+  height: 4000
+  colour: true
+  classification: ''
+  medium: Oil on canvasPainting
+  department: The American Wing
+- id: met_11241
+  category: painting
+  stratum: other_art
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 00b0adba558366dee2fa9feb862c4ee225dc0078f74bdc7b8fd5d5cda546bbd5
+  prepared_sha256: c5c7f1f44cc197fd552924ddc8534adc35f68146ebc6fbd9f2d4110d737e3e52
+  title: Augustus Washington Clason
+  author: John Wesley Jarvis
+  date: ca. 1820
+  page_url: https://www.metmuseum.org/art/collection/search/11241
+  url: https://images.metmuseum.org/CRDImages/ad/original/ap75.8.jpg
+  source_id: '11241'
+  subtype: american
+  width: 1758
+  height: 2268
+  colour: true
+  classification: ''
+  medium: Oil on canvas
+  department: The American Wing
+- id: met_13102
+  category: painting
+  stratum: other_art
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 9daf8c3fd6007eb160ff5ef5da649421345aef68763894bec36ea223002b778f
+  prepared_sha256: c947d948c1cc751f938b1f53967ca684fc620e3ad011f8beaf85a4d4314c8399
+  title: Portrait of a Lady (Possibly of the Buloid Family)
+  author: Samuel Lovett Waldo
+  date: '1832'
+  page_url: https://www.metmuseum.org/art/collection/search/13102
+  url: https://images.metmuseum.org/CRDImages/ad/original/ap29.148.2.jpg
+  source_id: '13102'
+  subtype: american
+  width: 1824
+  height: 2305
+  colour: true
+  classification: ''
+  medium: Oil on wood
+  department: The American Wing
+- id: met_283187
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: c4a1e798f2e9ba15fd92e4eb0856db14ccf270f781f6acc4893c3f6e1d017171
+  prepared_sha256: faec361d1d517422d0075796040fca876dcebe2276a53573f63bc3ae3cbcee34
+  title: '[Senator and Mrs. James Henry Lane]'
+  author: Brady & Co.
+  date: 1861–66
+  page_url: https://www.metmuseum.org/art/collection/search/283187
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP-387-001.jpg
+  source_id: '283187'
+  subtype: portrait
+  width: 3292
+  height: 3763
+  colour: false
+  classification: Photographs
+  medium: Albumen silver print from glass negative
+  department: Photographs
+- id: met_285903
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: b3acc363c725c31bfd82ed51ec7c27a04894166153c8209dd045c4d0d35cc4f6
+  prepared_sha256: 5b9929b5d16c233e0fd0c8802ba4642c96768ca1d81cea750d0259e103b08719
+  title: Portrait of His Daughter Reading
+  author: Louis-Désiré Blanquart-Évrard
+  date: ca. 1847
+  page_url: https://www.metmuseum.org/art/collection/search/285903
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP-19600-127.jpg
+  source_id: '285903'
+  subtype: portrait
+  width: 3011
+  height: 4000
+  colour: false
+  classification: Photographs
+  medium: Salted paper print from paper negative
+  department: Photographs
+- id: met_261532
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 75a26b9c303d25cb36f68d39ebe8dc8b3199eb7fb5627f71fd88c9861d6ce549
+  prepared_sha256: 04544513cf31b84307aefdc4396e353089b5835fbdbc0ab648a092f3fc73aa03
+  title: Marie Stuart
+  author: Pierre-Louis Pierson
+  date: 1860s
+  page_url: https://www.metmuseum.org/art/collection/search/261532
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP228922.jpg
+  source_id: '261532'
+  subtype: portrait
+  width: 2598
+  height: 3425
+  colour: false
+  classification: Photographs
+  medium: Albumen silver print from glass negative
+  department: Photographs
+- id: met_263532
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: d6c0a0a3fef299ed871eff7aca12fab5b816ec41db960591b9e6b6cf53acd2d6
+  prepared_sha256: d9fce90e514d9268581199a075dd1f411c06e5088df1e8d4e248c8099bea6e17
+  title: '[Performer in Bugaku-style Costume]'
+  author: Unknown
+  date: 1880s
+  page_url: https://www.metmuseum.org/art/collection/search/263532
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP71210.jpg
+  source_id: '263532'
+  subtype: portrait
+  width: 2514
+  height: 3180
+  colour: false
+  classification: Photographs
+  medium: Albumen silver print with applied color
+  department: Photographs
+- id: met_268534
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 42fd4a57ad1ca0bd36c0ca4eacd0f6513fc20e9d446687978d9616b01c68bcf5
+  prepared_sha256: 10505d1e0dd1d6e564bfe5a424ef9ada5764fd2c06e31e6a10e42bc26915d507
+  title: Cunningham, Beff, John Hamilton, Guthrie
+  author: Hill and Adamson
+  date: 1843–47
+  page_url: https://www.metmuseum.org/art/collection/search/268534
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP142372.jpg
+  source_id: '268534'
+  subtype: portrait
+  width: 2064
+  height: 1721
+  colour: false
+  classification: Photographs
+  medium: Salted paper print from paper negative
+  department: Photographs
+- id: met_261324
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: true
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 6cfdb7dd83d9c5f81ace882fbf1a7e49bae7b4f2b1a6a2625f74c950279c8bc4
+  prepared_sha256: 65d893c1a42a7ac333d07a783e537c4b1b29e5f8342fa9e287897225b62a51d8
+  title: Derelitta
+  author: Pierre-Louis Pierson
+  date: 1860s
+  page_url: https://www.metmuseum.org/art/collection/search/261324
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP228863.jpg
+  source_id: '261324'
+  subtype: portrait
+  width: 2693
+  height: 3289
+  colour: false
+  classification: Photographs
+  medium: Albumen silver print from glass negative
+  department: Photographs
+- id: met_261318
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: d71241b91f2a58df91323a2f4a4c3ede7434327cd2af1686c78ea354c826deb7
+  prepared_sha256: e246c41c90c8de75a7ef4725e51c240d168699f27b1fcca813a6921c3edc4ec6
+  title: Sèriè à la Ristori
+  author: Pierre-Louis Pierson
+  date: 1860s
+  page_url: https://www.metmuseum.org/art/collection/search/261318
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP232188.jpg
+  source_id: '261318'
+  subtype: portrait
+  width: 2957
+  height: 3722
+  colour: false
+  classification: Photographs
+  medium: Albumen silver print from glass negative
+  department: Photographs
+- id: met_268532
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 070dc4af7918fdf6ef935a044c791bd4b9c3db96554fd8423134bd6c2f470f86
+  prepared_sha256: 31db6aec88a038b1814d11f05343e0a0f3bc0545586c7aef6a91ef0dbc767a58
+  title: Dr. Welsh
+  author: Hill and Adamson
+  date: 1843–47
+  page_url: https://www.metmuseum.org/art/collection/search/268532
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP142370.jpg
+  source_id: '268532'
+  subtype: portrait
+  width: 2256
+  height: 2809
+  colour: false
+  classification: Photographs
+  medium: Salted paper print from paper negative
+  department: Photographs
+- id: commons_gus_worke_a_farmer_who_came_from_germany_40_years_ago1a35004
+  category: photo
+  stratum: photo_portrait
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 9e89bd73bb1280358a7fe29d0f3b32d48455f7d640c76c6dde5ca75917ce9a98
+  prepared_sha256: 787998f8247381d7ddd5932e85c36755cd617364dce278dadfc6ea35901a2bfb
+  title: Gus Worke, a farmer who came from Germany 40 years ago1a35004v
+  author: Charles Fenno Jacobs
+  date: May 1942date QS:P571,+1942-05-00T00:00:00Z/10
+  page_url: https://commons.wikimedia.org/wiki/File%3AGus_Worke%2C_a_farmer_who_came_from_Germany_40_years_ago1a35004v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/1/15/Gus_Worke%2C_a_farmer_who_came_from_Germany_40_years_ago1a35004v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Gus Worke, a farmer who came from Germany 40 years ago1a35004v.jpg
+  width: 787
+  height: 1024
+  colour: true
+  crop_box:
+  - 25
+  - 147
+  - 760
+  - 882
+  commons_sha1: d3b259946c706e68f2a7d89524f0d103426f96c4
+  commons_licence: Public domain
+- id: commons_guide_at_little_norway_blue_mounds_wis_lccn2017878934
+  category: photo
+  stratum: photo_portrait
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: c7e766370fe6e7577aa0ca7afec125849bb224a6f2ac84b2a67f7cf1bd802a51
+  prepared_sha256: 41ec46b2a4476dce5a5ea0d499e2e1d7cfb6308f77fa4b0b8d6fb27e305ac26d
+  title: Guide at Little Norway, Blue Mounds, Wis. LCCN2017878934
+  author: Arthur Rothstein
+  date: 1942-08
+  page_url: https://commons.wikimedia.org/wiki/File%3AGuide_at_Little_Norway%2C_Blue_Mounds%2C_Wis._LCCN2017878934.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/7/71/Guide_at_Little_Norway%2C_Blue_Mounds%2C_Wis._LCCN2017878934.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Guide at Little Norway, Blue Mounds, Wis. LCCN2017878934.jpg
+  width: 5063
+  height: 6657
+  colour: true
+  crop_box:
+  - 0
+  - 797
+  - 5063
+  - 5860
+  commons_sha1: 27c7ee8db40b4132d76c2a99851420ad5babfe4b
+  commons_licence: Public domain
+- id: commons_gorsky21767_3
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (Wikimedia Commons licence tag)
+  retrieved: '2026-10-26'
+  sha256: 65dba2012aa9e13e8688d998e33a82eae007aaf54ff6cc91f7b4f10c085315a3
+  prepared_sha256: f7af238e7a02a565763a32da7c22aa4940fbe61724e5392eee20b4994c5543fe
+  title: Gorsky21767-3
+  author: Sergei Mikhailovich Prokudin-Gorskii, digital rendering for Konstantin and Vladimir Khodakovsky
+  date: '1911-01-01'
+  page_url: https://commons.wikimedia.org/wiki/File%3AGorsky21767-3.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/6/67/Gorsky21767-3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Gorsky21767-3.jpg
+  width: 3372
+  height: 3098
+  colour: true
+  commons_sha1: 1ed92ef28f20f2d73a11f998aeadbd272b1f260b
+  commons_licence: Public domain
+- id: commons_south_andros_island_piping_plover_foraging_in_rocky_intertid
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, US Fish and Wildlife Service)
+  retrieved: '2026-10-26'
+  sha256: 210d5693059dc3da19f63da8331b1dfcd8a323ff362d56b6f1e1e4402215d22f
+  prepared_sha256: ee65ec7ef3d5e7edac8f0e3dcd953d235e935c10931eac230e8fc5cad4ab519b
+  title: South Andros Island- Piping Plover foraging in rocky intertidal zone (6771643257)
+  author: U. S. Fish and Wildlife Service - Northeast Region
+  date: '2011-02-01 15:55:22'
+  page_url: https://commons.wikimedia.org/wiki/File%3ASouth_Andros_Island-_Piping_Plover_foraging_in_rocky_intertidal_zone_%286771643257%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/c/c5/South_Andros_Island-_Piping_Plover_foraging_in_rocky_intertidal_zone_%286771643257%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:South Andros Island- Piping Plover foraging in rocky intertidal zone (6771643257).jpg
+  width: 2048
+  height: 1536
+  colour: true
+  commons_sha1: fd8ab3be0ac11c5f5ae72256757653feab2c28a2
+  commons_licence: Public domain
+- id: commons_cattle_in_corrals_on_ranch_beaverhead_county1a35024v
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 2d55029e9479c14b55fb2a2060cebad1752a425199a700eefee4d7ab06e89f6f
+  prepared_sha256: c6abe320b05c625d818a0b32eb601a355fab952eeb68922d9271387304011764
+  title: Cattle in corrals on ranch, Beaverhead County1a35024v
+  author: Russell Lee
+  date: September 1942date QS:P571,+1942-09-00T00:00:00Z/10
+  page_url: https://commons.wikimedia.org/wiki/File%3ACattle_in_corrals_on_ranch%2C_Beaverhead_County1a35024v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/c/cf/Cattle_in_corrals_on_ranch%2C_Beaverhead_County1a35024v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Cattle in corrals on ranch, Beaverhead County1a35024v.jpg
+  width: 1024
+  height: 790
+  colour: true
+  crop_box:
+  - 144
+  - 27
+  - 880
+  - 763
+  commons_sha1: 2cc162e60d6c72f4f6bafb4a55d559022e720e44
+  commons_licence: Public domain
+- id: commons_street_corner_dillon_mont1a35017v
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: f8e8b622d82c446321c5f668f643b0f9afba5c8f5cc97c3e29abd3536628fbb6
+  prepared_sha256: 2c232ce8639f9641a74e0a92701f7a0fb8eb0b61b6f259af1a7fa6f9b4b1cdb1
+  title: Street corner, Dillon, Mont1a35017v
+  author: Russell Lee
+  date: August 1942date QS:P571,+1942-08-00T00:00:00Z/10
+  page_url: https://commons.wikimedia.org/wiki/File%3AStreet_corner%2C_Dillon%2C_Mont1a35017v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/3/3d/Street_corner%2C_Dillon%2C_Mont1a35017v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Street corner, Dillon, Mont1a35017v.jpg
+  width: 1024
+  height: 784
+  colour: true
+  crop_box:
+  - 150
+  - 55
+  - 863
+  - 768
+  commons_sha1: a890496fd0ec8cfed40e73e3e281eee5d9cc3bfd
+  commons_licence: Public domain
+- id: commons_horse_breeding_ranch_grant_co_oregon_lccn2017877601
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 11c949d45f45d0c886b9327bfaea48f3e3b5842a95a3ef7c41b3ef9bc2e7cbae
+  prepared_sha256: 80628727ba5409fd694cfb03c2be89e9f6806849a35213e37c60fc32eea22744
+  title: Horse breeding ranch, Grant Co., Oregon LCCN2017877601
+  author: Lee, Russell, 1903-1986, photographer
+  date: 1942-07
+  page_url: https://commons.wikimedia.org/wiki/File%3AHorse_breeding_ranch%2C_Grant_Co.%2C_Oregon_LCCN2017877601.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/c/c1/Horse_breeding_ranch%2C_Grant_Co.%2C_Oregon_LCCN2017877601.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Horse breeding ranch, Grant Co., Oregon LCCN2017877601.jpg
+  width: 7768
+  height: 6010
+  colour: true
+  crop_box:
+  - 1054
+  - 183
+  - 6688
+  - 5817
+  commons_sha1: 0c272e5e31177191346d4bacb0c928e525bfce2e
+  commons_licence: Public domain
+- id: commons_russellshepherd
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 347075bdbf16385645781dd119faf80d30fbfa408cccd87a912f637b7fac4339
+  prepared_sha256: a2a9de52952b228b049cf18292a64aa12bbb75a13051d2e82a25c1fbc0f813b6
+  title: Russellshepherd
+  author: Russell Lee
+  date: 1942-08
+  page_url: https://commons.wikimedia.org/wiki/File%3ARussellshepherd.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/7/7f/Russellshepherd.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Russellshepherd.jpg
+  width: 4529
+  height: 6007
+  colour: true
+  commons_sha1: f31b8e09c974a9900469922cb108c2d151bb7e60
+  commons_licence: Public domain
+- id: commons_in_the_flat_cattle_country_in_the_south_western_tip_1a34078v
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 8b2688969e9b9e84262402376d44360545227fe1d05b6e3b4d60d2aebc43c289
+  prepared_sha256: 1b2a118aedb5a0c938b75bddd9dba13c8abbf6864dba5c52d06773f90f0fab87
+  title: In the flat cattle country in the south western tip 1a34078v
+  author: Jack Delano
+  date: January 1942date QS:P571,+1942-01-00T00:00:00Z/10
+  page_url: https://commons.wikimedia.org/wiki/File%3AIn_the_flat_cattle_country_in_the_south_western_tip_1a34078v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/4/4f/In_the_flat_cattle_country_in_the_south_western_tip_1a34078v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:In the flat cattle country in the south western tip 1a34078v.jpg
+  width: 1024
+  height: 811
+  colour: true
+  crop_box:
+  - 133
+  - 29
+  - 886
+  - 782
+  commons_sha1: bea4b4a4a68af7bf5d4d46df56dbcc14c8d598f0
+  commons_licence: Public domain
+- id: commons_shulman_s_market_at_the_southeast_corner_of_n_street_and_uni
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 8a289e1a15b90fb669e14a500eae129e6ff4098663ee96509cdd6a0336e30754
+  prepared_sha256: 38cf0c8229f5c757ef51ac5eea45a836ed32594f368a93ba908f5d1f84632109
+  title: Shulman's Market at the southeast corner of N Street and Union Street S.W., Washington, D.C., with a 1931 Chevrolet
+    car parked in front LCCN2017877969
+  author: Louise Rosskam
+  date: between 1941 and 1942date QS:P,+1941-00-00T00:00:00Z/8,P1319,+1941-00-00T00:00:00Z/9,P1326,+1942-00-00T00:00:00Z/9
+  page_url: https://commons.wikimedia.org/wiki/File%3AShulman%27s_Market_at_the_southeast_corner_of_N_Street_and_Union_Street_S.W.%2C_Washington%2C_D.C.%2C_with_a_1931_Chevrolet_car_parked_in_front_LCCN2017877969.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/5/54/Shulman%27s_Market_at_the_southeast_corner_of_N_Street_and_Union_Street_S.W.%2C_Washington%2C_D.C.%2C_with_a_1931_Chevrolet_car_parked_in_front_LCCN2017877969.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Shulman's Market at the southeast corner of N Street and Union Street S.W., Washington, D.C., with a 1931
+    Chevrolet car parked in front LCCN2017877969.jpg
+  width: 7697
+  height: 6010
+  colour: true
+  crop_box:
+  - 1010
+  - 144
+  - 6698
+  - 5832
+  commons_sha1: 00e8319499eb13170f1d1c7c2750f44dbed3de21
+  commons_licence: Public domain
+- id: commons_seed_and_feed_store_lincoln_nebraska1a34278v
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: fb84569d004ffa4051fc5f6acacf62476a1d86e6d1317a0898abd957e04563d4
+  prepared_sha256: f10a4a8f0b3b657660621f5e983436be7aed3bbabea01686c97cd3bd62d92431
+  title: Seed and feed store, Lincoln Nebraska
+  author: John Vachon
+  date: 1942date QS:P571,+1942-00-00T00:00:00Z/9
+  page_url: https://commons.wikimedia.org/wiki/File%3ASeed_and_feed_store%2C_Lincoln_Nebraska1a34278v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/4/41/Seed_and_feed_store%2C_Lincoln_Nebraska1a34278v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Seed and feed store, Lincoln Nebraska1a34278v.jpg
+  width: 1024
+  height: 817
+  colour: true
+  crop_box:
+  - 119
+  - 15
+  - 901
+  - 797
+  commons_sha1: d74f130d17952c8bb86a5c1fe1b20c53d3fe2bbb
+  commons_licence: Public domain
+- id: commons_street_in_san_juan_1a34067v
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: dc7a237ec234217c09a744069acdd2505f143f27c0f3f1aaed3340e3ce6628b9
+  prepared_sha256: c171a5c8fbaeb1f54b23c1a179a55a5e0b8b44d7dca6d9ff098fccac8bcb58c4
+  title: Street in San Juan 1a34067v
+  author: Jack Delano
+  date: 1941-12
+  page_url: https://commons.wikimedia.org/wiki/File%3AStreet_in_San_Juan_1a34067v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/1/16/Street_in_San_Juan_1a34067v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Street in San Juan 1a34067v.jpg
+  width: 1024
+  height: 790
+  colour: true
+  crop_box:
+  - 134
+  - 19
+  - 886
+  - 771
+  commons_sha1: 19e641e18fc74cbc49691a1dcdfc9d7510718448
+  commons_licence: Public domain
+- id: commons_rosskam_dc1
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: true
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: a908450431ae3bfd81addc06f755c8b7a9241160b276cd913d9d4f9039f7312a
+  prepared_sha256: b6e35ca2b78b0970d6829ec74f04c44e3d2581a01bebb6cc1edbc2616ae81c7c
+  title: Rosskam-dc1
+  author: Louise Rosskam
+  date: between 1941 and 1942date QS:P,+1941-00-00T00:00:00Z/8,P1319,+1941-00-00T00:00:00Z/9,P1326,+1942-00-00T00:00:00Z/9
+  page_url: https://commons.wikimedia.org/wiki/File%3ARosskam-dc1.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/7/72/Rosskam-dc1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Rosskam-dc1.jpg
+  width: 1024
+  height: 795
+  colour: true
+  crop_box:
+  - 137
+  - 21
+  - 888
+  - 772
+  commons_sha1: 3ff41439fe334bd400ad48a36fe60a3c8bb359e1
+  commons_licence: Public domain
+- id: commons_laundry_barbershop_and_store_washington_d_c_1a34422v
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 1377a13160f1c63b7eebada4a8cb9133ade50d73da0ab4095cca8dcb0889a739
+  prepared_sha256: 3b09f8e9e6738fb7fb01b24e147d741eef9ad8af1110ff7c5d4107c72dd1a777
+  title: '[Laundry, barbershop and store, Washington, D.C.?]'
+  author: Louise Rosskam
+  date: between 1941 and 1942date QS:P571,+1941-00-00T00:00:00Z/8,P1319,+1941-00-00T00:00:00Z/9,P1326,+1942-00-00T00:00:00Z/9
+  page_url: https://commons.wikimedia.org/wiki/File%3ALaundry%2C_barbershop_and_store%2C_Washington%2C_D.C.1a34422v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/3/3f/Laundry%2C_barbershop_and_store%2C_Washington%2C_D.C.1a34422v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Laundry, barbershop and store, Washington, D.C.1a34422v.jpg
+  width: 1024
+  height: 794
+  colour: true
+  crop_box:
+  - 137
+  - 22
+  - 887
+  - 772
+  commons_sha1: a47cf18a3285d4d6651d0c5872ea07d3103eefcd
+  commons_licence: Public domain
+- id: commons_harrowing_a_field_with_a_diesel_tractor_seabrook_farm_bridge
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 9cb4a5d7ab7fa8179fc9dd53a81c0351172a68c0fdbcbe2346ae3a8d664f789f
+  prepared_sha256: e34e6198a6cfcf4c02a2aeb5bf87ccef7696cf56d18d5fc96076d5de2b34718a
+  title: Harrowing a field with a diesel tractor, Seabrook Farm, Bridgeton, N.J. LCCN2017877677
+  author: Collier, John, Jr., 1913-1992, photographer; Wolcott, Marion Post, 1910-1990, photographer
+  date: 1942-06
+  page_url: https://commons.wikimedia.org/wiki/File%3AHarrowing_a_field_with_a_diesel_tractor%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877677.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/4/4b/Harrowing_a_field_with_a_diesel_tractor%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877677.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Harrowing a field with a diesel tractor, Seabrook Farm, Bridgeton, N.J. LCCN2017877677.jpg
+  width: 9113
+  height: 7305
+  colour: true
+  crop_box:
+  - 1062
+  - 168
+  - 8038
+  - 7144
+  commons_sha1: c7a26b3499ea01139eaf32219b3a08760b10d27d
+  commons_licence: Public domain
+- id: commons_french_village_a_small_settlement_on_st_thomas_island1a33940
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: bf86b25a571fd7bc0df72bf10a835e3cfc80b8aaae15c9fec7ffa6f86c35f3cb
+  prepared_sha256: 32715dd43136a22ce26127575d27119e144c822af8c6ce98c9bf122970686a3f
+  title: French village, a small settlement on St. Thomas Island1a33940v
+  author: Jack Delano
+  date: December 1941date QS:P571,+1941-12-00T00:00:00Z/10
+  page_url: https://commons.wikimedia.org/wiki/File%3AFrench_village%2C_a_small_settlement_on_St._Thomas_Island1a33940v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/9/90/French_village%2C_a_small_settlement_on_St._Thomas_Island1a33940v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:French village, a small settlement on St. Thomas Island1a33940v.jpg
+  width: 1024
+  height: 791
+  colour: true
+  crop_box:
+  - 134
+  - 17
+  - 889
+  - 772
+  commons_sha1: 9aa853d514f7d49702c2901c7f25c390c335ac4c
+  commons_licence: Public domain
+- id: commons_fish_survey_at_air_force_base_51253092996
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, US Fish and Wildlife Service)
+  retrieved: '2026-10-26'
+  sha256: 969ed46fac0679d03633e7afed683a20b3df220ea901026b624dc9a51b1ac3ea
+  prepared_sha256: 275d7b9b69e4355917d76eecfa078bcffd7c131be41a5d20ed97998b863d4557
+  title: Fish survey at Air Force Base (51253092996)
+  author: USFWS Mountain-Prairie
+  date: Taken on 4 September 2014, 09:36
+  page_url: https://commons.wikimedia.org/wiki/File%3AFish_survey_at_Air_Force_Base_%2851253092996%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/b/b6/Fish_survey_at_Air_Force_Base_%2851253092996%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Fish survey at Air Force Base (51253092996).jpg
+  width: 3264
+  height: 2448
+  colour: true
+  commons_sha1: 7e89b79211a88aa7f1965edd3edd83487b79f925
+  commons_licence: Public domain
+- id: commons_part_of_string_bean_factory_and_field_system_seabrook_farm_b
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: true
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 0a1d4469228b63ba9cc0efe22aa866d08b9c8153dd7b78651215d5f9c69855fa
+  prepared_sha256: 4855b1d7d35d46b13ab6cba223dae7bc6142d4c3771b0281e68c4115e7443ff4
+  title: Part of string bean factory and field system, Seabrook Farm, Bridgeton, N.J. LCCN2017877681
+  author: Collier, John, Jr., 1913-1992, photographer
+  date: 1942-06
+  page_url: https://commons.wikimedia.org/wiki/File%3APart_of_string_bean_factory_and_field_system%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877681.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/8/8e/Part_of_string_bean_factory_and_field_system%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877681.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Part of string bean factory and field system, Seabrook Farm, Bridgeton, N.J. LCCN2017877681.jpg
+  width: 9185
+  height: 7477
+  colour: true
+  crop_box:
+  - 867
+  - 217
+  - 8127
+  - 7477
+  commons_sha1: 45bfc8b8590c4c5fa0fb349dd01c320b2635e894
+  commons_licence: Public domain
+- id: commons_near_white_plains_ga_ca_1941_lccn2017877525
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: cc9f6bfd6abd273cf64bcaf3f25b0c19b4b58fd2166e888d61fccb82f15cbf72
+  prepared_sha256: cb32ba18b3ff2940253dc202c3312387ca2df9504420b8c10be9033ab988215d
+  title: Near White Plains, Ga., ca. 1941. LCCN2017877525
+  author: Delano, Jack, photographer; Wolcott, Marion Post, 1910-1990, photographer
+  date: '1941'
+  page_url: https://commons.wikimedia.org/wiki/File%3ANear_White_Plains%2C_Ga.%2C_ca._1941._LCCN2017877525.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/4/4d/Near_White_Plains%2C_Ga.%2C_ca._1941._LCCN2017877525.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Near White Plains, Ga., ca. 1941. LCCN2017877525.jpg
+  width: 5970
+  height: 7647
+  colour: true
+  crop_box:
+  - 170
+  - 990
+  - 5843
+  - 6663
+  commons_sha1: 0cce826fac56470942fa6a8025ba35d0c31ae960
+  commons_licence: Public domain
+- id: commons_shasta_dam_under_construction_california_lccn2017877975
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 462bbbeb5d120240f16497906c4819885f03ce67ba9f5646e419d0ceaa6e4415
+  prepared_sha256: c8ed159673da0fde6241ad2c2a985dec2eeefb39bc18b2d3cd28a02345c802bc
+  title: Shasta dam under construction, California LCCN2017877975
+  author: Lee, Russell, 1903-1986, photographer
+  date: 1942-06
+  page_url: https://commons.wikimedia.org/wiki/File%3AShasta_dam_under_construction%2C_California_LCCN2017877975.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/1/11/Shasta_dam_under_construction%2C_California_LCCN2017877975.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Shasta dam under construction, California LCCN2017877975.jpg
+  width: 6569
+  height: 5107
+  colour: true
+  crop_box:
+  - 792
+  - 162
+  - 5637
+  - 5007
+  commons_sha1: 6740070219976de8cebae1237699ba299d98a55c
+  commons_licence: Public domain
+- id: commons_patuxent_research_refuge_md_10408633954
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, US Fish and Wildlife Service)
+  retrieved: '2026-10-26'
+  sha256: 4c41dee86794ebe75330d1751887aeec6bfbdbff60261bcbad6b9e56aab40112
+  prepared_sha256: 800eff53f1f4994dad84df01aee02d261bbe31386c9930b1470213a98022d8af
+  title: Patuxent Research Refuge, MD (10408633954)
+  author: U.S. Fish and Wildlife Service Headquarters
+  date: 2002-10-26 09:38
+  page_url: https://commons.wikimedia.org/wiki/File%3APatuxent_Research_Refuge%2C_MD_%2810408633954%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/6/6e/Patuxent_Research_Refuge%2C_MD_%2810408633954%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Patuxent Research Refuge, MD (10408633954).jpg
+  width: 1280
+  height: 960
+  colour: true
+  commons_sha1: 871c579172112cb901f3eea9e8ec93bc4bf781c2
+  commons_licence: Public domain
+- id: commons_house_near_white_plains_ga_lccn2017877526
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 93211e76b3f45d159634fbc0d58e26d3c8c3173716bf90790b1a03f880cfb28d
+  prepared_sha256: 93176d463825baa1b8698ef15652a822b8f0af4b172eb1a1feac252c3ef207e1
+  title: House near White Plains, Ga.? LCCN2017877526
+  author: Delano, Jack, photographer; Wolcott, Marion Post, 1910-1990, photographer
+  date: '1941'
+  page_url: https://commons.wikimedia.org/wiki/File%3AHouse_near_White_Plains%2C_Ga.%3F_LCCN2017877526.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/5/5a/House_near_White_Plains%2C_Ga.%3F_LCCN2017877526.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:House near White Plains, Ga.? LCCN2017877526.jpg
+  width: 7678
+  height: 5949
+  colour: true
+  crop_box:
+  - 997
+  - 137
+  - 6660
+  - 5800
+  commons_sha1: 6306ef55abe81a2fc93b542aed62bbf939ca2a76
+  commons_licence: Public domain
+- id: sdxl_00
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a studio portrait photograph of an elderly fisherman with a white beard, soft window light, shallow depth of field
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a studio portrait photograph of an elderly fisherman with a white beard, soft window light, shallow depth of field
+  seed: 0
+- id: sdxl_01
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a close-up photograph of a smiling young woman with freckles and curly red hair, outdoors in overcast light
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a close-up photograph of a smiling young woman with freckles and curly red hair, outdoors in overcast light
+  seed: 1
+- id: sdxl_02
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a portrait photograph of a child in a yellow raincoat looking at the camera, city street in the background
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a portrait photograph of a child in a yellow raincoat looking at the camera, city street in the background
+  seed: 2
+- id: sdxl_03
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a middle-aged man wearing glasses and a green scarf, three-quarter view, warm evening light
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a middle-aged man wearing glasses and a green scarf, three-quarter view, warm evening light
+  seed: 3
+- id: sdxl_04
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: true
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a candid photograph of two musicians laughing together on a street corner
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a candid photograph of two musicians laughing together on a street corner
+  seed: 4
+- id: sdxl_05
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: an oil painting of a young woman in a blue dress seated by a window, visible brush strokes, classical portrait
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: an oil painting of a young woman in a blue dress seated by a window, visible brush strokes, classical portrait
+  seed: 5
+- id: sdxl_06
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: an impressionist oil painting of an old sailor smoking a pipe, thick brush strokes
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: an impressionist oil painting of an old sailor smoking a pipe, thick brush strokes
+  seed: 6
+- id: sdxl_07
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a baroque oil painting portrait of a nobleman with a lace collar, dark background, dramatic lighting
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a baroque oil painting portrait of a nobleman with a lace collar, dark background, dramatic lighting
+  seed: 7
+- id: sdxl_08
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a watercolor and gouache portrait of a girl with a red ribbon in her hair
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a watercolor and gouache portrait of a girl with a red ribbon in her hair
+  seed: 8
+- id: sdxl_09
+  category: sdxl
+  stratum: sdxl_portrait
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: an expressionist oil painting of a laughing woman with bold colors and a turquoise background
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: an expressionist oil painting of a laughing woman with bold colors and a turquoise background
+  seed: 9
+- id: sdxl_10
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a mountain lake at sunrise with mist and pine trees
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a mountain lake at sunrise with mist and pine trees
+  seed: 10
+- id: sdxl_11
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a narrow cobblestone street in an old European town after rain
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a narrow cobblestone street in an old European town after rain
+  seed: 11
+- id: sdxl_12
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a lighthouse on a rocky coast under a stormy sky
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a lighthouse on a rocky coast under a stormy sky
+  seed: 12
+- id: sdxl_13
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a wheat field with a lone tree at golden hour
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a wheat field with a lone tree at golden hour
+  seed: 13
+- id: sdxl_14
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: true
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a busy harbor with colorful fishing boats in the morning
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a busy harbor with colorful fishing boats in the morning
+  seed: 14
+- id: sdxl_15
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: an impressionist oil painting of a river with water lilies and a small wooden bridge
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: an impressionist oil painting of a river with water lilies and a small wooden bridge
+  seed: 15
+- id: sdxl_16
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: an oil painting of a snow covered village at dusk with lit windows, thick impasto
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: an oil painting of a snow covered village at dusk with lit windows, thick impasto
+  seed: 16
+- id: sdxl_17
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a romantic landscape painting of a ship in a stormy sea with dramatic clouds
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a romantic landscape painting of a ship in a stormy sea with dramatic clouds
+  seed: 17
+- id: sdxl_18
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a post-impressionist painting of a sunflower field under a swirling blue sky
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a post-impressionist painting of a sunflower field under a swirling blue sky
+  seed: 18
+- id: sdxl_19
+  category: sdxl
+  stratum: sdxl_scene
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a Japanese woodblock print style image of large waves and a distant mountain
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a Japanese woodblock print style image of large waves and a distant mountain
+  seed: 19
+- id: sdxl_20
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a red fox sitting in the snow looking at the camera
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a red fox sitting in the snow looking at the camera
+  seed: 20
+- id: sdxl_21
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a bowl of ripe peaches on a wooden table, soft light
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a bowl of ripe peaches on a wooden table, soft light
+  seed: 21
+- id: sdxl_22
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a vintage bicycle leaning against a blue wall
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a vintage bicycle leaning against a blue wall
+  seed: 22
+- id: sdxl_23
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a ceramic teapot and two cups on a linen cloth
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a ceramic teapot and two cups on a linen cloth
+  seed: 23
+- id: sdxl_24
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a photograph of a horse standing in a misty meadow
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: photographic
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a photograph of a horse standing in a misty meadow
+  seed: 24
+- id: sdxl_25
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: true
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a still life oil painting of a vase of flowers, lemons and a glass of wine, Dutch golden age style
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a still life oil painting of a vase of flowers, lemons and a glass of wine, Dutch golden age style
+  seed: 25
+- id: sdxl_26
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: an oil painting of a white cat sleeping on a velvet cushion
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: an oil painting of a white cat sleeping on a velvet cushion
+  seed: 26
+- id: sdxl_27
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a gouache painting of a rooster with colorful feathers
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a gouache painting of a rooster with colorful feathers
+  seed: 27
+- id: sdxl_28
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: an oil painting of a bowl of cherries and a silver spoon on a dark table
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: an oil painting of a bowl of cherries and a silver spoon on a dark table
+  seed: 28
+- id: sdxl_29
+  category: sdxl
+  stratum: sdxl_object
+  source: sdxl
+  dev: false
+  licence: CC0 1.0 (own-generated, SDXL output)
+  retrieved: ''
+  sha256: ''
+  prepared_sha256: ''
+  title: a charcoal and oil sketch of a horse running in a field
+  author: Stable Diffusion XL base 1.0 (own generation)
+  subtype: painted
+  width: 1024
+  height: 1024
+  colour: true
+  prompt: a charcoal and oil sketch of a horse running in a field
+  seed: 29
