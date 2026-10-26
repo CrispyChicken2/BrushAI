@@ -7,7 +7,6 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 025 [T-025] Evaluation saliency maps, InSPyReNet + spectral residual (M3)
 - [ ] 026 [T-026] Evaluation harness: metrics, anytime AUC, SW-LPIPS, stats (M3)
 - [ ] 027 [T-027] Renderer bounding-box rasterization speed-up (M3)
 - [ ] 028 [T-028] Learning to Paint study + Bezier and neural renderer (M3)
@@ -21,9 +20,10 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 034 [T-034] Finish eval-set curation: review fixes + systematic audit (M3)
+- [~] 025 [T-025] Evaluation saliency maps, InSPyReNet + spectral residual (M3)
 
 ## Fait
+- [x] 034 [T-034] Finish eval-set curation: review fixes + systematic audit (M3) (81b9ebc)
 - [x] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2) (a9b1f8f)
 - [x] 022 [T-022] M3 plan and evaluation protocol design note (M3) (b904fcd)
 - [x] 021 [T-021] PT: ablations with the paper loss weights, 3 seeds (M2, P2) (a9283c7)
