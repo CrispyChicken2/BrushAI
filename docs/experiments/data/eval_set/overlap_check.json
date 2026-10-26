@@ -12,5 +12,26 @@
  "max_thumbnail_correlation": 0.593,
  "near_duplicates_of_tuning_images": {},
  "excluded_met_objects_present": [],
+ "same_series_pairs": [],
+ "max_dark_border_area": 0.0039,
+ "dark_border_over_5_percent": {},
+ "photographers_per_name": {
+  "lee russell": 3,
+  "delano jack": 3,
+  "usfwsalaska": 2,
+  "and fish headquarters service wildlife": 2,
+  "john vachon": 2,
+  "charles fenno jacobs": 1,
+  "arthur rothstein": 1,
+  "and fish northeast region service wildlife": 1,
+  "from midwest midwest region region states united usfws": 1,
+  "mountain-prairie usfws": 1,
+  "louise rosskam": 1,
+  "marion post wolcott": 1,
+  "collier john jr": 1,
+  "arthur siegel": 1,
+  "prokudin-gorskii sergei": 1,
+  "author authorunknown unknown": 1
+ },
  "manifest_problems": []
 }

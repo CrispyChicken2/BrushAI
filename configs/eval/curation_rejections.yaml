@@ -24,3 +24,19 @@ commons_thomas_white_two_bar_ranch_7096051473: no animal visible (animal stratum
 commons_bands_of_s_cattle_on_the_gravelly_range_at_the_foot_of_black: animals too small to be the subject
 commons_a_fourth_of_july_celebration_st_helena_s_island_s_c_adjusted: no clear subject (faces cut by the crop)
 met_51803: album leaf where calligraphy covers about half of the area (inscriptions integral to a work are accepted below a third of the area)
+# review round 1 (fixes): checked on the prepared images, same rules as above
+commons_shulman_s_market_at_the_southeast_corner_of_n_street_and_uni: same scene as the dev image commons_rosskam_dc1 (same photographer, place and car), a dev to test leak
+met_261318: white card mount and handwriting over about 30 % of the area
+met_437548: wooden frame and stand visible on both sides (up to 8 % each)
+met_51686: calibration target and white mount margins (about 10 % of the width on one side)
+commons_street_corner_dillon_mont1a35017v: no animal visible (animal stratum)
+commons_in_the_flat_cattle_country_in_the_south_western_tip_1a34078v: animals a few pixels tall
+commons_horse_breeding_ranch_grant_co_oregon_lccn2017877601: animals a few pixels tall
+# round 1 (fixes), second look at the US Fish and Wildlife Service animals drawn after the series and people rules
+commons_bird_key_stono_seabird_sanctuary_red_knot_trapping_bbanding: people on a beach, animal not visible
+commons_posing_for_picture_with_bald_eagle_10594716994: two people who may be alive pose with the animal
+commons_tundra_swan_nest_20702138842: a nest on a marsh, no animal visible
+commons_snowy_owl_51712794491: animal a few pixels tall
+commons_long_tailed_duck_15423698505: animal under 5 % of the area
+commons_banding_cackling_geese_38430481896: a person in a jacket fills the frame, animal hidden
+commons_polar_bear_research_33331611273: a researcher who may be alive next to the animal

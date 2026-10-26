@@ -410,3 +410,19 @@ No test-set number exists yet, so none of these is *post hoc*. What changed, and
 6. **Verification by pixels.** A source file whose bytes changed but whose decoded prepared pixels are identical passes (two Met files were re-encoded within a day); a pixel mismatch fails.
 
 Affected runs: none (the set did not exist). Record of the check against the tuning images: `docs/experiments/data/eval_set/overlap_check.json`.
+
+### 2026-10-26 (T-024, review round 1, still before any method run)
+
+Defects found by the review of the first realization, corrected and redrawn (the manifest, the dev split and the records changed; no run existed):
+
+1. **Dev to test leak.** Two views of one scene (same photographer, same shop, same car) were one dev and one test image. The curation now refuses a second
+   view of a series (same normalized photographer and a shared place category or a similar title; not applied to agency wildlife photographs) and the final set is checked for it (`build_eval_set check`, 0 pairs).
+2. **Frames, mats and calibration targets** over 5 % of the area were accepted for three Met images; rejected (the visual rejections list grew to 35 entries with reasons).
+3. **"Clear subjects".** Animal photographs with no animal or an animal a few pixels tall were rejected. The animal stratum is drawn from the US Fish and Wildlife Service
+   photographs, only if they carry a species category, name the animal in the title and mention no person, staff or event; images with a person who may be alive
+   are rejected on the contact sheet.
+4. **"At most 3 images per photographer"** now applies to normalized names (it was counted on the raw `Artist` string).
+5. Smaller points: the hand-coloured Met print is `colour: true`; dates of Commons files are cleaned of their Wikidata residue; the data card lists the dev count once per stratum;
+   `fetch_eval_set --sdxl` no longer hides a failure of the downloaded images behind the SDXL result.
+
+Affected runs: none. The replay of the curation (`python -m scripts.build_eval_set curate`, same cached API data and live Commons) reproduces the manifest.
