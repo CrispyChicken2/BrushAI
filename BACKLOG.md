@@ -22,9 +22,9 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2)
 
 ## Fait
+- [x] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2) (a9b1f8f)
 - [x] 022 [T-022] M3 plan and evaluation protocol design note (M3) (b904fcd)
 - [x] 021 [T-021] PT: ablations with the paper loss weights, 3 seeds (M2, P2) (a9283c7)
 - [x] 020 [T-020] PT: BN recalibration for a usable validation curve (M2, P2) (feb3ef5)
