@@ -2,6 +2,11 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-034] Evaluation set: audit and last review fixes
+
+- `scripts/audit_eval_set.py`: every machine-checkable protocol rule on every prepared image (borders with one definition, near-duplicates and same-scene pairs, photographer caps, strata, dev/test, sources, control characters, people detector, colour), report in `docs/experiments/data/eval_set/audit.json` (0 violations); `docs/experiments/data/eval_set/visual_audit.md`: one line per image after a look at all 100.
+- Fixes: the dead agency word filter (backspace characters), one `flat` / `film` border definition for trimming and reporting (`brushstroke/eval/dataset.py`), children and possibly living persons excluded, file sizes from the file used. Amendment in `docs/design/evaluation.md`, data card updated.
+
 ## [T-024] Evaluation set curation
 
 - `brushstroke/eval/dataset.py`, `configs/eval/` (`eval_set.yaml`: the 100-image manifest with licence, SHA-256, dev flag; `sdxl_prompts.yaml`; `curation_rejections.yaml`), `scripts/build_eval_set.py` (seeded curation, `check`, `card`), `scripts/fetch_eval_set.py`, `scripts/generate_eval_sdxl.py`, `brushstroke/utils/http.py`; data card in `docs/data_sources.md`; amendments of section 1 in `docs/design/evaluation.md`.

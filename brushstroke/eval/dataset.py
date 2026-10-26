@@ -319,13 +319,18 @@ def border_widths(grey: np.ndarray, kind: str, limit: float = 0.25) -> tuple[int
     )
 
 
-def border_area_fraction(pixels: np.ndarray, kind: str) -> float:
-    """Fraction of the area of a prepared image taken by its border bands (the figure reported
-    against the 5 % rule)."""
-    grey = np.asarray(Image.fromarray(pixels).convert("L"), dtype=np.float32)
+def grey_border_area(grey: np.ndarray, kind: str) -> float:
+    """Fraction of the area of a greyscale image (H, W) taken by its border bands."""
     top, bottom, left, right = border_widths(grey, kind, limit=0.5)
     h, w = grey.shape
     return float((top * w + bottom * w + (left + right) * (h - top - bottom)) / (h * w))
+
+
+def border_area_fraction(pixels: np.ndarray, kind: str) -> float:
+    """Border fraction of an RGB image (the figure reported against the 5 % rule)."""
+    return grey_border_area(
+        np.asarray(Image.fromarray(pixels).convert("L"), dtype=np.float32), kind
+    )
 
 
 def border_crop_box(

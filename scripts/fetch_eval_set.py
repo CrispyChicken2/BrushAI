@@ -48,9 +48,14 @@ def fetch_one(im: EvalImage, out: Path, http: Http | None) -> str:
             return "missing"
         src.parent.mkdir(parents=True, exist_ok=True)
         src.write_bytes(http.get(im.url))
-    with Image.open(src) as pil:
-        pixels = prepare_image(pil, im.crop_box)
     same_bytes = sha256_file(src) == im.sha256
+    try:
+        with Image.open(src) as pil:
+            pixels = prepare_image(pil, im.crop_box)
+    except (
+        ValueError
+    ) as err:  # the file is not the one of the manifest (another size, a crop box outside it)
+        return f"SHA-256 MISMATCH (source file{'' if same_bytes else ' changed'}): {err}"
     if pixel_sha256(pixels) != im.prepared_sha256:
         return "SHA-256 MISMATCH (prepared pixels)" + ("" if same_bytes else " and source file")
     # A museum can re-encode a file (metadata, container) without changing a pixel: the pixels decide.

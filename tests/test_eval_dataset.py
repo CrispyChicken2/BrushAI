@@ -425,3 +425,94 @@ def test_no_text_file_of_the_repository_holds_a_control_character() -> None:
         if any(b < 32 and b not in (9, 10, 12, 13) for b in path.read_bytes()):
             bad.append(str(path))
     assert bad == []
+
+
+def audit_images() -> list[EvalImage]:
+    _, images = valid_set()
+    for im in images:
+        if im.source == "commons":
+            im.author = "Russell Lee"
+            im.source_id = f"File:{im.id}.jpg"
+            im.url = "https://upload.wikimedia.org/wikipedia/commons/x.jpg"
+        elif im.source == "met":
+            im.url = "https://images.metmuseum.org/CRDImages/x.jpg"
+    return images
+
+
+def test_the_audit_flags_a_photographer_over_the_cap_and_a_wrong_dev_split() -> None:
+    from scripts import audit_eval_set as audit
+
+    images = audit_images()
+    counts, bad = audit.check_photographers(images)
+    assert counts["lee russell"] == sum(1 for im in images if im.source == "commons")
+    assert len(bad) == 1 and "lee russell" in bad[0]
+    assert audit.check_dev_test(images) == []
+    images[0].dev = not images[0].dev
+    assert any("dev" in b for b in audit.check_dev_test(images))
+
+
+def test_the_audit_flags_unclean_sources_a_foreign_host_and_a_child_title() -> None:
+    from scripts import audit_eval_set as audit
+
+    images = audit_images()
+    assert audit.check_sources(images) == []
+    commons = next(im for im in images if im.source == "commons")
+    commons.date = "May 1942date QS:P571,+1942-05-00T00:00:00Z/10"
+    commons.url = "https://example.org/x.jpg"
+    commons.title = "Boy with a dog\x08"
+    commons.licence = ds.LICENCES[1]
+    problems = "\n".join(audit.check_sources(images))
+    assert "unclean date" in problems and "unclean title" in problems and "allow-list" in problems
+
+
+def test_the_audit_sees_two_copies_of_one_image(tmp_path: Path) -> None:
+    from scripts import audit_eval_set as audit
+
+    images = audit_images()[:3]
+    rng = np.random.default_rng(3)
+    (tmp_path / "prepared").mkdir()
+    base = rng.integers(0, 255, (512, 512, 3), dtype=np.uint8)
+    arrays = [base, base.copy(), rng.integers(0, 255, (512, 512, 3), dtype=np.uint8)]
+    for im, arr in zip(images, arrays, strict=True):
+        Image.fromarray(arr).save(tmp_path / "prepared" / f"{im.id}.png")
+    worst, bad = audit.check_duplicates(tmp_path, images)
+    assert worst > 0.99 and any("correlate" in b for b in bad)
+
+
+def test_colliding_commons_ids_get_a_hash_and_cannot_share_a_cache_file() -> None:
+    long = "File:First snow of the season in the foothills of the Little Belt Mountains"
+    titles = [long + " LCCN1.jpg", long + "1a35029v.jpg", "File:A short title.jpg"]
+    fids = build.unique_fids(titles)
+    assert len(set(fids.values())) == 3 and fids[titles[2]] == "commons_a_short_title"
+    assert all(len(v) <= 68 for v in fids.values()) and fids[titles[0]] != fids[titles[1]]
+    assert fids == build.unique_fids(titles[::-1])  # a function of the title set, not of the order
+
+
+def test_a_cache_file_that_is_not_the_described_file_is_downloaded_again(tmp_path: Path) -> None:
+    class FakeHttp:
+        calls = 0
+
+        def get(self, url: str) -> bytes:
+            self.calls += 1
+            return b"the right file"
+
+    dest = tmp_path / "x.jpg"
+    dest.write_bytes(b"another file with the same cache name")
+    http = FakeHttp()
+    right = build.sha1_hex(b"the right file")
+    assert build.download_image(http, "https://x/y.jpg", dest, right) == b"the right file"  # type: ignore[arg-type]
+    assert http.calls == 1 and dest.read_bytes() == b"the right file"
+    assert build.download_image(http, "https://x/y.jpg", dest, right) == b"the right file"  # type: ignore[arg-type]
+    assert http.calls == 1  # now cached and verified
+
+
+def test_fetch_reports_a_changed_source_instead_of_crashing(tmp_path: Path) -> None:
+    (tmp_path / "source").mkdir()
+    Image.fromarray(np.zeros((300, 300, 3), dtype=np.uint8)).save(tmp_path / "source" / "t2.jpg")
+    im = EvalImage(
+        id="t2", category="photo", stratum="photo_scene", source="commons", dev=False,
+        licence=ds.LICENCES[1], retrieved="2026-10-26", sha256="0" * 64, prepared_sha256="1" * 64,
+        url="https://example.org/t2.jpg", page_url="https://example.org/t2", crop_box=[10, 10, 900, 900],
+    )  # fmt: skip
+    status = fetch.fetch_one(im, tmp_path, None)
+    assert status.startswith("SHA-256 MISMATCH") and "outside" in status

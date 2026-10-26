@@ -243,7 +243,7 @@ images:
   category: painting
   stratum: european_other
   source: met
-  dev: false
+  dev: true
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: f55313e2d5cc8104df83142a0ebda10c5e66459ed9799b971aa8728df41c5336
@@ -533,7 +533,7 @@ images:
   category: painting
   stratum: european_landscape
   source: met
-  dev: true
+  dev: false
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: 506e6a6b2be9bb4dadbf69bc598c6407dbf77890d955ef05ffd996a984f70ad4
@@ -667,7 +667,7 @@ images:
   category: painting
   stratum: asian
   source: met
-  dev: true
+  dev: false
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: 02596dfdd9e372d0b295106343072c233857c24f99353bb19a653449c677c65b
@@ -716,7 +716,7 @@ images:
   category: painting
   stratum: asian
   source: met
-  dev: false
+  dev: true
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: 5eb11344afd8deef7d736fefd710547f4a7016edc36ec92c65bca9967ed6dda2
@@ -946,7 +946,7 @@ images:
   category: painting
   stratum: other_art
   source: met
-  dev: true
+  dev: false
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: c6013014475572f69bf66aec9bd11e117e4c7ebc6ab95aa7c2290c44f838c704
@@ -1017,7 +1017,7 @@ images:
   category: painting
   stratum: other_art
   source: met
-  dev: false
+  dev: true
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: 9daf8c3fd6007eb160ff5ef5da649421345aef68763894bec36ea223002b778f
@@ -1039,7 +1039,7 @@ images:
   category: photo
   stratum: photo_portrait
   source: met
-  dev: false
+  dev: true
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: c4a1e798f2e9ba15fd92e4eb0856db14ccf270f781f6acc4893c3f6e1d017171
@@ -1171,7 +1171,7 @@ images:
   category: photo
   stratum: photo_portrait
   source: met
-  dev: true
+  dev: false
   licence: CC0 1.0 (Met Open Access, isPublicDomain)
   retrieved: '2026-10-26'
   sha256: 070dc4af7918fdf6ef935a044c791bd4b9c3db96554fd8423134bd6c2f470f86
@@ -1216,6 +1216,28 @@ images:
   classification: Photographs
   medium: Gelatin silver print from glass negative
   department: Photographs
+- id: met_286569
+  category: photo
+  stratum: photo_portrait
+  source: met
+  dev: false
+  licence: CC0 1.0 (Met Open Access, isPublicDomain)
+  retrieved: '2026-10-26'
+  sha256: 88076341af56e98c1c32b60a4b81dac9e51da7056c6358166396a42bfbb125ef
+  prepared_sha256: 8b69846a6342640c5a5cffa94ec7df2b720b3d48ca8fbc37f82928ddac332e0b
+  title: Omar Pasha
+  author: Roger Fenton
+  date: '1855'
+  page_url: https://www.metmuseum.org/art/collection/search/286569
+  url: https://images.metmuseum.org/CRDImages/ph/original/DP-42195-001.jpg
+  source_id: '286569'
+  subtype: portrait
+  width: 2432
+  height: 3206
+  colour: false
+  classification: Photographs
+  medium: Salted paper print from glass negative
+  department: Photographs
 - id: commons_guide_at_little_norway_blue_mounds_wis_lccn2017878934
   category: photo
   stratum: photo_portrait
@@ -1224,7 +1246,7 @@ images:
   licence: Public domain (US government work, Library of Congress FSA/OWI)
   retrieved: '2026-10-26'
   sha256: c7e766370fe6e7577aa0ca7afec125849bb224a6f2ac84b2a67f7cf1bd802a51
-  prepared_sha256: eec6f1ffc07bec21d13998d40c311c5d2b51de385cae35dca3a78a48983f88b3
+  prepared_sha256: 61bf4bfc1d36c2feeb0fa8e202073afd8a782c0db5572434ea9c441c04bfe5fa
   title: Guide at Little Norway, Blue Mounds, Wis. LCCN2017878934
   author: Arthur Rothstein
   date: 1942-08
@@ -1235,264 +1257,209 @@ images:
   height: 6657
   colour: true
   crop_box:
-  - 20
-  - 807
+  - 14
+  - 806
   - 5063
-  - 5850
+  - 5855
   commons_sha1: 27c7ee8db40b4132d76c2a99851420ad5babfe4b
   commons_licence: Public domain
   commons_categories: Images from the Library of Congress|Little Norway, Wisconsin|Images uploaded by Fæ|PD US FSA/OWI|August
     1942 in Wisconsin|Farm Security Administration in Wisconsin|1942 portrait photographs of men|August 1942 United States
     photographs|Color photographs from the Farm Security Administration|Farm Security Administration photographs by Arthur
     Rothstein
-- id: commons_gus_worke_a_farmer_who_came_from_germany_40_years_ago1a35004
-  category: photo
-  stratum: photo_portrait
-  source: commons
-  dev: false
-  licence: Public domain (US government work, Library of Congress FSA/OWI)
-  retrieved: '2026-10-26'
-  sha256: 9e89bd73bb1280358a7fe29d0f3b32d48455f7d640c76c6dde5ca75917ce9a98
-  prepared_sha256: 787998f8247381d7ddd5932e85c36755cd617364dce278dadfc6ea35901a2bfb
-  title: Gus Worke, a farmer who came from Germany 40 years ago1a35004v
-  author: Charles Fenno Jacobs
-  date: May 1942
-  page_url: https://commons.wikimedia.org/wiki/File%3AGus_Worke%2C_a_farmer_who_came_from_Germany_40_years_ago1a35004v.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/1/15/Gus_Worke%2C_a_farmer_who_came_from_Germany_40_years_ago1a35004v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Gus Worke, a farmer who came from Germany 40 years ago1a35004v.jpg
-  width: 787
-  height: 1024
-  colour: true
-  crop_box:
-  - 25
-  - 147
-  - 760
-  - 882
-  commons_sha1: d3b259946c706e68f2a7d89524f0d103426f96c4
-  commons_licence: Public domain
-  commons_categories: Images from the Library of Congress|Southington, Connecticut|PD US FSA/OWI|Farm Security Administration
-    in Connecticut|1942 portrait photographs of men|May 1942 in Connecticut|May 1942 United States photographs|Color photographs
-    from the Farm Security Administration|Farm Security Administration photographs by Charles Fenno Jacobs
-- id: commons_emperor_goose_on_nest
+- id: commons_fox_squirrell_51384470246
   category: photo
   stratum: photo_animal
   source: commons
   dev: false
   licence: Public domain (US government work, US Fish and Wildlife Service)
   retrieved: '2026-10-26'
-  sha256: e2a689a9c17a2d9b1b7556b5fdfaf57d5b3f780f25ed79fdd35152fdf219643b
-  prepared_sha256: 6ee2050d3dec5b0f9aef107afc287d21257c0dd11fd339c43f2ac86131ea90b7
-  title: Emperor Goose on nest
-  author: Tim Bowman, USFWS
-  date: '2004-06-02'
-  page_url: https://commons.wikimedia.org/wiki/File%3AEmperor_Goose_on_nest.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/c/c8/Emperor_Goose_on_nest.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Emperor Goose on nest.jpg
-  width: 1050
-  height: 788
-  colour: true
-  commons_sha1: 5dd2f8e3e29e912086b1fba5cc63ae937efeb711
-  commons_licence: Public domain
-  commons_categories: PD US FWS|Anser canagicus nests
-- id: commons_white_tailed_prairie_dog_at_arapaho_national_wildlife_refuge
-  category: photo
-  stratum: photo_animal
-  source: commons
-  dev: false
-  licence: Public domain (US government work, US Fish and Wildlife Service)
-  retrieved: '2026-10-26'
-  sha256: 509fc8df1623abb471a55072d17a3111c13737a9a13aae69dda26cf1d611f54f
-  prepared_sha256: 35e93d782ef06f1956339c30d2837d0e039768fe3e8cb86b61000b5aeb31b0e4
-  title: White-tailed prairie dog at Arapaho National Wildlife Refuge Colorado (52061841988)
+  sha256: 1244cae637b1fb43175e8193804afdef490ceb60270a06dbf8754792353d3b2f
+  prepared_sha256: cdf7ccb8030f630970bc054c4dbbe234df575658bfd767be68467c11980f4353
+  title: Fox Squirrell (51384470246)
   author: USFWS Mountain Prairie
-  date: 21 April 2022, 07:24:33
-  page_url: https://commons.wikimedia.org/wiki/File%3AWhite-tailed_prairie_dog_at_Arapaho_National_Wildlife_Refuge_Colorado_%2852061841988%29.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/d/df/White-tailed_prairie_dog_at_Arapaho_National_Wildlife_Refuge_Colorado_%2852061841988%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:White-tailed prairie dog at Arapaho National Wildlife Refuge Colorado (52061841988).jpg
-  width: 1612
-  height: 2121
+  date: 10 June 2021, 12:04:26
+  page_url: https://commons.wikimedia.org/wiki/File%3AFox_Squirrell_%2851384470246%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/4/4a/Fox_Squirrell_%2851384470246%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Fox Squirrell (51384470246).jpg
+  width: 1163
+  height: 1318
   colour: true
-  commons_sha1: 7e7bf6dc1866e099e916ec8907b75d70d441a3b6
+  commons_sha1: af3e1e1682951442301322e3ebdd156bf8303495
   commons_licence: Public domain
-  commons_categories: Cynomys leucurus|PD US FWS|Flickr images missing SDC creator|Files from the United States Fish and Wildlife
+  commons_categories: Sciurus niger|PD US FWS|Flickr images missing SDC creator|Files from the United States Fish and Wildlife
     Service Mountain-Prairie Region Flickr stream|Flickr images reviewed by FlickreviewR 2|United States photographs taken
-    on 2022-04-21|U.S. Fish and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Flickr images missing SDC published
+    on 2021-06-10|U.S. Fish and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Flickr images missing SDC published
     in
-- id: commons_great_horned_owl_usfws
+- id: commons_dehydrated_key_deer_36952540200
   category: photo
   stratum: photo_animal
   source: commons
   dev: false
   licence: Public domain (US government work, US Fish and Wildlife Service)
   retrieved: '2026-10-26'
-  sha256: 4962214d3f39d27a12322ee8b46b99d454d9f7925471d0674312c4dfff749a1d
-  prepared_sha256: d9cbe5093a344730462ebfe582ab4fcd5546d19e1081c6c672163b1d1b77b1c7
-  title: Great Horned Owl.USFWS
-  author: Stolz, Gary M.
-  date: Unknown date
-  page_url: https://commons.wikimedia.org/wiki/File%3AGreat_Horned_Owl.USFWS.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/8/83/Great_Horned_Owl.USFWS.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Great Horned Owl.USFWS.jpg
-  width: 1516
-  height: 1492
+  sha256: f684c1b1d087a5105b93166bafa0e7418d9219808b3ba85fed08dee83354b6e6
+  prepared_sha256: a6c1504ab93795ef446d8fa70e0941af82acca6553ac43d6360ae6e16f4f2a71
+  title: Dehydrated key deer (36952540200)
+  author: U.S. Fish and Wildlife Service Southeast Region
+  date: 2017-09-20 13:24
+  page_url: https://commons.wikimedia.org/wiki/File%3ADehydrated_key_deer_%2836952540200%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/7/79/Dehydrated_key_deer_%2836952540200%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Dehydrated key deer (36952540200).jpg
+  width: 2048
+  height: 1536
   colour: true
-  crop_box:
-  - 0
-  - 55
-  - 1382
-  - 1437
-  commons_sha1: e705aa5ce989e424797bddaabc62b772058e8373
+  commons_sha1: 3ef8b5e05d6cb8568086b42abbe0db7567cc2346
   commons_licence: Public domain
-  commons_categories: Birds of New Mexico|PD US FWS|Images from the United States Fish and Wildlife Service|Unknown date|Bubo
-    virginianus heads|Strigidae of the United States
-- id: commons_barred_owl_eating_53952104106
+  commons_categories: PD US FWS|Dehydrated animals|Flickr images reviewed by FlickreviewR 2|Odocoileus virginianus clavium
+    in National Key Deer Refuge|Files from the U.S. Fish and Wildlife Service Southeast Region Flickr stream
+- id: commons_trumpeter_swan_at_seedskadee_national_wildlife_refuge_497247
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, US Fish and Wildlife Service)
+  retrieved: '2026-10-26'
+  sha256: 0309a0944ae9fb9d772470782fda9db4c7fed0b781cba248fa7bdf3feb115fcb
+  prepared_sha256: 845df6b04f227c7f8c1b7a0f54af7981ef0d627396e80cbd9ebb22294a36f2c1
+  title: Trumpeter swan at Seedskadee National Wildlife Refuge (49724778307)
+  author: USFWS Mountain Prairie
+  date: 18 March 2020, 16:16:59
+  page_url: https://commons.wikimedia.org/wiki/File%3ATrumpeter_swan_at_Seedskadee_National_Wildlife_Refuge_%2849724778307%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/8/82/Trumpeter_swan_at_Seedskadee_National_Wildlife_Refuge_%2849724778307%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Trumpeter swan at Seedskadee National Wildlife Refuge (49724778307).jpg
+  width: 3310
+  height: 2508
+  colour: true
+  commons_sha1: 7cebdab9bd8ce57c3b3432bb932e06f667db7f7d
+  commons_licence: Public domain
+  commons_categories: Cygnus buccinator|PD US FWS|Files from the United States Fish and Wildlife Service Mountain-Prairie
+    Region Flickr stream|Flickr images reviewed by FlickreviewR 2|United States photographs taken on 2020-03-18|U.S. Fish
+    and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Birds of Seedskadee National Wildlife Refuge|Flickr images
+    missing SDC published in
+- id: commons_short_eared_owl_at_funk_waterfowl_production_area_4100881413
+  category: photo
+  stratum: photo_animal
+  source: commons
+  dev: false
+  licence: Public domain (US government work, US Fish and Wildlife Service)
+  retrieved: '2026-10-26'
+  sha256: f98b1748b0045f585b83bd6cc18e8b22f05dd439cde0ebdb34d964f28e8f743e
+  prepared_sha256: 6b08dc8e1fa96053d551bd4f83db5f647cebf4c308375366bc26eff76638b49c
+  title: Short-eared Owl at Funk Waterfowl Production Area (41008814132)
+  author: USFWS Mountain Prairie
+  date: 28 December 2017, 13:23:34
+  page_url: https://commons.wikimedia.org/wiki/File%3AShort-eared_Owl_at_Funk_Waterfowl_Production_Area_%2841008814132%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/a/a3/Short-eared_Owl_at_Funk_Waterfowl_Production_Area_%2841008814132%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Short-eared Owl at Funk Waterfowl Production Area (41008814132).jpg
+  width: 4608
+  height: 3456
+  colour: true
+  commons_sha1: be8b2a0a8bb79cb63908918affbc3e8fadfb79d0
+  commons_licence: Public domain
+  commons_categories: Asio flammeus|PD US FWS|Flickr images missing SDC creator|Files from the United States Fish and Wildlife
+    Service Mountain-Prairie Region Flickr stream|United States photographs taken on 2017-12-28|Flickr images reviewed by
+    FlickreviewR 2|U.S. Fish and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Flickr images missing SDC published
+    in|Rainwater Basin Wetland Management District
+- id: commons_ruddy_duck_scott_somershoe_49717209451
   category: photo
   stratum: photo_animal
   source: commons
   dev: true
   licence: Public domain (US government work, US Fish and Wildlife Service)
   retrieved: '2026-10-26'
-  sha256: 5a252762259ec335c5c22e2413b3b04c5af6d6bb244a119f01de5e5cd5b9478e
-  prepared_sha256: c9b9bcd8c370294ecc26334b8b8bc7987d9ae8a5d8976a54025a3377b21d42e4
-  title: Barred owl eating (53952104106)
-  author: U.S. Fish and Wildlife Service - Midwest Region
-  date: 23 August 2024, 20:06:24
-  page_url: https://commons.wikimedia.org/wiki/File%3ABarred_owl_eating_%2853952104106%29.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/d/d2/Barred_owl_eating_%2853952104106%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Barred owl eating (53952104106).jpg
-  width: 3192
-  height: 2552
+  sha256: f86391b4a854688f3ce89cc3d731490ee835de87a1818f81999ec42ce3f2c913
+  prepared_sha256: 9249c78518c8bf577a5c422446f5562b135e0a6daa76ab5bc6e74bb376f9f632
+  title: Ruddy Duck, Scott Somershoe (49717209451)
+  author: USFWS Mountain Prairie
+  date: 25 October 2019, 09:16:35
+  page_url: https://commons.wikimedia.org/wiki/File%3ARuddy_Duck%2C_Scott_Somershoe_%2849717209451%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/2/20/Ruddy_Duck%2C_Scott_Somershoe_%2849717209451%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Ruddy Duck, Scott Somershoe (49717209451).jpg
+  width: 1485
+  height: 1237
   colour: true
-  commons_sha1: f491f1f0949828f47e125201a472120f435dbba6
+  commons_sha1: 88e7bdc48e393b0d1dc73711bb82d349c3ddb3e7
   commons_licence: Public domain
-  commons_categories: Strix varia|PD US FWS|Flickr images missing SDC creator|Flickr images reviewed by FlickreviewR 2|United
-    States photographs taken on 2024-08-23|Files from the United States Fish and Wildlife Service Midwest Region Flickr stream|U.S.
-    Fish and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Flickr images missing SDC published in
-- id: commons_cackling_goose_with_goslings_6902917950
-  category: photo
-  stratum: photo_animal
-  source: commons
-  dev: false
-  licence: Public domain (US government work, US Fish and Wildlife Service)
-  retrieved: '2026-10-26'
-  sha256: 43fc112117dbf8a52a94d8c360a5f35a79ec12f0f6a356fda44a7518c18d7909
-  prepared_sha256: beaaff79e1b6d142a429864726e58c357899c458628d8568184f204c54bfc550
-  title: Cackling goose with goslings (6902917950)
-  author: USFWSAlaska
-  date: 22 June 2010, 14:13:11
-  page_url: https://commons.wikimedia.org/wiki/File%3ACackling_goose_with_goslings_%286902917950%29.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/b/b3/Cackling_goose_with_goslings_%286902917950%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Cackling goose with goslings (6902917950).jpg
-  width: 3648
-  height: 2736
-  colour: true
-  commons_sha1: 5031f01e7a36243e36dc2831326aedc5f2935c38
-  commons_licence: Public domain
-  commons_categories: Branta hutchinsii|PD US FWS|Flickr images missing SDC creator|United States photographs taken on 2010-06-22|Flickr
-    images reviewed by FlickreviewR 2|Files from the U.S. Fish and Wildlife Service Alaska Region Flickr stream|U.S. Fish
+  commons_categories: Oxyura jamaicensis|PD US FWS|Files from the United States Fish and Wildlife Service Mountain-Prairie
+    Region Flickr stream|Flickr images reviewed by FlickreviewR 2|United States photographs taken on 2019-10-25|U.S. Fish
     and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Flickr images missing SDC published in
-- id: commons_moose_in_river_animal_alces_americanus
+- id: commons_white_tailed_deer_53627568015
   category: photo
   stratum: photo_animal
   source: commons
   dev: false
   licence: Public domain (US government work, US Fish and Wildlife Service)
   retrieved: '2026-10-26'
-  sha256: 270ea07c1b050387c2193c531699fb77e52b0c355a2a2257e197acf2e232ba22
-  prepared_sha256: 4858442c7b9893a59098505e6d08fe66f2c8cafc56707367b6fa3dd7808b9637
-  title: Moose in river animal alces americanus
-  author: Govtaski David, U.S. Fish and Wildlife Service
-  date: 'Not given
-
-
-    Transferred by Fæ on 2013-02-25'
-  page_url: https://commons.wikimedia.org/wiki/File%3AMoose_in_river_animal_alces_americanus.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/d/d6/Moose_in_river_animal_alces_americanus.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Moose in river animal alces americanus.jpg
-  width: 2048
-  height: 1536
+  sha256: a03a6d969dccce49c73dbd6e0bbc009a042544c877e4d09933579844d7f90e91
+  prepared_sha256: 7fea9e7410e42686b3a0ee8974675f809b3c82cb295161dbf93285a0956eecbd
+  title: White-tailed deer (53627568015)
+  author: U.S. Fish and Wildlife Service - Midwest Region
+  date: 29 March 2024, 19:10:07
+  page_url: https://commons.wikimedia.org/wiki/File%3AWhite-tailed_deer_%2853627568015%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/6/6e/White-tailed_deer_%2853627568015%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:White-tailed deer (53627568015).jpg
+  width: 2678
+  height: 2019
   colour: true
-  commons_sha1: 431d27dafe371879ee9e9487ed4a39796ad6f0eb
+  commons_sha1: a7229b5c71d2452ae4630d493bf135f777934895
   commons_licence: Public domain
-  commons_categories: Alces alces americanus|Silvio O. Conte National Fish and Wildlife Refuge|PD US FWS|Images uploaded by
-    Fæ|Images from the United States Fish and Wildlife Service|Images with extracted images|Animals of Vermont|Public-domain-image.com|Public-domain-image.com
-    (check needed)|Alces alces (male)|Alces alces in the United States|Mammals in water
-- id: commons_oil_spill_mobile_briefings_oiled_bird_cleaning_071_immature
+  commons_categories: Odocoileus virginianus|PD US FWS|Flickr images missing SDC creator|Flickr images reviewed by FlickreviewR
+    2|United States photographs taken on 2024-03-29|Files from the United States Fish and Wildlife Service Midwest Region
+    Flickr stream|U.S. Fish and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Flickr images missing SDC published
+    in
+- id: commons_wild_turkey_52870186395
   category: photo
   stratum: photo_animal
   source: commons
   dev: false
   licence: Public domain (US government work, US Fish and Wildlife Service)
   retrieved: '2026-10-26'
-  sha256: e06d700acd936bca4597b1767b3c3f1a42d5c811506c1a252aea9e12e18a22c2
-  prepared_sha256: 56b6d5f915b586791b869c982ea6710affb1380d26e76a6444d61322a3ee7c59
-  title: Oil spill Mobile - Briefings & Oiled Bird cleaning 071 immature northern gannets in rehab (5015323356)
-  author: U.S. Fish and Wildlife Service Southeast Region
-  date: 2010-05-26 11:02
-  page_url: https://commons.wikimedia.org/wiki/File%3AOil_spill_Mobile_-_Briefings_%26_Oiled_Bird_cleaning_071_immature_northern_gannets_in_rehab_%285015323356%29.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/a/a3/Oil_spill_Mobile_-_Briefings_%26_Oiled_Bird_cleaning_071_immature_northern_gannets_in_rehab_%285015323356%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Oil spill Mobile - Briefings & Oiled Bird cleaning 071 immature northern gannets in rehab (5015323356).jpg
-  width: 3319
-  height: 2658
+  sha256: fff77ef6e9f6aa9cab82cbb7a8bde5dc81d398d6a76c39666be5feb431c75ff3
+  prepared_sha256: 12ebeb92cb03b82136d233693c703cfc7bda67950badfe9029f0a5bae23d2b07
+  title: Wild turkey (52870186395)
+  author: U.S. Fish and Wildlife Service - Midwest Region
+  date: 4 May 2023, 08:53:37
+  page_url: https://commons.wikimedia.org/wiki/File%3AWild_turkey_%2852870186395%29.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/7/71/Wild_turkey_%2852870186395%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Wild turkey (52870186395).jpg
+  width: 3194
+  height: 3992
   colour: true
-  commons_sha1: a85ee0bd2410caec6dab20de44491b5329495f4e
+  commons_sha1: e9a430a63c0c6d265d67fc3397d25f308903914a
   commons_licence: Public domain
-  commons_categories: Taken with Canon EOS 5D Mark II|Wildlife rehabilitation and conservation centers|PD US FWS|Flickr images
-    reviewed by File Upload Bot (Magnus Manske)|Oiled birds|Morus bassanus (captive)|Wildlife rehabilitation as a result of
-    the Deepwater Horizon oil spill|Files from the U.S. Fish and Wildlife Service Southeast Region Flickr stream
-- id: commons_shulman_s_market_on_n_at_union_street_s_w_washington_d_c_lcc
+  commons_categories: Meleagris gallopavo|PD US FWS|Flickr images missing SDC creator|United States photographs taken on 2023-05-04|Flickr
+    images reviewed by FlickreviewR 2|Files from the United States Fish and Wildlife Service Midwest Region Flickr stream|U.S.
+    Fish and Wildlife Service Flickr files uploaded by OptimusPrimeBot|Flickr images missing SDC published in
+- id: commons_harrowing_a_field_with_a_diesel_tractor_seabrook_farm_bridge
   category: photo
   stratum: photo_object
   source: commons
   dev: false
   licence: Public domain (US government work, Library of Congress FSA/OWI)
   retrieved: '2026-10-26'
-  sha256: c6ce29d2e7a3c396ddfacce300f3cccd4df9ba395dc006e12909b9e544cefc53
-  prepared_sha256: 6b71c6e75495194ec2d8810377525cab96383fbf14f3c414475180bf6d084a79
-  title: Shulman's market, on N at Union Street S.W., Washington, D.C. LCCN2017877966
-  author: Louise Rosskam
-  date: between 1941 and 1942
-  page_url: https://commons.wikimedia.org/wiki/File%3AShulman%27s_market%2C_on_N_at_Union_Street_S.W.%2C_Washington%2C_D.C._LCCN2017877966.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/a/a1/Shulman%27s_market%2C_on_N_at_Union_Street_S.W.%2C_Washington%2C_D.C._LCCN2017877966.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Shulman's market, on N at Union Street S.W., Washington, D.C. LCCN2017877966.jpg
-  width: 6580
-  height: 5197
+  sha256: 9cb4a5d7ab7fa8179fc9dd53a81c0351172a68c0fdbcbe2346ae3a8d664f789f
+  prepared_sha256: d6a51fa1b287a4a6c8f3a49c8767a6a6246a15b3f455457bcaa3096226aec79c
+  title: Harrowing a field with a diesel tractor, Seabrook Farm, Bridgeton, N.J. LCCN2017877677
+  author: Collier, John, Jr., 1913-1992, photographer; Wolcott, Marion Post, 1910-1990, photographer
+  date: 1942-06
+  page_url: https://commons.wikimedia.org/wiki/File%3AHarrowing_a_field_with_a_diesel_tractor%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877677.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/4/4b/Harrowing_a_field_with_a_diesel_tractor%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877677.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Harrowing a field with a diesel tractor, Seabrook Farm, Bridgeton, N.J. LCCN2017877677.jpg
+  width: 9113
+  height: 7305
   colour: true
   crop_box:
-  - 844
-  - 181
-  - 5704
-  - 5041
-  commons_sha1: 898390b9bb2acfc2cf0c4413aaedc5de8907d689
+  - 1063
+  - 172
+  - 8036
+  - 7145
+  commons_sha1: c7a26b3499ea01139eaf32219b3a08760b10d27d
   commons_licence: Public domain
-  commons_categories: Washington, D.C. in the 1940s|Images from the Library of Congress|Southwest, Washington, D.C.|Images
-    uploaded by Fæ|1940s photographs of the United States|PD US FSA/OWI|Demolished buildings in Washington, D.C.|Farm Security
-    Administration in Washington, D.C.|Color photographs from the Farm Security Administration|Farm Security Administration
-    photographs by Louise Rosskam
-- id: commons_russellllanodesanjuan
-  category: photo
-  stratum: photo_object
-  source: commons
-  dev: false
-  licence: Public domain (US government work, Library of Congress FSA/OWI)
-  retrieved: '2026-10-26'
-  sha256: 03516cf49c251de5361aad73d19058952d9870c6504c708f98fe1e00c15dd274
-  prepared_sha256: 0249beee7a8d7e4367df9feb33b3af0a8cfdb428c30f88a1804088eccfa0ca19
-  title: RussellLLanodeSanJuan
-  author: Russell Lee
-  date: between July 1940 and October 1940
-  page_url: https://commons.wikimedia.org/wiki/File%3ARussellLLanodeSanJuan.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/c/c8/RussellLLanodeSanJuan.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:RussellLLanodeSanJuan.jpg
-  width: 3000
-  height: 2281
-  colour: true
-  commons_sha1: 4c36019ace30ab847b710e2328540c815bdf7828
-  commons_licence: Public domain
-  commons_categories: 1940 in New Mexico|Images from the Library of Congress|Gates in New Mexico|PD US FSA/OWI|Church towers
-    in New Mexico|Church facades in New Mexico|Farm Security Administration in New Mexico|Metal gates in the United States|Color
-    photographs from the Farm Security Administration|Farm Security Administration photographs by Russell Lee|Llano de San
-    Juan Catholic Church
+  commons_categories: Images from the Library of Congress|Images uploaded by Fæ|PD US FSA/OWI|June 1942 in New Jersey|1942
+    in agriculture|Farm Security Administration in New Jersey|June 1942 United States photographs|Land vehicles photographed
+    in 1942|Tractors in New Jersey|Color photographs from the Farm Security Administration|Farm Security Administration photographs
+    by John Collier|Seabrook Farms
 - id: commons_street_in_san_juan_1a34067v
   category: photo
   stratum: photo_object
@@ -1522,58 +1489,86 @@ images:
     signs in Puerto Rico|Street scenes in Puerto Rico|December 1941 photographs|Farm Security Administration in Puerto Rico|Color
     photographs from the Farm Security Administration|Farm Security Administration photographs by Jack Delano|Calle de San
     José (San Juan)
-- id: commons_malaria_poster_in_small_hotel_1a34060v
-  category: photo
-  stratum: photo_object
-  source: commons
-  dev: true
-  licence: Public domain (US government work, Library of Congress FSA/OWI)
-  retrieved: '2026-10-26'
-  sha256: 25ea818206659ced8d80faac1fd312b11968f82d1754f742f591cd9cc68228e6
-  prepared_sha256: dedb6934dd28f358580e6150e1ccb7cd09ae269bfed9c22ea8662c0bfa8f6a99
-  title: Malaria poster in small hotel 1a34060v
-  author: Jack Delano
-  date: December 1941
-  page_url: https://commons.wikimedia.org/wiki/File%3AMalaria_poster_in_small_hotel_1a34060v.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/9/95/Malaria_poster_in_small_hotel_1a34060v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Malaria poster in small hotel 1a34060v.jpg
-  width: 794
-  height: 1024
-  colour: true
-  commons_sha1: 2c246eafba7774f86efbdb3720a16bfd8ea594d6
-  commons_licence: Public domain
-  commons_categories: 1941 in Puerto Rico|Images from the Library of Congress|PD US FSA/OWI|December 1941 photographs|Farm
-    Security Administration in Puerto Rico|Color photographs from the Farm Security Administration|Farm Security Administration
-    photographs by Jack Delano
-- id: commons_harrowing_a_field_with_a_diesel_tractor_seabrook_farm_bridge
+- id: commons_door_and_window_in_a_spanish_american_home_1a34162v
   category: photo
   stratum: photo_object
   source: commons
   dev: false
   licence: Public domain (US government work, Library of Congress FSA/OWI)
   retrieved: '2026-10-26'
-  sha256: 9cb4a5d7ab7fa8179fc9dd53a81c0351172a68c0fdbcbe2346ae3a8d664f789f
-  prepared_sha256: e34e6198a6cfcf4c02a2aeb5bf87ccef7696cf56d18d5fc96076d5de2b34718a
-  title: Harrowing a field with a diesel tractor, Seabrook Farm, Bridgeton, N.J. LCCN2017877677
-  author: Collier, John, Jr., 1913-1992, photographer; Wolcott, Marion Post, 1910-1990, photographer
-  date: 1942-06
-  page_url: https://commons.wikimedia.org/wiki/File%3AHarrowing_a_field_with_a_diesel_tractor%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877677.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/4/4b/Harrowing_a_field_with_a_diesel_tractor%2C_Seabrook_Farm%2C_Bridgeton%2C_N.J._LCCN2017877677.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Harrowing a field with a diesel tractor, Seabrook Farm, Bridgeton, N.J. LCCN2017877677.jpg
-  width: 9113
-  height: 7305
+  sha256: b27d2b9fe9116b00feb54f7ba175c6ee5c4c17bb09941e970742c7792020f0e6
+  prepared_sha256: d4251a5bde3d7b0715feb950f1f250dc5e64e715d1cb556ab4cf10ca93eb76ad
+  title: Door and window in a Spanish-American home 1a34162v
+  author: Russell Lee
+  date: July 1940
+  page_url: https://commons.wikimedia.org/wiki/File%3ADoor_and_window_in_a_Spanish-American_home_1a34162v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/c/cc/Door_and_window_in_a_Spanish-American_home_1a34162v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Door and window in a Spanish-American home 1a34162v.jpg
+  width: 797
+  height: 1024
   colour: true
   crop_box:
-  - 1062
-  - 168
-  - 8038
-  - 7144
-  commons_sha1: c7a26b3499ea01139eaf32219b3a08760b10d27d
+  - 18
+  - 133
+  - 775
+  - 890
+  commons_sha1: 6bc3a49d1496c98c0f96e7895d6beef24d86ee98
   commons_licence: Public domain
-  commons_categories: Images from the Library of Congress|Images uploaded by Fæ|PD US FSA/OWI|June 1942 in New Jersey|1942
-    in agriculture|Farm Security Administration in New Jersey|June 1942 United States photographs|Land vehicles photographed
-    in 1942|Tractors in New Jersey|Color photographs from the Farm Security Administration|Farm Security Administration photographs
-    by John Collier|Seabrook Farms
+  commons_categories: Images from the Library of Congress|PD US FSA/OWI|Houses in Taos County, New Mexico|July 1940 in New
+    Mexico|Farm Security Administration in New Mexico|Color photographs from the Farm Security Administration|Farm Security
+    Administration photographs by Russell Lee|Buildings in Costilla, New Mexico
+- id: commons_laundry_barbershop_and_stores_washington_d_c_1a34426v
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 9d510fcb1acc8bcc8440b2e0e7fde1e452e24c7d4fb982caab5d8b7a20414202
+  prepared_sha256: d841104ed265ac5e0115ae61b5bc508a4aa48ec1cb9e94f02c201c5279ca7d4e
+  title: '[Laundry, barbershop and stores, Washington, D.C.?]'
+  author: Louise Rosskam
+  date: between 1941 and 1942
+  page_url: https://commons.wikimedia.org/wiki/File%3ALaundry%2C_barbershop_and_stores%2C_Washington%2C_D.C.1a34426v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/5/50/Laundry%2C_barbershop_and_stores%2C_Washington%2C_D.C.1a34426v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Laundry, barbershop and stores, Washington, D.C.1a34426v.jpg
+  width: 1024
+  height: 779
+  colour: true
+  crop_box:
+  - 144
+  - 21
+  - 880
+  - 757
+  commons_sha1: e3009ea3d7c27de7aa32b42e3a0a554e6b87931f
+  commons_licence: Public domain
+  commons_categories: Washington, D.C. in the 1940s|Images from the Library of Congress|1940s photographs of the United States|PD
+    US FSA/OWI|Farm Security Administration in Washington, D.C.|Color photographs from the Farm Security Administration|Farm
+    Security Administration photographs by Louise Rosskam
+- id: commons_russellllanodesanjuan
+  category: photo
+  stratum: photo_object
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 03516cf49c251de5361aad73d19058952d9870c6504c708f98fe1e00c15dd274
+  prepared_sha256: 0249beee7a8d7e4367df9feb33b3af0a8cfdb428c30f88a1804088eccfa0ca19
+  title: RussellLLanodeSanJuan
+  author: Russell Lee
+  date: between July 1940 and October 1940
+  page_url: https://commons.wikimedia.org/wiki/File%3ARussellLLanodeSanJuan.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/c/c8/RussellLLanodeSanJuan.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:RussellLLanodeSanJuan.jpg
+  width: 3000
+  height: 2281
+  colour: true
+  commons_sha1: 4c36019ace30ab847b710e2328540c815bdf7828
+  commons_licence: Public domain
+  commons_categories: 1940 in New Mexico|Images from the Library of Congress|Gates in New Mexico|PD US FSA/OWI|Church towers
+    in New Mexico|Church facades in New Mexico|Farm Security Administration in New Mexico|Metal gates in the United States|Color
+    photographs from the Farm Security Administration|Farm Security Administration photographs by Russell Lee|Llano de San
+    Juan Catholic Church
 - id: commons_seed_and_feed_store_lincoln_nebraska1a34278v
   category: photo
   stratum: photo_object
@@ -1582,7 +1577,7 @@ images:
   licence: Public domain (US government work, Library of Congress FSA/OWI)
   retrieved: '2026-10-26'
   sha256: fb84569d004ffa4051fc5f6acacf62476a1d86e6d1317a0898abd957e04563d4
-  prepared_sha256: f10a4a8f0b3b657660621f5e983436be7aed3bbabea01686c97cd3bd62d92431
+  prepared_sha256: c8ca607c7d1660f440a71b01f15781b037220344821d70c8dd452df10cdc1d21
   title: Seed and feed store, Lincoln Nebraska
   author: John Vachon
   date: '1942'
@@ -1593,72 +1588,153 @@ images:
   height: 817
   colour: true
   crop_box:
-  - 119
+  - 120
   - 15
   - 901
-  - 797
+  - 796
   commons_sha1: d74f130d17952c8bb86a5c1fe1b20c53d3fe2bbb
   commons_licence: Public domain
   commons_categories: 1942 in Nebraska|Images from the Library of Congress|History of Lincoln, Nebraska|Shops in Lincoln,
     Nebraska|PD US FSA/OWI|1942 photographs of the United States|Farm Security Administration in Nebraska|Nebraska photographs
     by John Vachon|Color photographs from the Farm Security Administration|Farm Security Administration photographs by John
     Vachon
-- id: commons_scrap_and_salvage_depot_butte_montana1a35034v
+- id: commons_near_white_plains_ga_lccn2017877524
   category: photo
   stratum: photo_scene
   source: commons
   dev: false
   licence: Public domain (US government work, Library of Congress FSA/OWI)
   retrieved: '2026-10-26'
-  sha256: 9375826d3047abaca3ce2ff20852d014dc3c0b7cae68d81f2a50d8a24456eb2c
-  prepared_sha256: 09989490f57a87380fb6a420e294b98e8cf8310a0f67d623675842e7adb3497f
-  title: Scrap and salvage depot, Butte, Montana1a35034v
-  author: Russell Lee
-  date: October 1942
-  page_url: https://commons.wikimedia.org/wiki/File%3AScrap_and_salvage_depot%2C_Butte%2C_Montana1a35034v.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/9/9e/Scrap_and_salvage_depot%2C_Butte%2C_Montana1a35034v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Scrap and salvage depot, Butte, Montana1a35034v.jpg
-  width: 1024
-  height: 796
+  sha256: b0108b1f2a35ddfed4b848c0738fa540841c3eca06613e5b84df6dfbeb398538
+  prepared_sha256: 2da917d1f2bc3e2f2a7421f98717d536a0ad817da61a1b69bade63582a774c49
+  title: Near White Plains, Ga. LCCN2017877524
+  author: Jack Delano
+  date: '1941'
+  page_url: https://commons.wikimedia.org/wiki/File%3ANear_White_Plains%2C_Ga._LCCN2017877524.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/b/b8/Near_White_Plains%2C_Ga._LCCN2017877524.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Near White Plains, Ga. LCCN2017877524.jpg
+  width: 5960
+  height: 7748
   colour: true
   crop_box:
-  - 139
-  - 26
-  - 882
-  - 769
-  commons_sha1: 55e30ddc84696a0f00d44edca4a6d633ffeca525
+  - 144
+  - 1031
+  - 5799
+  - 6686
+  commons_sha1: cdb520535af19080e6868a9264c1412882140224
   commons_licence: Public domain
-  commons_categories: 1942 in Montana|Images from the Library of Congress|PD US FSA/OWI|Farm Security Administration in Montana|Color
-    photographs from the Farm Security Administration|Farm Security Administration photographs by Russell Lee|Scrap and salvage
-    depot, Butte, Mont.
-- id: commons_palm_trees_along_the_road_vicinity_of_christiansted1a34000v
+  commons_categories: 1941 in Georgia (U.S. state)|Greene County, Georgia|Images from the Library of Congress|Images uploaded
+    by Fæ|PD US FSA/OWI|1941 photographs of the United States|Farm Security Administration in Georgia (U.S. state)|Color photographs
+    from the Farm Security Administration|Farm Security Administration photographs by Jack Delano
+- id: commons_a_street_in_a_town_of_the_virgin_islands1a33999v
   category: photo
   stratum: photo_scene
   source: commons
   dev: false
   licence: Public domain (US government work, Library of Congress FSA/OWI)
   retrieved: '2026-10-26'
-  sha256: 08308ec1b4d0fe63d684be7584320b949a512ac151954df2b9bc666bf19743ad
-  prepared_sha256: 8f9d16372b0650f635be93cb03e2eb7782a88973546e4de02fdb2dd4f4251b95
-  title: Palm trees along the road, vicinity of Christiansted1a34000v
+  sha256: 17f78ea4574fb8d028c1e8e3ba966ec7ea813ef4dba78d3ec85fe9f3b39983a8
+  prepared_sha256: f8a04123cb0ac419026f2000346cca9654d3d4e8c502cb67b9d5c3b996fb2c2e
+  title: A street in a town of the Virgin Islands, Christiansted, Saint Croix
   author: Jack Delano
   date: December 1941
-  page_url: https://commons.wikimedia.org/wiki/File%3APalm_trees_along_the_road%2C_vicinity_of_Christiansted1a34000v.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/3/32/Palm_trees_along_the_road%2C_vicinity_of_Christiansted1a34000v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Palm trees along the road, vicinity of Christiansted1a34000v.jpg
+  page_url: https://commons.wikimedia.org/wiki/File%3AA_street_in_a_town_of_the_Virgin_Islands1a33999v.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/9/98/A_street_in_a_town_of_the_Virgin_Islands1a33999v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:A street in a town of the Virgin Islands1a33999v.jpg
   width: 1024
-  height: 792
+  height: 790
   colour: true
   crop_box:
-  - 133
-  - 18
-  - 890
-  - 775
-  commons_sha1: 2faed0d46459cc5d36d18ca2161a7df1ea294e40
+  - 136
+  - 24
+  - 886
+  - 774
+  commons_sha1: 172d5aebf01a3842453442ba751fc8c511119409
   commons_licence: Public domain
-  commons_categories: Images from the Library of Congress|Christiansted|Cumulus humilis clouds|PD US FSA/OWI|Office of War
-    Information photographs by Jack Delano|Color photographs from the Farm Security Administration|Farm Security Administration
-    photographs of the United States Virgin Islands
+  commons_categories: Images from the Library of Congress|King Street (Christiansted)|1941 in the United States Virgin Islands|Automobiles
+    in the United States Virgin Islands|PD US FSA/OWI|December 1941 in the United States|Coca-Cola signs in the United States
+    Virgin Islands|Office of War Information photographs by Jack Delano|Color photographs from the Farm Security Administration|Farm
+    Security Administration photographs of the United States Virgin Islands
+- id: commons_scrap_and_salvage_depot_butte_mont_lccn2017878813
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 136e08dcf80a9f685c4658f8d83e620415b0e514eefbb6f9779a0dee974ea20e
+  prepared_sha256: 442dc83494603d76227212e26a303ffb702e3d4526f681838dfbb34b915a3360
+  title: Scrap and salvage depot, Butte, Mont. LCCN2017878813
+  author: Russell Lee
+  date: 1942-10
+  page_url: https://commons.wikimedia.org/wiki/File%3AScrap_and_salvage_depot%2C_Butte%2C_Mont._LCCN2017878813.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/9/96/Scrap_and_salvage_depot%2C_Butte%2C_Mont._LCCN2017878813.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Scrap and salvage depot, Butte, Mont. LCCN2017878813.jpg
+  width: 7860
+  height: 6162
+  colour: true
+  crop_box:
+  - 1037
+  - 216
+  - 6767
+  - 5946
+  commons_sha1: a3b365d8bd8c3c712898bbe958ce7caf301d7dde
+  commons_licence: Public domain
+  commons_categories: 1942 in Montana|Images from the Library of Congress|Images uploaded by Fæ|PD US FSA/OWI|Farm Security
+    Administration in Montana|October 1942 United States photographs|Color photographs from the Farm Security Administration|Farm
+    Security Administration photographs by Russell Lee|Scrap and salvage depot, Butte, Mont.
+- id: commons_russell_lee_street_corner_dillon_montana
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 875eea996ed851df0a51b173f175cd1dc5e428d705b2a3424648772281b5e994
+  prepared_sha256: a3d5b82d73b8b36d2878e757f46ef88063514629542282a28cce6b4b49f3df25
+  title: Russell Lee street corner Dillon Montana
+  author: Russell Lee
+  date: 1942-08
+  page_url: https://commons.wikimedia.org/wiki/File%3ARussell_Lee_street_corner_Dillon_Montana.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/2/2a/Russell_Lee_street_corner_Dillon_Montana.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:Russell Lee street corner Dillon Montana.jpg
+  width: 6040
+  height: 4530
+  colour: true
+  commons_sha1: 04401536b68ecea0fea79b6d5b112b91fe985ac9
+  commons_licence: Public domain
+  commons_categories: 1942 in Montana|Images from the Library of Congress|Dillon, Montana|PD US FSA/OWI|Cafés in 1942|Farm
+    Security Administration in Montana|Streetcorners in the United States|Color photographs from the Farm Security Administration|Farm
+    Security Administration photographs by Russell Lee
+- id: commons_the_greensboro_lumber_co_greensboro_ga_lccn2017877531
+  category: photo
+  stratum: photo_scene
+  source: commons
+  dev: false
+  licence: Public domain (US government work, Library of Congress FSA/OWI)
+  retrieved: '2026-10-26'
+  sha256: 30e437355cdbf1d8f3a254c21820d52c71b713d26f94488c4901a9e1a2dc9af2
+  prepared_sha256: ac24493a7bbb915c1852fcaa4c54bccf2b7692bf272744b867b6cc849d03d216
+  title: The Greensboro Lumber Co., Greensboro, Ga. LCCN2017877531
+  author: Jack Delano
+  date: 1941-06
+  page_url: https://commons.wikimedia.org/wiki/File%3AThe_Greensboro_Lumber_Co.%2C_Greensboro%2C_Ga._LCCN2017877531.jpg
+  url: https://upload.wikimedia.org/wikipedia/commons/4/43/The_Greensboro_Lumber_Co.%2C_Greensboro%2C_Ga._LCCN2017877531.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
+  source_id: File:The Greensboro Lumber Co., Greensboro, Ga. LCCN2017877531.jpg
+  width: 7930
+  height: 6152
+  colour: true
+  crop_box:
+  - 1080
+  - 183
+  - 6824
+  - 5927
+  commons_sha1: f9280e9fbb6cc0639081a2242c6ee9c7b36e5da0
+  commons_licence: Public domain
+  commons_categories: 1941 in Georgia (U.S. state)|Images from the Library of Congress|Greensboro, Georgia|Images uploaded
+    by Fæ|PD US FSA/OWI|Sawmills in the United States|June 1941 in Georgia (U.S. state)|Farm Security Administration in Georgia
+    (U.S. state)|June 1941 United States photographs|Color photographs from the Farm Security Administration|Farm Security
+    Administration photographs by Jack Delano
 - id: commons_traffic_at_5_30_on_second_avenue_detroit_mich_lccn2017878611
   category: photo
   stratum: photo_scene
@@ -1687,102 +1763,15 @@ images:
   commons_categories: Images from the Library of Congress|Images uploaded by Fæ|PD US FSA/OWI|1942 in Detroit|July 1942 in
     Michigan|Farm Security Administration in Michigan|July 1942 United States photographs|Color photographs from the Farm
     Security Administration|Farm Security Administration photographs by Arthur Siegel
-- id: commons_shasta_dam_under_construction_1a34231v
-  category: photo
-  stratum: photo_scene
-  source: commons
-  dev: false
-  licence: Public domain (US government work, Library of Congress FSA/OWI)
-  retrieved: '2026-10-26'
-  sha256: f8450d2993d8f0aaf2c2b497a6dc68dc039c473a1233ba6ccf4558a8aa27f150
-  prepared_sha256: 8b005dcf531a5108a41143dc1acc1b59dd12231f3a3b0e63c4eb3fcd0c3b23de
-  title: Shasta dam under construction,1a34231v
-  author: Russell Lee
-  date: June 1942
-  page_url: https://commons.wikimedia.org/wiki/File%3AShasta_dam_under_construction%2C1a34231v.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/d/d6/Shasta_dam_under_construction%2C1a34231v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Shasta dam under construction,1a34231v.jpg
-  width: 800
-  height: 1024
-  colour: true
-  crop_box:
-  - 31
-  - 137
-  - 772
-  - 878
-  commons_sha1: 813ff2f6735be44c63ebd693c926d5226635788c
-  commons_licence: Public domain
-  commons_categories: Images from the Library of Congress|Shasta Dam|June 1942 in California|Farm Security Administration
-    in California|PD US FSA/OWI|Dam construction in the United States|June 1942 United States photographs|Color photographs
-    from the Farm Security Administration|Farm Security Administration photographs by Russell Lee
-- id: commons_cultivating_tobacco_1a34077v
-  category: photo
-  stratum: photo_scene
-  source: commons
-  dev: false
-  licence: Public domain (US government work, Library of Congress FSA/OWI)
-  retrieved: '2026-10-26'
-  sha256: 493f35ffafbe3f15c7ad94a13c5e54426734c57a67ae6bb382c3297e3e643cbe
-  prepared_sha256: 6f05e489af63c376afc41e6d92a8868449f98d679888946807d4fa24b717a074
-  title: Cultivating tobacco 1a34077v
-  author: Jack Delano
-  date: December 1941
-  page_url: https://commons.wikimedia.org/wiki/File%3ACultivating_tobacco_1a34077v.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/8/80/Cultivating_tobacco_1a34077v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:Cultivating tobacco 1a34077v.jpg
-  width: 1024
-  height: 791
-  colour: true
-  crop_box:
-  - 136
-  - 20
-  - 884
-  - 768
-  commons_sha1: 2c27af2b1d95d8af7b9f40d9a06f33ec74452032
-  commons_licence: Public domain
-  commons_categories: 1941 in Puerto Rico|Images from the Library of Congress|Puerto Rico Reconstruction Administration|PD
-    US FSA/OWI|December 1941 photographs|Farm Security Administration in Puerto Rico|Color photographs from the Farm Security
-    Administration|Farm Security Administration photographs by Jack Delano
-- id: commons_first_snow_of_the_season_in_the_foothills_of_the_little_belt
-  category: photo
-  stratum: photo_scene
-  source: commons
-  dev: false
-  licence: Public domain (US government work, Library of Congress FSA/OWI)
-  retrieved: '2026-10-26'
-  sha256: e2f083afc3846d0ad8126b5ad9c93e8453c82adafbc3c62de54f693969157aca
-  prepared_sha256: ff7af00f3dab326ce5446a86aef3461424831a167e922a4875d28a74b2871a65
-  title: First snow of the season in the foothills of the Little Belt Mountains, Lewis and Clark National Forest, Meagher
-    County, Montana LCCN2017878808
-  author: Russell Lee
-  date: 1942-08
-  page_url: https://commons.wikimedia.org/wiki/File%3AFirst_snow_of_the_season_in_the_foothills_of_the_Little_Belt_Mountains%2C_Lewis_and_Clark_National_Forest%2C_Meagher_County%2C_Montana_LCCN2017878808.jpg
-  url: https://upload.wikimedia.org/wikipedia/commons/d/da/First_snow_of_the_season_in_the_foothills_of_the_Little_Belt_Mountains%2C_Lewis_and_Clark_National_Forest%2C_Meagher_County%2C_Montana_LCCN2017878808.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original
-  source_id: File:First snow of the season in the foothills of the Little Belt Mountains, Lewis and Clark National Forest,
-    Meagher County, Montana LCCN2017878808.jpg
-  width: 7819
-  height: 6122
-  colour: true
-  crop_box:
-  - 1039
-  - 203
-  - 6748
-  - 5912
-  commons_sha1: d552d84d0679915bfa9748cccb067eec4a8c0c7e
-  commons_licence: Public domain
-  commons_categories: 1942 in Montana|Images from the Library of Congress|Meagher County, Montana|Lewis and Clark National
-    Forest|Images uploaded by Fæ|Snow in Montana|PD US FSA/OWI|Farm Security Administration in Montana|August 1942 United
-    States photographs|Color photographs from the Farm Security Administration|Farm Security Administration photographs by
-    Russell Lee
 - id: commons_landscape_northeast_utah1a34285v
   category: photo
   stratum: photo_scene
   source: commons
-  dev: false
+  dev: true
   licence: Public domain (US government work, Library of Congress FSA/OWI)
   retrieved: '2026-10-26'
   sha256: 8e59c33293e025c0e0b618c9b497cfe05b8d1e42b861cacd5af5dc16f617a154
-  prepared_sha256: 7ef8eb4e646f581993b2a2461ee914c9692f8aca431a2cd6f681e74e64d4b3fd
+  prepared_sha256: 706dc1ccaadf9570b079237b77e2ff47ee7215cdae5611a50268e66a34e31e29
   title: Landscape, Northeast Utah1a34285v
   author: John Vachon
   date: April 1942
@@ -1794,8 +1783,8 @@ images:
   colour: true
   crop_box:
   - 136
-  - 20
-  - 889
+  - 21
+  - 888
   - 773
   commons_sha1: 54c5f7d82f3705d5ad287db3f671d5cc82c62163
   commons_licence: Public domain

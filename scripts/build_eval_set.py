@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import functools
+import hashlib
 import html
 import io
 import json
@@ -34,6 +35,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -42,11 +44,9 @@ import yaml
 from PIL import Image, ImageDraw
 
 from brushstroke.eval.dataset import (
-    BORDER_MAX_AREA,
     DRAW_SEED,
     QUOTAS,
     EvalImage,
-    border_area_fraction,
     border_crop_box,
     dump_manifest,
     eligible,
@@ -216,9 +216,8 @@ def met_stratum(meta: dict[str, Any], dept: str) -> tuple[str, str] | None:
     return None
 
 
-MET_PHOTO_PORTRAITS = (
-    8  # of the 10 photographic portraits (monochrome: 8 of the at most 10 greyscale photographs)
-)
+# of the 10 photographic portraits: monochrome Met prints (at most 10 greyscale photographs in the set)
+MET_PHOTO_PORTRAITS = 9
 MET_DEPTS = {"european": 11, "asian": 6, "modern": 21, "american": 1, "photo": 19}
 MET_QUOTAS = {  # (dept, stratum, subtype) -> n ; subtype quotas keep the Asian and "other" strata balanced
     ("european", "european_portrait", "portrait"): 8,
@@ -232,9 +231,17 @@ MET_QUOTAS = {  # (dept, stratum, subtype) -> n ; subtype quotas keep the Asian 
 }
 
 
-def download_image(http: Http, url: str, dest: Path) -> bytes:
+def sha1_hex(data: bytes) -> str:
+    return hashlib.sha1(data).hexdigest()  # noqa: S324  (the checksum Commons publishes, not a security use)
+
+
+def download_image(http: Http, url: str, dest: Path, sha1: str | None = None) -> bytes:
+    """The bytes of ``url``, cached in ``dest``. With ``sha1`` (Commons publishes one per file) a cached file that is
+    not that file is downloaded again: a cache name must never stand for another file."""
     if dest.exists():
-        return dest.read_bytes()
+        data = dest.read_bytes()
+        if sha1 is None or sha1_hex(data) == sha1:
+            return data
     data = http.get(url)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(data)
@@ -511,6 +518,23 @@ FWS_PEOPLE_WORDS = [
     "trapping",
 ]
 FWS_PEOPLE_WORDS += ["rehab", "briefings?", "cleaning", "spill", "response"]
+# titles about something other than a visible animal: its nest, a fire, a habitat, traces
+FWS_PEOPLE_WORDS += [
+    "nests?",
+    "burn",
+    "burns",
+    "fire",
+    "fires",
+    "smoke",
+    "habitat",
+    "tracks?",
+    "scat",
+    "eggs?",
+    "skull",
+    "pelt",
+    "footprints?",
+    "survey",
+]
 FWS_PEOPLE = re.compile(r"\b(" + "|".join(FWS_PEOPLE_WORDS) + r")\b", re.I)
 
 
@@ -586,6 +610,26 @@ def clean_date(raw: str) -> str:
     return re.sub(r"^Taken on\s+", "", text)
 
 
+def unique_fids(titles: list[str]) -> dict[str, str]:
+    """Manifest id of each Commons title: ``commons_`` and the first 60 characters of the title, made of letters and
+    digits. Titles whose ids would collide (long titles of one series differ only at the end) get a hash suffix, so
+    that an id, and the cache file named after it, always stand for one file."""
+    base = {
+        t: "commons_"
+        + re.sub(r"[^a-z0-9]+", "_", t.rsplit(".", 1)[0].removeprefix("File:").lower())[:60].strip(
+            "_"
+        )
+        for t in titles
+    }
+    count = Counter(base.values())
+    return {
+        t: b
+        if count[b] == 1
+        else f"{b[:52].rstrip('_')}_{hashlib.sha1(t.encode()).hexdigest()[:7]}"
+        for t, b in base.items()
+    }
+
+
 def commons_candidates(http: Http) -> list[tuple[str, str, str, dict[str, Any]]]:
     """(title, stratum, licence, info) of the files that pass the licence, format, size and subject rules."""
     out: list[tuple[str, str, str, dict[str, Any]]] = []
@@ -636,6 +680,7 @@ def draw_photos(
         flush=True,
     )
     out: list[EvalImage] = []
+    fids = unique_fids([c[0] for c in cands])
     per_photographer: dict[str, int] = {}
     cat_count: dict[str, int] = {}
     for c in cands:
@@ -652,9 +697,7 @@ def draw_photos(
             if kept >= quota:
                 break
             _, _, licence, ii = pool[title]
-            fid = "commons_" + re.sub(
-                r"[^a-z0-9]+", "_", title.rsplit(".", 1)[0].removeprefix("File:").lower()
-            )[:60].strip("_")
+            fid = fids[title]
             meta = {k: strip_html(v["value"]) for k, v in ii["extmetadata"].items()}
             author = meta.get("Artist", "") or "unknown"
             who = photographers(author)
@@ -670,8 +713,13 @@ def draw_photos(
                 or any(same_series(view, other, frequent) for other in accepted)
             ):
                 continue
-            data = download_image(http, ii["url"], RAW / "source" / f"{fid}.jpg")
+            data = download_image(http, ii["url"], RAW / "source" / f"{fid}.jpg", ii["sha1"])
+            if sha1_hex(data) != ii["sha1"]:
+                continue  # the file served is not the one the API describes (re-uploaded since): unusable
             with Image.open(io.BytesIO(data)) as im:
+                src_w, src_h = (
+                    im.size
+                )  # the size of the file used, not the (possibly stale) API field
                 ok, box = border_crop_box(im, kind="film" if licence == LOC_FSA else "flat")
                 if not ok:
                     continue
@@ -691,7 +739,7 @@ def draw_photos(
                     sha256=sha256_bytes(data), prepared_sha256=pixel_sha256(pixels), title=meta.get("ObjectName", "") or title.removeprefix("File:"),
                     author=author, date=clean_date(ii["extmetadata"].get("DateTimeOriginal", {}).get("value", "")),
                     page_url="https://commons.wikimedia.org/wiki/" + urllib.parse.quote(title.replace(" ", "_")),
-                    url=ii["url"], source_id=title, width=ii["width"], height=ii["height"], colour=True, crop_box=box,
+                    url=ii["url"], source_id=title, width=src_w, height=src_h, colour=True, crop_box=box,
                     extra={"commons_sha1": ii["sha1"], "commons_licence": meta.get("LicenseShortName", ""), "commons_categories": meta.get("Categories", "")},
                 )
             )  # fmt: skip
@@ -784,7 +832,7 @@ def cmd_sheets(args: argparse.Namespace) -> None:
     _, images = load_manifest(MANIFEST)
     out = Path("outputs/eval_set")
     out.mkdir(parents=True, exist_ok=True)
-    cell, cols, rows = 256, 5, 4
+    cell, cols, rows = args.cell, args.cols, args.rows
     todo = [
         i for i in images if i.category != "sdxl" or (RAW / "prepared" / f"{i.id}.png").exists()
     ]
@@ -803,7 +851,8 @@ def cmd_sheets(args: argparse.Namespace) -> None:
                 thumb_im = Image.open(path).convert("RGB").resize((cell, cell))
             x, y = (k % cols) * cell, (k // cols) * (cell + 14)
             sheet.paste(thumb_im, (x, y + 14))
-            draw.text((x + 2, y + 1), f"{im.id[-38:]}{' [dev]' if im.dev else ''}", fill="black")
+            label = f"{start + k + 1:03d} {im.id[-36:]}{' [dev]' if im.dev else ''}"
+            draw.text((x + 2, y + 1), label, fill="black")
         sheet.save(out / f"sheet_{page:02d}.png")
     print(f"sheets in {out}")
 
@@ -828,7 +877,8 @@ def photographer_counts(images: list[EvalImage]) -> dict[str, int]:
 
 
 def cmd_check(args: argparse.Namespace) -> None:
-    """No image of the set is, or looks like, an image used for tuning (T-009 sweep, M1/M2 demos)."""
+    """No image of the set is, or looks like, an image used for tuning (T-009 sweep, M1/M2 demos). Every other
+    machine-checkable rule is in ``scripts/audit_eval_set.py``."""
     from brushstroke.eval.dataset import validate_manifest
 
     header, images = load_manifest(MANIFEST)
@@ -841,37 +891,6 @@ def cmd_check(args: argparse.Namespace) -> None:
             raise SystemExit(f"{path} is missing: run python -m scripts.fetch_eval_set first")
         t = thumb(np.asarray(Image.open(path).convert("RGB")))
         worst[im.id] = max((float((t * u).mean()) for u in tuning), default=0.0)
-    commons = [
-        {
-            "id": im.id,
-            "photographers": photographers(im.author),
-            "categories": set(str(im.extra.get("commons_categories", "")).split("|")),
-            "title": im.source_id,
-            "agency": im.licence == FWS,
-        }
-        for im in images
-        if im.source == "commons"
-    ]
-    series = [
-        (a["id"], b["id"])
-        for k, a in enumerate(commons)
-        for b in commons[k + 1 :]
-        if same_series(a, b, frequent_categories(commons))
-    ]
-    dark = {
-        im.id: border_area_fraction(
-            np.asarray(Image.open(RAW / "prepared" / f"{im.id}.png").convert("RGB")),
-            "film" if im.licence == LOC_FSA else "flat",
-        )
-        for im in images
-        if im.category != "sdxl"
-    }
-    people = [
-        im.id
-        for im in images
-        if im.licence == FWS
-        and has_person(np.asarray(Image.open(RAW / "prepared" / f"{im.id}.png").convert("RGB")))
-    ]
     ids = {im.source_id for im in images if im.source == "met"}
     excluded = sorted(str(i) for i in MET_EXCLUDED if str(i) in ids)
     overlap = {k: round(v, 3) for k, v in worst.items() if v > 0.9}
@@ -882,27 +901,13 @@ def cmd_check(args: argparse.Namespace) -> None:
         "max_thumbnail_correlation": round(max(worst.values()), 3),
         "near_duplicates_of_tuning_images": overlap,
         "excluded_met_objects_present": excluded,
-        "same_series_pairs": series,
-        "person_detected_in_agency_photographs": people,
-        "max_dark_border_area": round(max(dark.values()), 4),
-        "dark_border_over_5_percent": {
-            k: round(v, 4) for k, v in dark.items() if v > BORDER_MAX_AREA
-        },
-        "photographers_per_name": photographer_counts(images),
         "manifest_problems": problems,
     }
     out = Path("docs/experiments/data/eval_set")
     out.mkdir(parents=True, exist_ok=True)
     (out / "overlap_check.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps(report, indent=1))
-    if (
-        overlap
-        or excluded
-        or problems
-        or series
-        or people
-        or any(v > BORDER_MAX_AREA for v in dark.values())
-    ):
+    if overlap or excluded or problems:
         raise SystemExit(1)
 
 
@@ -942,7 +947,10 @@ def main(argv: list[str] | None = None) -> None:
     sub = parser.add_subparsers(dest="stage", required=True)
     c = sub.add_parser("curate")
     c.add_argument("--insecure", action="store_true", help="skip TLS certificate verification")
-    sub.add_parser("sheets")
+    sh = sub.add_parser("sheets")
+    sh.add_argument("--cell", type=int, default=320)
+    sh.add_argument("--cols", type=int, default=4)
+    sh.add_argument("--rows", type=int, default=3)
     sub.add_parser("check")
     sub.add_parser("card")
     args = parser.parse_args(argv)

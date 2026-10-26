@@ -438,3 +438,16 @@ Affected runs: none. The replay of the curation (`python -m scripts.build_eval_s
    photograph with a person, in the draw and again in `build_eval_set check` (0 detections on the final set). The word list of the filter matches substrings (it over-excludes, never under-excludes), left as is.
 
 Affected runs: none. The dev split was redrawn with the rest.
+
+### 2026-10-26 (T-034, finish of the curation: review round 3 and a systematic audit, still before any method run)
+
+Review round 3 found three more defects after two rounds of reactive fixes, so the set was audited systematically (`scripts/audit_eval_set.py`: every machine-checkable rule on every image, 0 violations; `docs/experiments/data/eval_set/visual_audit.md`: all 100 images looked at, one line each).
+
+1. **The agency word filter was dead** (two backspace characters instead of the word boundaries): none of the draws had applied "no word about people, staff or events". Repaired, with a test that matches the words and never matches "manatee"/"Mandarin"/"Dayton", and a test that no text file of the repository holds a control character. Words for non-animal titles (nest, fire, smoke, habitat, tracks) were added after the first redraw showed titles that name an animal that is not in the picture.
+2. **One border definition** for the trimming and the report: `flat` (near-black uniform lines) for paintings, prints and mats, `film` (mean luminance below 30, after a thin light edge line) for scanned slides; the report is computed on the cropped source at full resolution, and independently at 512 px for slides. A slide whose film bar sits next to a dark blue sky (`gus_worke`) cannot be told from its content by any rule and was rejected.
+3. **Children and possibly living persons.** The three views of Shulman's Market (children on the step and in the street) were rejected; the rule is applied to every FSA or agency photograph: no child, no person identifiable who may be alive (adults of a 1940-43 slide cannot be alive; the Met sitters are long dead, including one girl).
+4. **Identity of the files used.** Found by the audit and by the fetch from scratch: the Commons ids were the first 60 characters of the title, so four files of one series shared an id, and so a cache file; the manifest of one image held the hash, size and crop of a different file than its URL. Ids of colliding titles now carry a hash suffix; a cached file is only reused if its SHA-1 equals the one the API publishes (`audit_eval_set` checks it for every Commons image); the size in the manifest is that of the file used. Only that one image was affected (replaced).
+5. **Composition** (counts fixed by the protocol are unchanged): the colour photographs are 14 FSA/OWI slides and 7 US Fish and Wildlife Service photographs; the monochrome Met portraits are 9 (the portrait stratum has 9 + 1), because the FSA pool holds one usable colour portrait. Colour photographs: 21 (minimum 20), greyscale 8 (maximum 10). The visual rejections list holds 52 entries with reasons.
+
+Affected runs: none. The curation replay and the fetch from scratch reproduce the set.
+

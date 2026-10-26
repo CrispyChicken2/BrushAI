@@ -81,20 +81,24 @@ python -m scripts.fetch_eval_set            # download + verify the 70 Met / Com
 python -m scripts.generate_eval_sdxl        # generate the 30 SDXL images (GPU, about 10 min) and verify their hashes
 python -m scripts.fetch_eval_set --check    # verify everything that is on disk, download nothing
 python -m scripts.build_eval_set check      # no image of the set equals / resembles a tuning image (writes overlap_check.json)
+python -m scripts.audit_eval_set            # every machine-checkable rule on every image, 0 violations expected (writes audit.json)
 ```
+
+The rules that need eyes were applied to every image on contact sheets and are recorded one line per image in
+`docs/experiments/data/eval_set/visual_audit.md` (T-034).
 
 **Sources and licences (checked 2026-10-26).**
 - *Paintings (40)*: Metropolitan Museum Open Access, `isPublicDomain = true`, CC0 (API v1.1, object list per department; the `search` endpoint
   was retired on 2026-10-01). 24 European paintings (8 portraits / 8 landscapes / 8 other, from the Met subject tags), 8 Asian (4 paintings,
   4 woodblock prints), 8 other (4 Modern Art, 4 American Wing).
-- *Photographs (30)*: 8 nineteenth-century portrait photographs of the Met (CC0, monochrome or sepia prints, sitters long dead); 22 colour
-  photographs from Wikimedia Commons whose file page carries a public-domain tag and whose source is a US federal collection: 15 Library of
+- *Photographs (30)*: 9 nineteenth-century portrait photographs of the Met (CC0, monochrome or sepia prints, one hand-coloured, sitters long dead); 21 colour
+  photographs from Wikimedia Commons whose file page carries a public-domain tag and whose source is a US federal collection: 14 Library of
   Congress FSA/OWI Kodachrome slides (1939-1943, US government work), 7 US Fish and Wildlife Service wildlife photographs (animals only: a species
   category and the animal in the title, no word about people, staff or events, and no "person" found by a COCO detector, torchvision Faster R-CNN MobileNetV3, checked again
-  on the final set). Prokudin-Gorsky plates were tried and dropped: most are sepia-toned reproductions, not colour photographs. 10 portraits (8 + 2), 7 animals, 6 objects, 7 scenes. Smithsonian Open
+  on the final set). Prokudin-Gorsky plates were tried and dropped: most are sepia-toned reproductions, not colour photographs. 10 portraits (9 + 1), 7 animals, 6 objects, 7 scenes. Smithsonian Open
   Access was not needed and is not used, so its per-file statement was not relied on. Excluded: any image of a person who may be alive
-  (no child of the FSA series: title rule and contact-sheet check; the Met portraits are long-dead historical sitters of any age, one of them a girl).
-  `colour: false` marks the 7 monochrome or sepia Met prints; the hand-coloured Met portrait is `colour: true`.
+  (no child and no possibly living identifiable person among the FSA or agency photographs: title rule, people detector for the agency photographs, and the image-by-image visual audit; the Met portraits are long-dead historical sitters of any age, one of them a girl; the adults of 1940-43 slides cannot be alive).
+  `colour: false` marks the 8 monochrome or sepia Met prints; the hand-coloured Met portrait is `colour: true`.
 - *SDXL (30)*: Stable Diffusion XL base 1.0, revision `462165984030d82259a11f4367a4eed129e94a7b`, licence CreativeML Open RAIL++-M (Licensor
   claims no rights in the outputs; the use restrictions do not concern the prompts). The 30 outputs are dedicated to CC0 1.0. Settings are
   the library defaults (`configs/eval/sdxl_prompts.yaml`, dependencies pinned in `requirements-gen.txt`); fp16 weights with model CPU offload; `diffusers` 0.42.0, `torch` 2.11.0+cu128.
@@ -105,10 +109,10 @@ shuffled; the first candidates that pass the rules are kept (`scripts/build_eval
 per-file statement, source short side >= 768 px and aspect in [3:4, 4:3], colour for the Commons photographs, at most 4 images per
 photographer (3 until review round 2: once the sepia Prokudin plates were out, the FSA pool could not fill the strata at 3; names normalized: "Lee, Russell, 1903-1986, photographer" and "Russell Lee" count together), no two views of one scene
 (same photographer and a shared specific category such as a place, or similar titles; applied to the FSA photographs, not to agency wildlife
-photographs), no near-duplicate of an accepted or of a tuning image. The 43 visual rejections taken on the contact sheets (text over 5 %
+photographs), no near-duplicate of an accepted or of a tuning image. The 52 visual rejections taken on the contact sheets (text over 5 %
 of the area, frames and mats, no clear subject, possible living person, sepia tint, duplicates) are listed with their reason in
 `configs/eval/curation_rejections.yaml`, and every rejected candidate was replaced by the next one of the seeded draw. Preparation: centre crop
-(43 images carry a mechanical `crop_box` that removes uniform black film or mat borders, side >= 640 px) and a Pillow BOX (area) reduction to 512.
+(40 images carry a mechanical `crop_box` that removes uniform black film or mat borders, side >= 640 px) and a Pillow BOX (area) reduction to 512.
 
 **Reproducibility, measured.**
 - Fetch: a download from scratch into an empty directory reproduced the prepared pixels of all 70 images (SHA-256) in 64 s. One Met file
@@ -123,26 +127,26 @@ of the area, frames and mats, no clear subject, possible living person, sepia ti
   pastiches of tuning images (`sdxl_19`: waves and a distant mountain in woodblock style, `sdxl_18`: a swirling sky over sunflowers); they are test images,
   not copies, and the thumbnail check does not flag them (see the correlation above), but a reader should know the resemblance of motif. Record: `docs/experiments/data/eval_set/overlap_check.json`.
 
-**Dev split (10, fixed here before any method ran; redrawn in review rounds 1 and 2 when test-set defects were corrected: no method had run).** 4 paintings (2 European, 1 Asian, 1 other), 3 photographs (1 portrait, 2 others), SDXL
+**Dev split (10, fixed here before any method ran; redrawn in review rounds 1 to 3 and in T-034 when test-set defects were corrected: no method had run).** 4 paintings (2 European, 1 Asian, 1 other), 3 photographs (1 portrait, 2 others), SDXL
 prompts 04, 14, 25. Drawn with the same `random.Random(22)` after the three draws, flagged `dev: true` in the manifest and in the table below.
 
 **Limits.** The photographs are dominated by one US federal collection (FSA/OWI 1939-1943) and the portraits by 19th-century prints, so they
-are not representative of modern photography; the paintings are mostly European; after the trimming (which now sees through a thin light edge line), the dark film border of the FSA slides is at most 4.7 % of the area (measured by `build_eval_set check`; three slides carried 6.4 % before, with the measure blind to the light edge line); inscriptions that are part of an East Asian work are kept (below a third of the area).
+are not representative of modern photography; the paintings are mostly European; after the trimming (which sees through a thin light edge line, with one definition of a border for the trimming and the report), the border of any image is at most 4.5 % of the area (measured by `audit_eval_set`; a slide with a film bar next to a dark sky, and three slides with a light line in front of the bar, carried 6 % or more before and were rejected or trimmed); inscriptions that are part of an East Asian work are kept (below a third of the area).
 
 <!-- BEGIN EVALSET -->
 
 | category | stratum | n | dev | licence |
 |---|---|---|---|---|
 | painting | asian | 8 | 1 | CC0 1.0 (Met Open Access, isPublicDomain) |
-| painting | european_landscape | 8 | 1 | CC0 1.0 (Met Open Access, isPublicDomain) |
-| painting | european_other | 8 | 1 | CC0 1.0 (Met Open Access, isPublicDomain) |
+| painting | european_landscape | 8 | 0 | CC0 1.0 (Met Open Access, isPublicDomain) |
+| painting | european_other | 8 | 2 | CC0 1.0 (Met Open Access, isPublicDomain) |
 | painting | european_portrait | 8 | 0 | CC0 1.0 (Met Open Access, isPublicDomain) |
 | painting | other_art | 8 | 1 | CC0 1.0 (Met Open Access, isPublicDomain) |
 | photo | photo_animal | 7 | 1 | Public domain (US government work, US Fish and Wildlife Service) |
-| photo | photo_object | 6 | 1 | Public domain (US government work, Library of Congress FSA/OWI) |
-| photo | photo_portrait | 8 | 1 | CC0 1.0 (Met Open Access, isPublicDomain) |
-| photo | photo_portrait | 2 |  | Public domain (US government work, Library of Congress FSA/OWI) |
-| photo | photo_scene | 7 | 0 | Public domain (US government work, Library of Congress FSA/OWI) |
+| photo | photo_object | 6 | 0 | Public domain (US government work, Library of Congress FSA/OWI) |
+| photo | photo_portrait | 9 | 1 | CC0 1.0 (Met Open Access, isPublicDomain) |
+| photo | photo_portrait | 1 |  | Public domain (US government work, Library of Congress FSA/OWI) |
+| photo | photo_scene | 7 | 1 | Public domain (US government work, Library of Congress FSA/OWI) |
 | sdxl | sdxl_object | 10 | 1 | CC0 1.0 (own-generated, SDXL output) |
 | sdxl | sdxl_portrait | 10 | 1 | CC0 1.0 (own-generated, SDXL output) |
 | sdxl | sdxl_scene | 10 | 1 | CC0 1.0 (own-generated, SDXL output) |
@@ -157,7 +161,7 @@ are not representative of modern photography; the paintings are mostly European;
 | `met_439977` | painting / european_other | Christ Carrying the Cross | Jan Gossart (called Mabuse) | ca. 1520–25 |  |
 | `met_436496` | painting / european_other | Saint John the Evangelist with Acteus and Eugenius | Francescuccio Ghissi (Francesco di Cecco | ca. 1370 |  |
 | `met_437921` | painting / european_portrait | Portrait of a Man | Abraham de Vries | 1643 |  |
-| `met_438545` | painting / european_other | Léon Pallière (1787–1820) in His Room at the Villa Medici, R | Jean Alaux | 1817 |  |
+| `met_438545` | painting / european_other | Léon Pallière (1787–1820) in His Room at the Villa Medici, R | Jean Alaux | 1817 | dev |
 | `met_436616` | painting / european_other | Young Man and Woman in an Inn | Frans Hals | 1623 |  |
 | `met_437897` | painting / european_other | Abraham's Parting from the Family of Lot | Jan Victors | ca. 1655–65 |  |
 | `met_436824` | painting / european_portrait | Lady Mary Berkeley | Sir Godfrey Kneller | ca. 1700 |  |
@@ -168,14 +172,14 @@ are not representative of modern photography; the paintings are mostly European;
 | `met_437211` | painting / european_landscape | The Rest on the Flight into Egypt | Netherlandish (Antwerp) Painters |  |  |
 | `met_436025` | painting / european_landscape | View of Ornans | Gustave Courbet | probably mid-1850s |  |
 | `met_437179` | painting / european_landscape | Near Penshurst, Kent | Patrick Nasmyth | 1828 |  |
-| `met_436782` | painting / european_landscape | Capriccio with St. Paul's and Old London Bridge | Antonio Joli | ca. 1745 | dev |
+| `met_436782` | painting / european_landscape | Capriccio with St. Paul's and Old London Bridge | Antonio Joli | ca. 1745 |  |
 | `met_436183` | painting / european_landscape | Departure of the Amazons | Claude Déruet | 1620s |  |
 | `met_436830` | painting / european_landscape | A Panoramic Landscape with a Country Estate | Philips Koninck | ca. 1649 |  |
 | `met_436971` | painting / european_landscape | The Flood Gate | Emile van Marcke |  |  |
 | `met_435880` | painting / european_landscape | Rocks at Fontainebleau | Paul Cézanne | 1890s |  |
-| `met_72416` | painting / asian | Landscape | Watanabe Shikō 渡辺始興 | first half of the 18th century | dev |
+| `met_72416` | painting / asian | Landscape | Watanabe Shikō 渡辺始興 | first half of the 18th century |  |
 | `met_54318` | painting / asian | Kanjo (Court Lady) Seated, and a Tsurikoro Hanging near Her  | Totoya Hokkei | ca. 1825 |  |
-| `met_54196` | painting / asian | Snowy Landscape | Ishikawa Kazan | ca. 1820 |  |
+| `met_54196` | painting / asian | Snowy Landscape | Ishikawa Kazan | ca. 1820 | dev |
 | `met_54675` | painting / asian | Bird Catching Fish Among Reeds | Watanabe Seitei | ca. 1887 |  |
 | `met_48980` | painting / asian | Spring and Summer Flowers with Bamboo | unknown | 18th century |  |
 | `met_54224` | painting / asian | Print | Totoya Hokkei | 1780–1850 |  |
@@ -185,42 +189,40 @@ are not representative of modern photography; the paintings are mostly European;
 | `met_488126` | painting / other_art | "One Third of a Nation" | O. Louis Guglielmi | 1939 |  |
 | `met_485551` | painting / other_art | Self-Portrait | Umberto Boccioni | 1905 |  |
 | `met_488903` | painting / other_art | Jeanne Hébuterne | Amedeo Modigliani | 1919 |  |
-| `met_11718` | painting / other_art | Samuel Mifflin | Charles Willson Peale | 1777–80 | dev |
+| `met_11718` | painting / other_art | Samuel Mifflin | Charles Willson Peale | 1777–80 |  |
 | `met_701989` | painting / other_art | Emma Van Name | Joshua Johnson | ca. 1805 |  |
 | `met_11241` | painting / other_art | Augustus Washington Clason | John Wesley Jarvis | ca. 1820 |  |
-| `met_13102` | painting / other_art | Portrait of a Lady (Possibly of the Buloid Family) | Samuel Lovett Waldo | 1832 |  |
-| `met_283187` | photo / photo_portrait | [Senator and Mrs. James Henry Lane] | Brady & Co. | 1861–66 |  |
+| `met_13102` | painting / other_art | Portrait of a Lady (Possibly of the Buloid Family) | Samuel Lovett Waldo | 1832 | dev |
+| `met_283187` | photo / photo_portrait | [Senator and Mrs. James Henry Lane] | Brady & Co. | 1861–66 | dev |
 | `met_285903` | photo / photo_portrait | Portrait of His Daughter Reading | Louis-Désiré Blanquart-Évrard | ca. 1847 |  |
 | `met_261532` | photo / photo_portrait | Marie Stuart | Pierre-Louis Pierson | 1860s |  |
 | `met_263532` | photo / photo_portrait | [Performer in Bugaku-style Costume] | Unknown | 1880s |  |
 | `met_268534` | photo / photo_portrait | Cunningham, Beff, John Hamilton, Guthrie | Hill and Adamson | 1843–47 |  |
 | `met_261324` | photo / photo_portrait | Derelitta | Pierre-Louis Pierson | 1860s |  |
-| `met_268532` | photo / photo_portrait | Dr. Welsh | Hill and Adamson | 1843–47 | dev |
+| `met_268532` | photo / photo_portrait | Dr. Welsh | Hill and Adamson | 1843–47 |  |
 | `met_285608` | photo / photo_portrait | Scherzo di Follia | Pierre-Louis Pierson | 1861–67, printed ca. 1930 |  |
+| `met_286569` | photo / photo_portrait | Omar Pasha | Roger Fenton | 1855 |  |
 | `commons_guide_at_little_norway_blue_mounds_wis_lccn2017878934` | photo / photo_portrait | Guide at Little Norway, Blue Mounds, Wis. LCCN2017878934 | Arthur Rothstein | 1942-08 |  |
-| `commons_gus_worke_a_farmer_who_came_from_germany_40_years_ago1a35004` | photo / photo_portrait | Gus Worke, a farmer who came from Germany 40 years ago1a3500 | Charles Fenno Jacobs | May 1942 |  |
-| `commons_emperor_goose_on_nest` | photo / photo_animal | Emperor Goose on nest | Tim Bowman, USFWS | 2004-06-02 |  |
-| `commons_white_tailed_prairie_dog_at_arapaho_national_wildlife_refuge` | photo / photo_animal | White-tailed prairie dog at Arapaho National Wildlife Refuge | USFWS Mountain Prairie | 21 April 2022, 07:24:33 |  |
-| `commons_great_horned_owl_usfws` | photo / photo_animal | Great Horned Owl.USFWS | Stolz, Gary M. | Unknown date |  |
-| `commons_barred_owl_eating_53952104106` | photo / photo_animal | Barred owl eating (53952104106) | U.S. Fish and Wildlife Service - Midwest | 23 August 2024, 20:06:24 | dev |
-| `commons_cackling_goose_with_goslings_6902917950` | photo / photo_animal | Cackling goose with goslings (6902917950) | USFWSAlaska | 22 June 2010, 14:13:11 |  |
-| `commons_moose_in_river_animal_alces_americanus` | photo / photo_animal | Moose in river animal alces americanus | Govtaski David, U.S. Fish and Wildlife S | Not given
-
-Transferred by Fæ on 2013-02-25 |  |
-| `commons_oil_spill_mobile_briefings_oiled_bird_cleaning_071_immature` | photo / photo_animal | Oil spill Mobile - Briefings & Oiled Bird cleaning 071 immat | U.S. Fish and Wildlife Service Southeast | 2010-05-26 11:02 |  |
-| `commons_shulman_s_market_on_n_at_union_street_s_w_washington_d_c_lcc` | photo / photo_object | Shulman's market, on N at Union Street S.W., Washington, D.C | Louise Rosskam | between 1941 and 1942 |  |
-| `commons_russellllanodesanjuan` | photo / photo_object | RussellLLanodeSanJuan | Russell Lee | between July 1940 and October 1940 |  |
-| `commons_street_in_san_juan_1a34067v` | photo / photo_object | Street in San Juan 1a34067v | Jack Delano | 1941-12 |  |
-| `commons_malaria_poster_in_small_hotel_1a34060v` | photo / photo_object | Malaria poster in small hotel 1a34060v | Jack Delano | December 1941 | dev |
+| `commons_fox_squirrell_51384470246` | photo / photo_animal | Fox Squirrell (51384470246) | USFWS Mountain Prairie | 10 June 2021, 12:04:26 |  |
+| `commons_dehydrated_key_deer_36952540200` | photo / photo_animal | Dehydrated key deer (36952540200) | U.S. Fish and Wildlife Service Southeast | 2017-09-20 13:24 |  |
+| `commons_trumpeter_swan_at_seedskadee_national_wildlife_refuge_497247` | photo / photo_animal | Trumpeter swan at Seedskadee National Wildlife Refuge (49724 | USFWS Mountain Prairie | 18 March 2020, 16:16:59 |  |
+| `commons_short_eared_owl_at_funk_waterfowl_production_area_4100881413` | photo / photo_animal | Short-eared Owl at Funk Waterfowl Production Area (410088141 | USFWS Mountain Prairie | 28 December 2017, 13:23:34 |  |
+| `commons_ruddy_duck_scott_somershoe_49717209451` | photo / photo_animal | Ruddy Duck, Scott Somershoe (49717209451) | USFWS Mountain Prairie | 25 October 2019, 09:16:35 | dev |
+| `commons_white_tailed_deer_53627568015` | photo / photo_animal | White-tailed deer (53627568015) | U.S. Fish and Wildlife Service - Midwest | 29 March 2024, 19:10:07 |  |
+| `commons_wild_turkey_52870186395` | photo / photo_animal | Wild turkey (52870186395) | U.S. Fish and Wildlife Service - Midwest | 4 May 2023, 08:53:37 |  |
 | `commons_harrowing_a_field_with_a_diesel_tractor_seabrook_farm_bridge` | photo / photo_object | Harrowing a field with a diesel tractor, Seabrook Farm, Brid | Collier, John, Jr., 1913-1992, photograp | 1942-06 |  |
+| `commons_street_in_san_juan_1a34067v` | photo / photo_object | Street in San Juan 1a34067v | Jack Delano | 1941-12 |  |
+| `commons_door_and_window_in_a_spanish_american_home_1a34162v` | photo / photo_object | Door and window in a Spanish-American home 1a34162v | Russell Lee | July 1940 |  |
+| `commons_laundry_barbershop_and_stores_washington_d_c_1a34426v` | photo / photo_object | [Laundry, barbershop and stores, Washington, D.C.?] | Louise Rosskam | between 1941 and 1942 |  |
+| `commons_russellllanodesanjuan` | photo / photo_object | RussellLLanodeSanJuan | Russell Lee | between July 1940 and October 1940 |  |
 | `commons_seed_and_feed_store_lincoln_nebraska1a34278v` | photo / photo_object | Seed and feed store, Lincoln Nebraska | John Vachon | 1942 |  |
-| `commons_scrap_and_salvage_depot_butte_montana1a35034v` | photo / photo_scene | Scrap and salvage depot, Butte, Montana1a35034v | Russell Lee | October 1942 |  |
-| `commons_palm_trees_along_the_road_vicinity_of_christiansted1a34000v` | photo / photo_scene | Palm trees along the road, vicinity of Christiansted1a34000v | Jack Delano | December 1941 |  |
+| `commons_near_white_plains_ga_lccn2017877524` | photo / photo_scene | Near White Plains, Ga. LCCN2017877524 | Jack Delano | 1941 |  |
+| `commons_a_street_in_a_town_of_the_virgin_islands1a33999v` | photo / photo_scene | A street in a town of the Virgin Islands, Christiansted, Sai | Jack Delano | December 1941 |  |
+| `commons_scrap_and_salvage_depot_butte_mont_lccn2017878813` | photo / photo_scene | Scrap and salvage depot, Butte, Mont. LCCN2017878813 | Russell Lee | 1942-10 |  |
+| `commons_russell_lee_street_corner_dillon_montana` | photo / photo_scene | Russell Lee street corner Dillon Montana | Russell Lee | 1942-08 |  |
+| `commons_the_greensboro_lumber_co_greensboro_ga_lccn2017877531` | photo / photo_scene | The Greensboro Lumber Co., Greensboro, Ga. LCCN2017877531 | Jack Delano | 1941-06 |  |
 | `commons_traffic_at_5_30_on_second_avenue_detroit_mich_lccn2017878611` | photo / photo_scene | Traffic at 5-30 on Second Avenue, Detroit, Mich. LCCN2017878 | Arthur S. Siegel | 1942-07 |  |
-| `commons_shasta_dam_under_construction_1a34231v` | photo / photo_scene | Shasta dam under construction,1a34231v | Russell Lee | June 1942 |  |
-| `commons_cultivating_tobacco_1a34077v` | photo / photo_scene | Cultivating tobacco 1a34077v | Jack Delano | December 1941 |  |
-| `commons_first_snow_of_the_season_in_the_foothills_of_the_little_belt` | photo / photo_scene | First snow of the season in the foothills of the Little Belt | Russell Lee | 1942-08 |  |
-| `commons_landscape_northeast_utah1a34285v` | photo / photo_scene | Landscape, Northeast Utah1a34285v | John Vachon | April 1942 |  |
+| `commons_landscape_northeast_utah1a34285v` | photo / photo_scene | Landscape, Northeast Utah1a34285v | John Vachon | April 1942 | dev |
 | `sdxl_00` | sdxl / sdxl_portrait | a studio portrait photograph of an elderly fisherman with a  | Stable Diffusion XL base 1.0 (own genera |  |  |
 | `sdxl_01` | sdxl / sdxl_portrait | a close-up photograph of a smiling young woman with freckles | Stable Diffusion XL base 1.0 (own genera |  |  |
 | `sdxl_02` | sdxl / sdxl_portrait | a portrait photograph of a child in a yellow raincoat lookin | Stable Diffusion XL base 1.0 (own genera |  |  |
