@@ -7,7 +7,6 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 024 [T-024] Eval set curation, Met CC0 + CC0 photos + SDXL, dev split (M3)
 - [ ] 025 [T-025] Evaluation saliency maps, InSPyReNet + spectral residual (M3)
 - [ ] 026 [T-026] Evaluation harness: metrics, anytime AUC, SW-LPIPS, stats (M3)
 - [ ] 027 [T-027] Renderer bounding-box rasterization speed-up (M3)
@@ -22,6 +21,7 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
+- [~] 034 [T-034] Finish eval-set curation: review fixes + systematic audit (M3)
 
 ## Fait
 - [x] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2) (a9b1f8f)
@@ -49,3 +49,4 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [x] 001 [T-001] Project scaffold, pinned environment, config system, CI, M1 plan (e3b6324)
 
 ## Bloqué
+- [!] 024 [T-024] Eval set curation — 3 KO (regex FWS mort, bordures film, enfant identifiable) ; repris par T-034
