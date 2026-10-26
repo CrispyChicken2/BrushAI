@@ -451,3 +451,15 @@ Review round 3 found three more defects after two rounds of reactive fixes, so t
 
 Affected runs: none. The curation replay and the fetch from scratch reproduce the set.
 
+### 2026-10-26 (T-025, evaluation saliency maps, before any method run)
+
+Realization of section 4; nothing in the metric changes, the measured facts are recorded.
+
+1. **Model and pins.** InSPyReNet SwinB trained on DUTS-TR, code at commit `692ad8a5` (MIT, 15 files pinned by SHA-256), checkpoint SHA-256 `6a352536...faee` (367,526,592 bytes, 90.7 M parameters), `configs/eval/saliency.yaml`. The checkpoint comes from the Google Drive file of the model zoo (the OneDrive mirror answers 403). **No licence is stated for the checkpoint** (README, model zoo, LICENSE checked on 2026-10-26): it is fetched, never committed or redistributed, and used only as a measuring instrument; this is the same status as the Paint Transformer weights.
+2. **Maps.** Float32 `(512, 512)`, in [0, 1] as returned by the model, no re-scaling. A 512 px target is below the model's pyramid threshold (512), so the model sees the 384 px bilinear resize (ImageNet mean and std), returns its own min-max normalized map, which is resized to 512 with `align_corners=True` (the `run/Inference.py` path of the pinned commit); TF32 is off. The control, the spectral residual, is computed on the 64 x 64 greyscale image (3 x 3 local average of the log spectrum, Gaussian sigma 8, bilinear resize, min-max), and is zero on a flat image. Both are functions of the target only.
+3. **Measured (RTX 5070, 100 images).** InSPyReNet: 95.5 ms per image, peak VRAM 692 MB allocated / 830 MB reserved (the estimate was under 3 GB); spectral residual: 6.6 ms per image on the CPU. The maps are **bitwise deterministic**: a recomputation reproduces the recorded SHA-256 of all 200 maps and two runs of the model give identical bytes. The mean value of the map is 0.30 / 0.25 / 0.29 for InSPyReNet on paintings / photographs / SDXL, 0.36 to 0.37 for the control; the two maps correlate at 0.32 to 0.35 on average, so the control is a genuinely different, much blurrier map: a SW-LPIPS claim that keeps its sign with both is robust, as section 4.2 requires.
+4. **Circularity rule enforced.** `tests/test_circularity.py` fails if any method package (baselines, contribution, renderer, stroke_model, animation, generation, utils) or any script other than the two saliency scripts mentions InSPyReNet or `brushstroke.eval.saliency`. The M4 plan must name a different model (Segment Anything family, a U2-Net-type network, or a lightweight net trained by us).
+5. **Known property of the control.** A spectral-residual map can put its peak on the border of the image (the transform is periodic) for a lone object on a flat background or next to the border; it is a control judged by sign agreement, not a second evaluator.
+
+Affected runs: none.
+

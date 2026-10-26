@@ -1,7 +1,8 @@
-"""The circularity rule of the evaluation protocol (docs/design/evaluation.md 4.2), on the code base.
+"""The circularity rule of the evaluation protocol (docs/design/evaluation.md 4.2).
 
-The evaluation saliency model (InSPyReNet) may only be used by the evaluation code and its scripts, never by the
-method, the renderer, the stroke models, the contribution (M4) or the animation."""
+The evaluation saliency model (InSPyReNet) may only be used by the evaluation code and its
+scripts, never by the method, the renderer, the stroke models, the contribution (M4)
+or the animation."""
 
 from __future__ import annotations
 
