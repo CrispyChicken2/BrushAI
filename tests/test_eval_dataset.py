@@ -246,8 +246,10 @@ def test_fetch_verifies_checksums_and_prepares_the_image(tmp_path: Path) -> None
     )
     assert fetch.fetch_one(im, tmp_path, None) == "ok"
     assert np.array_equal(np.asarray(Image.open(tmp_path / "prepared" / "t1.png")), pixels)
-    im.sha256 = "0" * 64
-    assert "MISMATCH" in fetch.fetch_one(im, tmp_path, None)
+    im.sha256 = (
+        "0" * 64
+    )  # the bytes changed but the decoded pixels did not (a re-encoded museum file)
+    assert fetch.fetch_one(im, tmp_path, None).startswith("ok (file bytes differ")
     im.sha256 = ds.sha256_file(path)
     im.prepared_sha256 = "0" * 64
     assert "prepared" in fetch.fetch_one(im, tmp_path, None)

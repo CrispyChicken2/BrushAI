@@ -200,8 +200,8 @@ def dump_manifest(path: Path, header: dict[str, Any], images: Sequence[EvalImage
     entries = []
     for im in images:
         d = {k: getattr(im, k) for k in EvalImage.__dataclass_fields__ if k != "extra"}
-        keep = ("id", "category", "stratum", "source", "dev", "licence", "retrieved")
-        keep += ("sha256", "prepared_sha256")
+        keep = {"id", "category", "stratum", "source", "dev", "licence", "retrieved"}
+        keep |= {"sha256", "prepared_sha256"}
         d = {k: v for k, v in d.items() if v not in ("", None) or k in keep}
         d.update(im.extra)
         entries.append(d)

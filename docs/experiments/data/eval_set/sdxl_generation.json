@@ -1,0 +1,163 @@
+{
+ "images": {
+  "sdxl_00": {
+   "seconds": 39.27,
+   "status": "recorded",
+   "seed": 0
+  },
+  "sdxl_01": {
+   "seconds": 33.12,
+   "status": "recorded",
+   "seed": 1
+  },
+  "sdxl_02": {
+   "seconds": 31.96,
+   "status": "recorded",
+   "seed": 2
+  },
+  "sdxl_03": {
+   "seconds": 31.84,
+   "status": "recorded",
+   "seed": 3
+  },
+  "sdxl_04": {
+   "seconds": 31.53,
+   "status": "recorded",
+   "seed": 4
+  },
+  "sdxl_05": {
+   "seconds": 31.43,
+   "status": "recorded",
+   "seed": 5
+  },
+  "sdxl_06": {
+   "seconds": 31.76,
+   "status": "recorded",
+   "seed": 6
+  },
+  "sdxl_07": {
+   "seconds": 31.68,
+   "status": "recorded",
+   "seed": 7
+  },
+  "sdxl_08": {
+   "seconds": 31.67,
+   "status": "recorded",
+   "seed": 8
+  },
+  "sdxl_09": {
+   "seconds": 31.57,
+   "status": "recorded",
+   "seed": 9
+  },
+  "sdxl_10": {
+   "seconds": 31.59,
+   "status": "recorded",
+   "seed": 10
+  },
+  "sdxl_11": {
+   "seconds": 32.03,
+   "status": "recorded",
+   "seed": 11
+  },
+  "sdxl_12": {
+   "seconds": 32.21,
+   "status": "recorded",
+   "seed": 12
+  },
+  "sdxl_13": {
+   "seconds": 32.11,
+   "status": "recorded",
+   "seed": 13
+  },
+  "sdxl_14": {
+   "seconds": 32.07,
+   "status": "recorded",
+   "seed": 14
+  },
+  "sdxl_15": {
+   "seconds": 31.57,
+   "status": "recorded",
+   "seed": 15
+  },
+  "sdxl_16": {
+   "seconds": 31.57,
+   "status": "recorded",
+   "seed": 16
+  },
+  "sdxl_17": {
+   "seconds": 31.86,
+   "status": "recorded",
+   "seed": 17
+  },
+  "sdxl_18": {
+   "seconds": 31.78,
+   "status": "recorded",
+   "seed": 18
+  },
+  "sdxl_19": {
+   "seconds": 31.82,
+   "status": "recorded",
+   "seed": 19
+  },
+  "sdxl_20": {
+   "seconds": 31.47,
+   "status": "recorded",
+   "seed": 20
+  },
+  "sdxl_21": {
+   "seconds": 31.78,
+   "status": "recorded",
+   "seed": 21
+  },
+  "sdxl_22": {
+   "seconds": 32.04,
+   "status": "recorded",
+   "seed": 22
+  },
+  "sdxl_23": {
+   "seconds": 31.74,
+   "status": "recorded",
+   "seed": 23
+  },
+  "sdxl_24": {
+   "seconds": 31.57,
+   "status": "recorded",
+   "seed": 24
+  },
+  "sdxl_25": {
+   "seconds": 31.72,
+   "status": "recorded",
+   "seed": 25
+  },
+  "sdxl_26": {
+   "seconds": 31.28,
+   "status": "recorded",
+   "seed": 26
+  },
+  "sdxl_27": {
+   "seconds": 31.68,
+   "status": "recorded",
+   "seed": 27
+  },
+  "sdxl_28": {
+   "seconds": 31.51,
+   "status": "recorded",
+   "seed": 28
+  },
+  "sdxl_29": {
+   "seconds": 31.66,
+   "status": "recorded",
+   "seed": 29
+  }
+ },
+ "peak_vram_allocated_mb": 5335,
+ "peak_vram_reserved_mb": 7484,
+ "versions": {
+  "torch": "2.11.0+cu128",
+  "diffusers": "0.42.0",
+  "transformers": "5.20.2",
+  "device": "NVIDIA GeForce RTX 5070"
+ },
+ "mean_seconds": 32.03
+}

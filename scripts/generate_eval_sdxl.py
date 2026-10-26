@@ -144,7 +144,7 @@ def main(argv: list[str] | None = None) -> None:
     import diffusers
     import transformers
 
-    record["versions"] = {"torch": torch.__version__, "diffusers": diffusers.__version__, "transformers": transformers.__version__, "device": torch.cuda.get_device_name(0)}  # fmt: skip
+    record["versions"] = {"torch": str(torch.__version__), "diffusers": str(diffusers.__version__), "transformers": str(transformers.__version__), "device": torch.cuda.get_device_name(0)}  # fmt: skip
     record["mean_seconds"] = round(
         float(np.mean([v["seconds"] for v in record["images"].values()])), 2
     )

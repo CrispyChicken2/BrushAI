@@ -18,6 +18,11 @@ sdxl:
   negative_prompt: null
   refiner: false
   seed_rule: torch.Generator('cpu').manual_seed(prompt index)
+  versions:
+    torch: 2.11.0+cu128
+    diffusers: 0.42.0
+    transformers: 5.20.2
+    device: NVIDIA GeForce RTX 5070
 images:
 - id: met_695496
   category: painting
@@ -1734,9 +1739,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 01be48462b99fe45b454232c20a1029f9875a18e92dd0e53f23cf348f8e8f2e8
+  prepared_sha256: 049054dd756cf024956cfb1d50ba3c2e9335b8e173c6f6151b1dbe72a9de2473
   title: a studio portrait photograph of an elderly fisherman with a white beard, soft window light, shallow depth of field
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1751,9 +1756,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: dd090263fe47b8af4012e40c07559d1e775c8ad8274a4d68a0e8add814992b99
+  prepared_sha256: 82a61a18f0c1d5b26c19b642d0dd71a0c7b68e625d5b9ac2736d6ff7f4398fa2
   title: a close-up photograph of a smiling young woman with freckles and curly red hair, outdoors in overcast light
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1768,9 +1773,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 449f462f230305e8614842074f4fbfe6e81fb47078cea54b4bbecc15de62335b
+  prepared_sha256: 9e8beb155b808c22cac19732157d3478783c4ee76eeb9cd33134bc74726ac88f
   title: a portrait photograph of a child in a yellow raincoat looking at the camera, city street in the background
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1785,9 +1790,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: fedfb8d39334291a66b7c7e171879dabcaf07ec7c64c11abdb9b5795bac42899
+  prepared_sha256: 8d81d40e9305847f55c342f9f5b53669e25b27228bd127ee2ea8f20f22802557
   title: a photograph of a middle-aged man wearing glasses and a green scarf, three-quarter view, warm evening light
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1802,9 +1807,9 @@ images:
   source: sdxl
   dev: true
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 45f7348ec63f4ba242006545c5f654b9f5614c5d177ba8895dab71177a4000f7
+  prepared_sha256: d618dfa2c30b4e4de5d4eeefadb05d08c4c7ad0d88604903478eb85b3939083c
   title: a candid photograph of two musicians laughing together on a street corner
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1819,9 +1824,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 87025d5d4de912816a2d14a6f0d1b948be0e1aff0fc8d9b019f945fca6a3dd51
+  prepared_sha256: 370333a34a24267f1029abb651c512fb885fb2a34204a69e37af687272b28bc6
   title: an oil painting of a young woman in a blue dress seated by a window, visible brush strokes, classical portrait
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -1836,9 +1841,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: e2aab053d9da0c8c40f2bde90cb32cf6ec58fd18ce605c7b95ac7c1abaedf184
+  prepared_sha256: d6d4e8912c10d02c471789d0a74053467c3ca955ba57eaf688fd238dbcba699b
   title: an impressionist oil painting of an old sailor smoking a pipe, thick brush strokes
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -1853,9 +1858,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: c816e7b950779756646afec58f53c99c46c140e25d4c99038b7a6dff2f593792
+  prepared_sha256: 469a403d4112ca58b4a6dcdaf179de0920f0029865ca5bb8211738e15c1e94c4
   title: a baroque oil painting portrait of a nobleman with a lace collar, dark background, dramatic lighting
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -1870,9 +1875,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 76df7ba935bed7e27863e81f464466334e7160a9b4351e7fe9340aee3b5ec237
+  prepared_sha256: 6ee857f9d73e6ba769a8d9c1849051463f12d4a4afa56c5dbcfc8cde14a87bcd
   title: a watercolor and gouache portrait of a girl with a red ribbon in her hair
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -1887,9 +1892,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 768cca838b37c444175228eb987d5ed5cb6d03206cc4cedee00ab38e6f96d7a6
+  prepared_sha256: bb80240f8e4d9ad4f7c5d2f6864b7025fc9e3b8497800627482384f80c1cf4d4
   title: an expressionist oil painting of a laughing woman with bold colors and a turquoise background
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -1904,9 +1909,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: a5597538d74852a907388303820d3a1eea6ee4b407db536796646e6c26375f42
+  prepared_sha256: f9da8d1b3172837a7e0e850781bdd55a4c1e6a2a4318c7ff31378587d10bd9de
   title: a photograph of a mountain lake at sunrise with mist and pine trees
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1921,9 +1926,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 106c4cddd8ff26c3412e824dab4e4ab0c2a8066ed3c4a7e2ae5a6756570acd54
+  prepared_sha256: eab813cb89464b86258088b01cdc113113ad65496296b1e35b1e1745737b5aad
   title: a photograph of a narrow cobblestone street in an old European town after rain
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1938,9 +1943,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 92f1fea967665abafd99467b358736590c44f03d0ef2bbc1290baa07a580d145
+  prepared_sha256: 63b606164f16479b3a80d6fd976f9e67f2aec3f60c9b4bbc607c07b6509ca392
   title: a photograph of a lighthouse on a rocky coast under a stormy sky
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1955,9 +1960,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: ac1e36ed3f7c773207ad413a141435c79b6d85cee31fb57f0427361d01de2d80
+  prepared_sha256: b01c6beec20b7eec4ddbc048a1c09579c41fce117c24e03ee5c73301a4c2d77c
   title: a photograph of a wheat field with a lone tree at golden hour
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1972,9 +1977,9 @@ images:
   source: sdxl
   dev: true
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 2d4649a7deceb20e6520ae2e2ebdc73d8b05a11b84a52370a0a4e1b7d6682c9a
+  prepared_sha256: ea5e0d178db0e418b6e540a7fe5312360c5c228e635c093f335964f37f56c7f9
   title: a photograph of a busy harbor with colorful fishing boats in the morning
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -1989,9 +1994,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 7cc7806dfcf658c39f8d8d6e76fe9571f9f3db872001ae0c7daed5f6f1b652ec
+  prepared_sha256: dac1ad898a81ee84be95a99dff57d099f88e48ea4a2b027d80af24d7967356a2
   title: an impressionist oil painting of a river with water lilies and a small wooden bridge
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2006,9 +2011,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: cfcbeb3aab6ca72593671843e4572d19feb19bac3eb49932a349d204b67387fe
+  prepared_sha256: 516b28ec60c3a0eb916a987f67a59e1a3d8ef6ff6e692c7c203995b0f478199f
   title: an oil painting of a snow covered village at dusk with lit windows, thick impasto
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2023,9 +2028,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 49d236718882c14a343537f2a54f9e0d492db9929f858cdd1f0b45ea2efda100
+  prepared_sha256: 6ea0a797f12a34136727231518d85ea6615ef2dd97f9fe2082f8f573d8803b08
   title: a romantic landscape painting of a ship in a stormy sea with dramatic clouds
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2040,9 +2045,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 47d15b0a4b923b016c258941c7c9f40a2efc99241f2fb878925d74398cd1c2a1
+  prepared_sha256: 7a35b51e3e395d00a3ee2f52846f101eaea2afd5330ae23bd59d664145db9225
   title: a post-impressionist painting of a sunflower field under a swirling blue sky
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2057,9 +2062,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 11745aff679ff6b5fd1501930aa1975add3a752b15320db25b534f0ff41ec891
+  prepared_sha256: f7e04a9d02749ea3f8e2f2d5bec7969220e44c54c2b17a1063694f3dfa284716
   title: a Japanese woodblock print style image of large waves and a distant mountain
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2074,9 +2079,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 5f64502d1cb52cbff1af6df9f6bedf7634f9bb718c4f4df75a0b2a53e7a8e321
+  prepared_sha256: ad7a8ea47362cc27dc2b643b8e64b767516aacfe162cbdd74d053e9a970d99b4
   title: a photograph of a red fox sitting in the snow looking at the camera
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -2091,9 +2096,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 06bfc905de3408280910311c188c06f6a3d28d5498186b8ccedeb351ecd6a9a3
+  prepared_sha256: 0c09b490b6d272753a0b55e86e270b6148b0df6d90354f8310054fa28667c923
   title: a photograph of a bowl of ripe peaches on a wooden table, soft light
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -2108,9 +2113,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 0393aa16f4483ec912044a1137291dd17e7761990fd85474d7c0d822093f5dbe
+  prepared_sha256: d87ed01b86115e93a9d67c6a5178b5b877ede8876f91b359214197314ed93260
   title: a photograph of a vintage bicycle leaning against a blue wall
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -2125,9 +2130,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: e5172bff16ec8ff4ad6a1c81c046f34ebdc5262c19784c96560f17f0667e9921
+  prepared_sha256: 3f6816eed0f534c3323f66b79d2cfd300dca0e322660e456970bb7eb54ca0e16
   title: a photograph of a ceramic teapot and two cups on a linen cloth
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -2142,9 +2147,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 184e094f99d0aa977a990b90e651a7fb2fd6f15c4365cdb247a92065d6a0b21c
+  prepared_sha256: 9e74bbacc2175b3015455eac97a555a0da3c9d14fbd6e20bab3ac0b184eaa6e6
   title: a photograph of a horse standing in a misty meadow
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: photographic
@@ -2159,9 +2164,9 @@ images:
   source: sdxl
   dev: true
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 93e7b010ef83c88c501b2dbebc458dd1d61dc514a690d2beef4ef45f083c958f
+  prepared_sha256: 2c681f918042d4972f4c1394e731b7fdf1d9b92b7e809c7f3805b08edc574e0a
   title: a still life oil painting of a vase of flowers, lemons and a glass of wine, Dutch golden age style
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2176,9 +2181,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 37324ec3b05a6f1567afd91f25aa53b4eefb6e7a68b0ab73df3bb112998f8e03
+  prepared_sha256: 3d2747eb37f3b2ce8dae7658727fed167842409bcdadf9d329d33af49a2599ee
   title: an oil painting of a white cat sleeping on a velvet cushion
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2193,9 +2198,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: f265d33e10d15615a598ab5d1cba0bac551bdbf36698422538eb6ab1de8cb079
+  prepared_sha256: f4cbc8293fc2eb5c797561b7921e586875eb8d21d06106090838d2ec7afff587
   title: a gouache painting of a rooster with colorful feathers
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2210,9 +2215,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: 07ef048e4fa7383e70ef93ffad96382c3fa5c86595a3fd25d2098deb77a46cd1
+  prepared_sha256: 9baef074c81b0b520581c0dec7aa712f776e962ba2bcb171f96f34a5ad43ac28
   title: an oil painting of a bowl of cherries and a silver spoon on a dark table
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted
@@ -2227,9 +2232,9 @@ images:
   source: sdxl
   dev: false
   licence: CC0 1.0 (own-generated, SDXL output)
-  retrieved: ''
-  sha256: ''
-  prepared_sha256: ''
+  retrieved: '2026-10-26'
+  sha256: a65b379d1e3e74ecc0571b20ba48eaed58e36cc9b1042dc4a6186b1a681c7adf
+  prepared_sha256: aca9ec44ce89534e6846edc0d853950363f796d0d835feb205b61e995236f876
   title: a charcoal and oil sketch of a horse running in a field
   author: Stable Diffusion XL base 1.0 (own generation)
   subtype: painted

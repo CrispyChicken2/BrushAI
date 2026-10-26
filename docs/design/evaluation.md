@@ -392,4 +392,21 @@ LPIPS-Alex of a black/white canvas against the target 0.77 to 1.115 (all six max
 - The Metropolitan Museum of Art, *Open Access* and *Collection API* documentation, <https://metmuseum.github.io/> (CC0; accessed 2026-10-25).
 
 ## Amendments
-None yet.
+### 2026-10-26 (T-024, before any method run): realization of section 1
+
+No test-set number exists yet, so none of these is *post hoc*. What changed, and why:
+
+1. **Photograph sources (1.1, 1.2.5).** 8 of the 10 portraits are Met Open Access photographs (CC0, nineteenth century, monochrome or sepia;
+   they use 8 of the at most 10 greyscale photographs of 1.3), the 22 other photographs are Wikimedia Commons files with a public-domain tag from US
+   federal collections (Library of Congress FSA/OWI Kodachrome slides, US Fish and Wildlife Service, one Prokudin-Gorsky plate). Reason: a
+   colour portrait pool of enough clear faces was not available under a machine-readable licence. Sub-strata of the 20 other photographs: 7 animals, 6 objects, 7 scenes. Smithsonian Open Access is not used.
+2. **Border trimming (1.3).** Uniform black film or mat borders are cut by a mechanical rule (near-black flat rows/columns, scanned inward over at most a
+   quarter of the side; for scanned slides a row with 90 % of its pixels below 40), recorded as a `crop_box` in the manifest; the trimmed square must be at least 640 px (the 768 px floor stays the rule for
+   the untrimmed source). Reason: the dark film-holder edges of the slides would otherwise count as a frame over 5 % of the area.
+3. **Resize filter (1.3).** The box (area) filter of Pillow, not `center_crop_resize` (bicubic with antialiasing): it is the "area" filter
+   of the protocol and does not depend on the torch version, which keeps the SHA-256 of the prepared pixels stable.
+4. **Text rule (1.2.3).** Applied to captions, labels, watermarks and overlays. Inscriptions that are part of an East Asian painting or print are kept below a third of the area (one album leaf of calligraphy was rejected).
+5. **Asian and "other" strata.** 4 paintings + 4 woodblock prints; 4 Modern Art + 4 American Wing paintings (the American Wing has an empty classification: `objectName = Painting`).
+6. **Verification by pixels.** A source file whose bytes changed but whose decoded prepared pixels are identical passes (two Met files were re-encoded within a day); a pixel mismatch fails.
+
+Affected runs: none (the set did not exist). Record of the check against the tuning images: `docs/experiments/data/eval_set/overlap_check.json`.

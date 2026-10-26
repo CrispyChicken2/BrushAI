@@ -1,0 +1,16 @@
+{
+ "tuning_images": [
+  "earth_apollo17",
+  "great_wave",
+  "kirkjufell",
+  "mona_lisa",
+  "pearl_earring",
+  "starry_night"
+ ],
+ "tuning_images_found": 6,
+ "images_checked": 100,
+ "max_thumbnail_correlation": 0.593,
+ "near_duplicates_of_tuning_images": {},
+ "excluded_met_objects_present": [],
+ "manifest_problems": []
+}

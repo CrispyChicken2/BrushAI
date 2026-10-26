@@ -47,16 +47,19 @@ def fetch_one(im: EvalImage, out: Path, http: Http | None) -> str:
             return "missing"
         src.parent.mkdir(parents=True, exist_ok=True)
         src.write_bytes(http.get(im.url))
-    if sha256_file(src) != im.sha256:
-        return "SHA-256 MISMATCH (source file)"
     with Image.open(src) as pil:
         pixels = prepare_image(pil, im.crop_box)
+    same_bytes = sha256_file(src) == im.sha256
     if pixel_sha256(pixels) != im.prepared_sha256:
-        return "SHA-256 MISMATCH (prepared pixels)"
+        return "SHA-256 MISMATCH (prepared pixels)" + ("" if same_bytes else " and source file")
+    # A museum can re-encode a file (metadata, container) without changing a pixel: the pixels decide.
+    status = (
+        "ok" if same_bytes else "ok (file bytes differ from the manifest, decoded pixels identical)"
+    )
     dest = out / "prepared" / f"{im.id}.png"
     dest.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(pixels).save(dest)
-    return "ok"
+    return status
 
 
 def verify_sdxl(im: EvalImage, out: Path) -> str:
@@ -93,7 +96,7 @@ def main(argv: list[str] | None = None) -> None:
         status = (
             verify_sdxl(im, args.out) if im.category == "sdxl" else fetch_one(im, args.out, http)
         )
-        bad += status != "ok"
+        bad += not status.startswith("ok")
         print(f"{im.id}: {status}")
     if args.sdxl and not args.check:
         subprocess.run(
