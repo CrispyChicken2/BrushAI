@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import ssl
 import time
@@ -37,7 +38,7 @@ class Http:
                     time.sleep(2.0 * 2**attempt)
                     continue
                 raise
-            except (urllib.error.URLError, TimeoutError):
+            except (urllib.error.URLError, http.client.HTTPException, OSError):
                 if attempt == retries - 1:
                     raise
                 time.sleep(2.0 * 2**attempt)
