@@ -1,0 +1,7 @@
+# Generation dependencies (SDXL evaluation images, T-024; the M5 front-end reuses them). Direct only, on top of requirements.txt.
+# Versions used to generate and verify the 30 SDXL images of the evaluation set (docs/data_sources.md).
+diffusers==0.42.0
+transformers==5.20.2
+accelerate==1.15.0
+safetensors==0.8.0
+huggingface_hub==2.3.0
