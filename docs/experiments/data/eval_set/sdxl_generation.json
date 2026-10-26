@@ -1,153 +1,153 @@
 {
  "images": {
   "sdxl_00": {
-   "seconds": 39.27,
-   "status": "recorded",
+   "seconds": 37.86,
+   "status": "verified",
    "seed": 0
   },
   "sdxl_01": {
-   "seconds": 33.12,
-   "status": "recorded",
+   "seconds": 33.01,
+   "status": "verified",
    "seed": 1
   },
   "sdxl_02": {
-   "seconds": 31.96,
-   "status": "recorded",
+   "seconds": 31.92,
+   "status": "verified",
    "seed": 2
   },
   "sdxl_03": {
-   "seconds": 31.84,
-   "status": "recorded",
+   "seconds": 31.47,
+   "status": "verified",
    "seed": 3
   },
   "sdxl_04": {
-   "seconds": 31.53,
-   "status": "recorded",
+   "seconds": 31.79,
+   "status": "verified",
    "seed": 4
   },
   "sdxl_05": {
-   "seconds": 31.43,
-   "status": "recorded",
+   "seconds": 31.99,
+   "status": "verified",
    "seed": 5
   },
   "sdxl_06": {
-   "seconds": 31.76,
-   "status": "recorded",
+   "seconds": 32.0,
+   "status": "verified",
    "seed": 6
   },
   "sdxl_07": {
-   "seconds": 31.68,
-   "status": "recorded",
+   "seconds": 32.07,
+   "status": "verified",
    "seed": 7
   },
   "sdxl_08": {
-   "seconds": 31.67,
-   "status": "recorded",
+   "seconds": 31.84,
+   "status": "verified",
    "seed": 8
   },
   "sdxl_09": {
-   "seconds": 31.57,
-   "status": "recorded",
+   "seconds": 32.14,
+   "status": "verified",
    "seed": 9
   },
   "sdxl_10": {
-   "seconds": 31.59,
-   "status": "recorded",
+   "seconds": 31.93,
+   "status": "verified",
    "seed": 10
   },
   "sdxl_11": {
-   "seconds": 32.03,
-   "status": "recorded",
+   "seconds": 32.1,
+   "status": "verified",
    "seed": 11
   },
   "sdxl_12": {
-   "seconds": 32.21,
-   "status": "recorded",
+   "seconds": 31.92,
+   "status": "verified",
    "seed": 12
   },
   "sdxl_13": {
-   "seconds": 32.11,
-   "status": "recorded",
+   "seconds": 31.79,
+   "status": "verified",
    "seed": 13
   },
   "sdxl_14": {
-   "seconds": 32.07,
-   "status": "recorded",
+   "seconds": 31.71,
+   "status": "verified",
    "seed": 14
   },
   "sdxl_15": {
-   "seconds": 31.57,
-   "status": "recorded",
+   "seconds": 31.87,
+   "status": "verified",
    "seed": 15
   },
   "sdxl_16": {
-   "seconds": 31.57,
-   "status": "recorded",
+   "seconds": 31.64,
+   "status": "verified",
    "seed": 16
   },
   "sdxl_17": {
-   "seconds": 31.86,
-   "status": "recorded",
+   "seconds": 31.57,
+   "status": "verified",
    "seed": 17
   },
   "sdxl_18": {
-   "seconds": 31.78,
-   "status": "recorded",
+   "seconds": 31.63,
+   "status": "verified",
    "seed": 18
   },
   "sdxl_19": {
-   "seconds": 31.82,
-   "status": "recorded",
+   "seconds": 31.76,
+   "status": "verified",
    "seed": 19
   },
   "sdxl_20": {
-   "seconds": 31.47,
-   "status": "recorded",
+   "seconds": 31.9,
+   "status": "verified",
    "seed": 20
   },
   "sdxl_21": {
-   "seconds": 31.78,
-   "status": "recorded",
+   "seconds": 31.64,
+   "status": "verified",
    "seed": 21
   },
   "sdxl_22": {
-   "seconds": 32.04,
-   "status": "recorded",
+   "seconds": 31.48,
+   "status": "verified",
    "seed": 22
   },
   "sdxl_23": {
-   "seconds": 31.74,
-   "status": "recorded",
+   "seconds": 31.85,
+   "status": "verified",
    "seed": 23
   },
   "sdxl_24": {
-   "seconds": 31.57,
-   "status": "recorded",
+   "seconds": 31.82,
+   "status": "verified",
    "seed": 24
   },
   "sdxl_25": {
-   "seconds": 31.72,
-   "status": "recorded",
+   "seconds": 31.58,
+   "status": "verified",
    "seed": 25
   },
   "sdxl_26": {
-   "seconds": 31.28,
-   "status": "recorded",
+   "seconds": 31.75,
+   "status": "verified",
    "seed": 26
   },
   "sdxl_27": {
-   "seconds": 31.68,
-   "status": "recorded",
+   "seconds": 31.58,
+   "status": "verified",
    "seed": 27
   },
   "sdxl_28": {
-   "seconds": 31.51,
-   "status": "recorded",
+   "seconds": 31.97,
+   "status": "verified",
    "seed": 28
   },
   "sdxl_29": {
-   "seconds": 31.66,
-   "status": "recorded",
+   "seconds": 31.65,
+   "status": "verified",
    "seed": 29
   }
  },
@@ -159,5 +159,5 @@
   "transformers": "5.20.2",
   "device": "NVIDIA GeForce RTX 5070"
  },
- "mean_seconds": 32.03
+ "mean_seconds": 32.04
 }
