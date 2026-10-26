@@ -601,6 +601,66 @@ def cmd_sheets(args: argparse.Namespace) -> None:
     print(f"sheets in {out}")
 
 
+def cmd_check(args: argparse.Namespace) -> None:
+    """No image of the set is, or looks like, an image used for tuning (T-009 sweep, M1/M2 demos)."""
+    from brushstroke.eval.dataset import validate_manifest
+
+    header, images = load_manifest(MANIFEST)
+    problems = validate_manifest(header, images)
+    tuning = tuning_thumbs()
+    worst: dict[str, float] = {}
+    for im in images:
+        path = RAW / "prepared" / f"{im.id}.png"
+        if not path.exists():
+            raise SystemExit(f"{path} is missing: run python -m scripts.fetch_eval_set first")
+        t = thumb(np.asarray(Image.open(path).convert("RGB")))
+        worst[im.id] = max((float((t * u).mean()) for u in tuning), default=0.0)
+    ids = {im.source_id for im in images if im.source == "met"}
+    excluded = sorted(str(i) for i in MET_EXCLUDED if str(i) in ids)
+    overlap = {k: round(v, 3) for k, v in worst.items() if v > 0.9}
+    report = {
+        "tuning_images": TUNING,
+        "tuning_images_found": len(tuning),
+        "images_checked": len(images),
+        "max_thumbnail_correlation": round(max(worst.values()), 3),
+        "near_duplicates_of_tuning_images": overlap,
+        "excluded_met_objects_present": excluded,
+        "manifest_problems": problems,
+    }
+    out = Path("docs/experiments/data/eval_set")
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "overlap_check.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
+    print(json.dumps(report, indent=1))
+    if overlap or excluded or problems:
+        raise SystemExit(1)
+
+
+def cmd_card(args: argparse.Namespace) -> None:
+    """Write the composition tables of the data card (block ``EVALSET`` of ``docs/data_sources.md``)."""
+    from collections import Counter
+
+    from scripts.pt_repro_common import write_block
+
+    _, images = load_manifest(MANIFEST)
+    count = Counter((i.category, i.stratum, i.licence) for i in images)
+    dev = Counter((i.category, i.stratum) for i in images if i.dev)
+    lines = ["| category | stratum | n | dev | licence |", "|---|---|---|---|---|"]
+    for (cat, stratum, lic), n in sorted(count.items()):
+        lines.append(f"| {cat} | {stratum} | {n} | {dev.get((cat, stratum), 0)} | {lic} |")
+    lines += [
+        "",
+        "| id | category / stratum | title | author | date | dev |",
+        "|---|---|---|---|---|---|",
+    ]
+    for i in images:
+        title = i.title.replace("|", "/")[:60]
+        lines.append(
+            f"| `{i.id}` | {i.category} / {i.stratum} | {title} | {i.author[:40].replace('|', '/')} | {i.date} | {'dev' if i.dev else ''} |"
+        )
+    write_block("EVALSET", chr(10).join(lines), Path("docs/data_sources.md"))
+    print(f"{len(images)} rows")
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
@@ -609,9 +669,13 @@ def main(argv: list[str] | None = None) -> None:
     c = sub.add_parser("curate")
     c.add_argument("--insecure", action="store_true", help="skip TLS certificate verification")
     sub.add_parser("sheets")
+    sub.add_parser("check")
+    sub.add_parser("card")
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]  # titles hold any script
-    {"curate": cmd_curate, "sheets": cmd_sheets}[args.stage](args)
+    {"curate": cmd_curate, "sheets": cmd_sheets, "check": cmd_check, "card": cmd_card}[args.stage](
+        args
+    )
 
 
 if __name__ == "__main__":
