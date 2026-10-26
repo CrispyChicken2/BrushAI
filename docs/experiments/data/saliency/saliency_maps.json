@@ -1,0 +1,1538 @@
+{
+ "model": {
+  "checkpoint_sha256": "6a35253650457b2d87d8704b08e19d90aef58da081456c18ac77cd357addfaee",
+  "code_commit": "692ad8a5774cf95ef615a730d5070aad18f6b160",
+  "config": "configs\\eval\\saliency.yaml"
+ },
+ "environment": {
+  "torch": "2.11.0+cu128",
+  "python": "3.11.9",
+  "device": "NVIDIA GeForce RTX 5070"
+ },
+ "cost": {
+  "inspyrenet_ms_per_image": 95.5,
+  "spectral_residual_ms_per_image": 6.6,
+  "inspyrenet_peak_vram_mb": 692,
+  "inspyrenet_peak_vram_reserved_mb": 830,
+  "model_parameters_million": 90.7
+ },
+ "by_category": {
+  "painting": {
+   "inspyrenet_mean": 0.303,
+   "spectral_residual_mean": 0.364,
+   "correlation_mean": 0.315
+  },
+  "photo": {
+   "inspyrenet_mean": 0.245,
+   "spectral_residual_mean": 0.366,
+   "correlation_mean": 0.335
+  },
+  "sdxl": {
+   "inspyrenet_mean": 0.292,
+   "spectral_residual_mean": 0.374,
+   "correlation_mean": 0.35
+  }
+ },
+ "images": {
+  "met_695496": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "769207107ef9e374b6f14cf941a066d3532282a2160db3f29749b8ca2af80ed5",
+    "mean": 0.6897,
+    "over_half": 0.6898
+   },
+   "spectral_residual": {
+    "sha256": "c08dd2f1d42bb16921109b1f21dc9da097cfbe3ac456da5943b9c99985c77473",
+    "mean": 0.1864,
+    "over_half": 0.0848
+   },
+   "correlation": 0.376
+  },
+  "met_435862": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "534d27dad079df3b7443361b0ce5d2923d8c9576999e229cf758f03d1e69fa3b",
+    "mean": 0.0154,
+    "over_half": 0.0119
+   },
+   "spectral_residual": {
+    "sha256": "cbd5d2c2b911afc4f9cf3126d936eeaac542e25c517eb72ffbaa323222459e2c",
+    "mean": 0.4897,
+    "over_half": 0.5606
+   },
+   "correlation": 0.066
+  },
+  "met_748947": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "3e9b3bd0dfc99885bbf460df6218fa746bff3c2d5bccc15f08d726faf3badf1a",
+    "mean": 0.5155,
+    "over_half": 0.5161
+   },
+   "spectral_residual": {
+    "sha256": "ad48a40da6ff29ab80bb2ab35d5078d60dd7791f53f85b7c33dc2ebce5d5dc63",
+    "mean": 0.3867,
+    "over_half": 0.3215
+   },
+   "correlation": 0.484
+  },
+  "met_436642": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "1674097748199a436f4e0797461f133c9763ac5414c7ceaaf87a7de6d694fc03",
+    "mean": 0.3902,
+    "over_half": 0.3879
+   },
+   "spectral_residual": {
+    "sha256": "d84c1bc8bc4660d03ac5a1501c1f19e3272693bf4fa3734d20f2ce1474a3170c",
+    "mean": 0.457,
+    "over_half": 0.4099
+   },
+   "correlation": 0.738
+  },
+  "met_436262": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "b78309ae496cf51da995d1f0d3b2160009de2bad0797e3565e22177be4493ba5",
+    "mean": 0.2924,
+    "over_half": 0.2823
+   },
+   "spectral_residual": {
+    "sha256": "91ddd1948028e2fc94d2021fee034920e06dec0a5cd52822822d8f8cbee6e172",
+    "mean": 0.3826,
+    "over_half": 0.2905
+   },
+   "correlation": 0.653
+  },
+  "met_439977": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "0f4dc4b96d45876c85bbcd39ac77f0e7bfdc5be0dc76381090a3016660082151",
+    "mean": 0.4204,
+    "over_half": 0.4203
+   },
+   "spectral_residual": {
+    "sha256": "f2b3bb7645c74ccd19b7b866cc36baf315362fbbfdf706035a0f18c2650eb836",
+    "mean": 0.3767,
+    "over_half": 0.311
+   },
+   "correlation": -0.145
+  },
+  "met_436496": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "3b8c2d140ab68d155752a2f1fd08ebe4aafc2a6b3b96a20560ca269b0c038e3a",
+    "mean": 0.3256,
+    "over_half": 0.328
+   },
+   "spectral_residual": {
+    "sha256": "c6c38b1abdd96a33d3e4a5c4cf309e410ad5febe682f9c628779e330130e5b18",
+    "mean": 0.4607,
+    "over_half": 0.5247
+   },
+   "correlation": -0.214
+  },
+  "met_437921": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "53cd59582b728d06c8527a97042109e9f466780a186869f1e020b6c8884f95de",
+    "mean": 0.474,
+    "over_half": 0.4737
+   },
+   "spectral_residual": {
+    "sha256": "e5756b5a71676e8c057cd06b0e184038bd754e4f9c726e89ad82b2aa5a43eae4",
+    "mean": 0.2762,
+    "over_half": 0.2085
+   },
+   "correlation": 0.515
+  },
+  "met_438545": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "c6c2c7059c7a9f69a8162852809b471c2072af918a0801d517b5cc896a1ab0f0",
+    "mean": 0.0429,
+    "over_half": 0.0382
+   },
+   "spectral_residual": {
+    "sha256": "707d66b61dab1fbdedf191d3964982763bd8bbf0bc0162af00401d4743e8a38e",
+    "mean": 0.3997,
+    "over_half": 0.4
+   },
+   "correlation": 0.269
+  },
+  "met_436616": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "d65bdd88c693cda4c30727eeb73703eceee682e60b8f8ce033f446f2e6417724",
+    "mean": 0.7319,
+    "over_half": 0.7505
+   },
+   "spectral_residual": {
+    "sha256": "0495e4f5c4368d7315427ec0cb032846fe55ae22f220503e0919f089bc21e6e0",
+    "mean": 0.3579,
+    "over_half": 0.2618
+   },
+   "correlation": 0.37
+  },
+  "met_437897": {
+   "category": "painting",
+   "stratum": "european_other",
+   "inspyrenet": {
+    "sha256": "3a88a3bc465291ed9b644ba530ed0db578bba5ab689897c8c68c7acef90b7df2",
+    "mean": 0.5698,
+    "over_half": 0.5685
+   },
+   "spectral_residual": {
+    "sha256": "6a2f74ed6acb193568607f53e50f9130c3c1e150daf53aa7d25810f230df227d",
+    "mean": 0.2291,
+    "over_half": 0.039
+   },
+   "correlation": -0.103
+  },
+  "met_436824": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "88df0da442b756c12a93a1e59bfa38e597412ee4430fd9841c309197156a1215",
+    "mean": 0.4087,
+    "over_half": 0.408
+   },
+   "spectral_residual": {
+    "sha256": "0db9c2cdbdd9d93846b2cbb514bf860de82658caa718a38625119d4ab3902947",
+    "mean": 0.3803,
+    "over_half": 0.3536
+   },
+   "correlation": 0.809
+  },
+  "met_437990": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "2f1216d84b3602305a5e062eb6c0872933ef4ab98d166ffd56087fa6c8a399cb",
+    "mean": 0.457,
+    "over_half": 0.4563
+   },
+   "spectral_residual": {
+    "sha256": "cd9e3f5c081bebd3867b9c7df34dbb45d3176b568c5412892d902f2a16ff061b",
+    "mean": 0.4233,
+    "over_half": 0.3397
+   },
+   "correlation": 0.565
+  },
+  "met_435993": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "62a110670871a68747b903d7d0d6dda4218947d213e1653c78362b521edd80e0",
+    "mean": 0.1974,
+    "over_half": 0.197
+   },
+   "spectral_residual": {
+    "sha256": "93b702c4fb2f5773ff2174c99e0a97f1015edd94616d2786e83a828b0e45cc39",
+    "mean": 0.3683,
+    "over_half": 0.3864
+   },
+   "correlation": 0.61
+  },
+  "met_436253": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "9db3498d65d68d3580fa700f0238cbfdc8843ddb6eaac85ebe5dd39d35e1890e",
+    "mean": 0.3752,
+    "over_half": 0.3736
+   },
+   "spectral_residual": {
+    "sha256": "65648e9ea8896c868cc8a09b1163b29987d2386e60547be8ec42651ad5837a51",
+    "mean": 0.278,
+    "over_half": 0.2405
+   },
+   "correlation": -0.099
+  },
+  "met_437386": {
+   "category": "painting",
+   "stratum": "european_portrait",
+   "inspyrenet": {
+    "sha256": "9e5f69ec5487e68e3fa675e16be394e472a72c02ac5e9bd86123d1c858b1cb26",
+    "mean": 0.4687,
+    "over_half": 0.4703
+   },
+   "spectral_residual": {
+    "sha256": "62a6db77d200877fd864a606bf1cffd5c66bfded1e7a2b10e1f92c2227c82069",
+    "mean": 0.2496,
+    "over_half": 0.1522
+   },
+   "correlation": 0.379
+  },
+  "met_437211": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "8cdf2f2272deb4e5b525d6504b7906a0fb099b711ae1b83f45a9070e2eb6dc08",
+    "mean": 0.0757,
+    "over_half": 0.0756
+   },
+   "spectral_residual": {
+    "sha256": "50c8d603e54c6acfb61dc10eb1c3bc4b89aa4864d0372e981f90de6b84e3bad3",
+    "mean": 0.4281,
+    "over_half": 0.2965
+   },
+   "correlation": 0.549
+  },
+  "met_436025": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "5ce23b8b08a2bbbae783710f140cfa8e4ca4e39a8104e7bffae91cbf9cdb8ea3",
+    "mean": 0.0055,
+    "over_half": 0.0002
+   },
+   "spectral_residual": {
+    "sha256": "34e8dac2ec430ea9350121ae135699115378058d4454007b1f7e78fd5dd646f6",
+    "mean": 0.2999,
+    "over_half": 0.1622
+   },
+   "correlation": 0.02
+  },
+  "met_437179": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "46d7dfe87c8c1aebdc62f50b1912ccd20523a1f3336c49b393f44f44396f0ad2",
+    "mean": 0.0055,
+    "over_half": 0.0003
+   },
+   "spectral_residual": {
+    "sha256": "bafd99c9a717b9c4750557c2cefb7878582cda9dd5f6b68d17df1d0ca411f46d",
+    "mean": 0.4567,
+    "over_half": 0.457
+   },
+   "correlation": 0.147
+  },
+  "met_436782": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "c44ffc12bef0d659d216dff5af07ba9f50a11ce4accd68a8d77a9f944cd1af57",
+    "mean": 0.0971,
+    "over_half": 0.0926
+   },
+   "spectral_residual": {
+    "sha256": "4cd9c374d6e6a1e9fecaccfb122d6798c03cee1d9c51ac29488e8a982fc8eb05",
+    "mean": 0.3599,
+    "over_half": 0.3114
+   },
+   "correlation": 0.022
+  },
+  "met_436183": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "2f5fa98dc903e465e00084f00bd947115ffeb35c9f96e25d39fe856d448d755e",
+    "mean": 0.1853,
+    "over_half": 0.1785
+   },
+   "spectral_residual": {
+    "sha256": "5fd6a0962b05b581d921c1e1c637dbbed99ebf37511192d8d714d414f3d0a9da",
+    "mean": 0.3272,
+    "over_half": 0.2401
+   },
+   "correlation": 0.69
+  },
+  "met_436830": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "dbd0ccf2f7346d43c426b04c85b7b6bac077de9e107e0538924b5438b0850a24",
+    "mean": 0.0143,
+    "over_half": 0.001
+   },
+   "spectral_residual": {
+    "sha256": "0096a7d81df82c15cc56dc0d560904da48dea022bbb0b8ff12f968155aa48195",
+    "mean": 0.3246,
+    "over_half": 0.1793
+   },
+   "correlation": 0.163
+  },
+  "met_436971": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "d27e2db4aac0f15d47131f837ff467d8fbd0fe5c9eb7b0dc30cfc0bb10243b2e",
+    "mean": 0.114,
+    "over_half": 0.1143
+   },
+   "spectral_residual": {
+    "sha256": "3e61db86c2353a8afea7efb5b8d69348f190c9ed59ad3f13dc35b22fe6bfec0a",
+    "mean": 0.3828,
+    "over_half": 0.3565
+   },
+   "correlation": 0.38
+  },
+  "met_435880": {
+   "category": "painting",
+   "stratum": "european_landscape",
+   "inspyrenet": {
+    "sha256": "a81fd5acdbb64fc94cc7121aaa74b6fef93e88ba032a2f67754c7c2037fcf951",
+    "mean": 0.0098,
+    "over_half": 0.0005
+   },
+   "spectral_residual": {
+    "sha256": "0a07484b14c1d58cdcdb6a0f9308e087be1b43646dcdb302c370d579dd856ed4",
+    "mean": 0.4856,
+    "over_half": 0.4615
+   },
+   "correlation": 0.2
+  },
+  "met_72416": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "1a6a02736b3ea95cb02b4ee1ae25cf271df4b94c04991cb0d5826978ec8a81b7",
+    "mean": 0.0094,
+    "over_half": 0.0088
+   },
+   "spectral_residual": {
+    "sha256": "61504e8bd182207899e9d3bc88d666b03c1f2115eb90ef8099fed9a6450b5dd1",
+    "mean": 0.3866,
+    "over_half": 0.39
+   },
+   "correlation": 0.143
+  },
+  "met_54318": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "876c5b2f4a17d31bc48670f9fa3a1e256b55d0bab76eaf3d075c04ef030aa382",
+    "mean": 0.44,
+    "over_half": 0.4407
+   },
+   "spectral_residual": {
+    "sha256": "d25184ea51709a0ce2465f08e0bf53ecf95a4a6716ed0d3dce136e4d1a89133b",
+    "mean": 0.4564,
+    "over_half": 0.3992
+   },
+   "correlation": 0.255
+  },
+  "met_54196": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "3fdcea95962bce6660e5b59e5cb23744813fadd34b11f8f1856e0d878a0a5c1b",
+    "mean": 0.0125,
+    "over_half": 0.0006
+   },
+   "spectral_residual": {
+    "sha256": "1c06c5bc99d8b85f1e4c24e05b050aad932e23f032060603d2fbcc2039e7a851",
+    "mean": 0.431,
+    "over_half": 0.3594
+   },
+   "correlation": 0.374
+  },
+  "met_54675": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "43d23df7d5fc8c99a0575f3c02e01d7482dafd353159f116971012f0506ea552",
+    "mean": 0.0303,
+    "over_half": 0.0306
+   },
+   "spectral_residual": {
+    "sha256": "2a02030ae95e855549e467829d56302c6ffd77f29870d23c577d691b64fac8a3",
+    "mean": 0.2303,
+    "over_half": 0.1506
+   },
+   "correlation": 0.144
+  },
+  "met_48980": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "aeb7b7e8f8b8d3c5f630f45bf4427958c4889bc3eca57703a76102f48fd16ca0",
+    "mean": 0.8778,
+    "over_half": 0.8866
+   },
+   "spectral_residual": {
+    "sha256": "999dc9b731e082a67cdaba75534314c552cd77d231598822bc3028bcc29fc2bc",
+    "mean": 0.3857,
+    "over_half": 0.366
+   },
+   "correlation": -0.009
+  },
+  "met_54224": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "de3281483330480fd006edded4cfeb02f879c3953f9bcf05ee4867416af746ad",
+    "mean": 0.1427,
+    "over_half": 0.1412
+   },
+   "spectral_residual": {
+    "sha256": "0d1eefedbc58814ecd4fd3cc41b2b74aaa964392c20f75d6c24eacbbc89d1366",
+    "mean": 0.4002,
+    "over_half": 0.3292
+   },
+   "correlation": 0.334
+  },
+  "met_54923": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "aaa9af3093d640ab87129a1c5cdd86a0eda3cc52c32f71944b87df8501711ae8",
+    "mean": 0.1365,
+    "over_half": 0.1372
+   },
+   "spectral_residual": {
+    "sha256": "9ccd54360264360495270c37e4b367b0fa2419a543372d439dda4ee6028cb032",
+    "mean": 0.4407,
+    "over_half": 0.4006
+   },
+   "correlation": 0.442
+  },
+  "met_74670": {
+   "category": "painting",
+   "stratum": "asian",
+   "inspyrenet": {
+    "sha256": "c50727db4034204a32f82b835da090cd094202b671bbe477b3fcc24a78f266a8",
+    "mean": 0.3423,
+    "over_half": 0.3305
+   },
+   "spectral_residual": {
+    "sha256": "53219fc51841ceb06dbbf6778e7dc94e1e1405e949865da6a0c5fb908acedc7f",
+    "mean": 0.3935,
+    "over_half": 0.2898
+   },
+   "correlation": 0.74
+  },
+  "met_488147": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "464f69b2569cc91c459cbb3d834af06307114aa9f9ae36ed88a2205922165b1f",
+    "mean": 0.4186,
+    "over_half": 0.42
+   },
+   "spectral_residual": {
+    "sha256": "b73fd5c9f66ddfcca21b536f13e36fc64bdb3aa115ffbaddcd1a8bffcd7d3644",
+    "mean": 0.4263,
+    "over_half": 0.4091
+   },
+   "correlation": 0.43
+  },
+  "met_488126": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "dcbd9518555df14a37606a87d6ae2fb70170099a34157515ae4ef1043dd0b2ef",
+    "mean": 0.5599,
+    "over_half": 0.5571
+   },
+   "spectral_residual": {
+    "sha256": "acdae49f6d849c736b6fb872f80e4474f41d267b8c06288d229f0f57d41930c2",
+    "mean": 0.3552,
+    "over_half": 0.2896
+   },
+   "correlation": -0.163
+  },
+  "met_485551": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "fae15462cf08524d711e7cd19cb4f83bebceb35f0193951ab9b8f2a233ffe522",
+    "mean": 0.3872,
+    "over_half": 0.3877
+   },
+   "spectral_residual": {
+    "sha256": "089b2acee9dc28f13100f8f989c75cd05ec08a09cc6a01c53003694a69414bc9",
+    "mean": 0.383,
+    "over_half": 0.2765
+   },
+   "correlation": -0.141
+  },
+  "met_488903": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "6552a94b0b4ea7646f1c82d5abb513f7f80ba761cea8fc133b50db9af8d6f837",
+    "mean": 0.3099,
+    "over_half": 0.3054
+   },
+   "spectral_residual": {
+    "sha256": "ca181d351990208a26c638b3fe8b542a15b0b4ed50fdef5e588ab6727c2e1da0",
+    "mean": 0.2597,
+    "over_half": 0.1248
+   },
+   "correlation": 0.324
+  },
+  "met_11718": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "b4d6120be4ca8d6d10a8e59f860b471a9c09fa2c6d8509a516943dec69e86cf0",
+    "mean": 0.3625,
+    "over_half": 0.3627
+   },
+   "spectral_residual": {
+    "sha256": "311ea8dc8bb9532ee7459ea7521abc19021fe1bee4fda7670b809d118c6a11fc",
+    "mean": 0.348,
+    "over_half": 0.2831
+   },
+   "correlation": 0.722
+  },
+  "met_701989": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "dd67d4173ab9f73375b72cda4b21eabc990c8d07e277510c7805acc02a356dd8",
+    "mean": 0.3082,
+    "over_half": 0.3082
+   },
+   "spectral_residual": {
+    "sha256": "c40adb6779b30152f7249f024354c0a69b755959201b6790ba2fb3fcfe961f04",
+    "mean": 0.4501,
+    "over_half": 0.3937
+   },
+   "correlation": 0.592
+  },
+  "met_11241": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "42d47d9e45a17e19ae23421bf46058e297faffc958b2f8463c1ac9a97097a97f",
+    "mean": 0.3657,
+    "over_half": 0.3662
+   },
+   "spectral_residual": {
+    "sha256": "6fba0cdb55cf43659ab0d03a8d24a8a18458f09f2348910d586ef7de3988e667",
+    "mean": 0.2445,
+    "over_half": 0.1732
+   },
+   "correlation": 0.526
+  },
+  "met_13102": {
+   "category": "painting",
+   "stratum": "other_art",
+   "inspyrenet": {
+    "sha256": "bec54bf4eeb84abe6ec03abdd5940dd31875871aeb35655fb2ee031fd06a2409",
+    "mean": 0.5204,
+    "over_half": 0.5198
+   },
+   "spectral_residual": {
+    "sha256": "58e7ef7640f4b10bb8b6849ebe30daab582e73cca936d6663f59184a00fa2d0d",
+    "mean": 0.2208,
+    "over_half": 0.0538
+   },
+   "correlation": 0.449
+  },
+  "met_283187": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "b6ab34a38459b4110ee51c856336090ac77e5610735e303fe7bcd41bb5c0d6dc",
+    "mean": 0.3418,
+    "over_half": 0.3423
+   },
+   "spectral_residual": {
+    "sha256": "c704346b43dce59f7e2e07902262edba16a89e95b4b9bf6026906a0a9d0e4bea",
+    "mean": 0.4406,
+    "over_half": 0.4478
+   },
+   "correlation": 0.57
+  },
+  "met_285903": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "1f0fd533cc27ba20ceb790e5ebce535e8bb601c6100635047e1a0ef73b05cb1c",
+    "mean": 0.2856,
+    "over_half": 0.2857
+   },
+   "spectral_residual": {
+    "sha256": "9e8c175207b263169a43f17e2eb3a2387ba765b5ede5377e4f3e6bf3bc49c4ae",
+    "mean": 0.4211,
+    "over_half": 0.416
+   },
+   "correlation": 0.552
+  },
+  "met_261532": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "06841e8b509b27fb570fdee33325ad7361d3425b714ada10675be61831db896d",
+    "mean": 0.4161,
+    "over_half": 0.4107
+   },
+   "spectral_residual": {
+    "sha256": "45b7288d70f47489128c825ae883eb51be45c9f7f175673792bafcad641dff70",
+    "mean": 0.4206,
+    "over_half": 0.3916
+   },
+   "correlation": 0.757
+  },
+  "met_263532": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "b3371eb0857e36fcfb21c678bebc12f33a25c6d73ebebb1442d5fdf3b838f29f",
+    "mean": 0.4347,
+    "over_half": 0.4356
+   },
+   "spectral_residual": {
+    "sha256": "eeb52804aef3f3ab69a1323954f5a35fbc572f7f5740af0f9cd957e87a0c4f37",
+    "mean": 0.3745,
+    "over_half": 0.3335
+   },
+   "correlation": 0.812
+  },
+  "met_268534": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "d9f4b08ea0176d6bf73c0d4c910ccd9132618e8f55343e105cd152293430834a",
+    "mean": 0.3646,
+    "over_half": 0.358
+   },
+   "spectral_residual": {
+    "sha256": "02f37a977f98eaf2e783dc6a02749da9b98b07b33ddeef1caa56b07330af42ba",
+    "mean": 0.359,
+    "over_half": 0.2949
+   },
+   "correlation": 0.627
+  },
+  "met_261324": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "4c279891668d370e8619e1b6d8eaa8f50882ac463b082b7ba379b32f3a764091",
+    "mean": 0.3609,
+    "over_half": 0.3617
+   },
+   "spectral_residual": {
+    "sha256": "3b43df27a67578e4190dd4ec89190b3a891d8ed75080d671643c82de28b1d896",
+    "mean": 0.3549,
+    "over_half": 0.2496
+   },
+   "correlation": 0.078
+  },
+  "met_268532": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "93529ff1d7fe0e81d19bb4dc764cccee62bcea68d93f71ede6884c0c6bb5d618",
+    "mean": 0.3192,
+    "over_half": 0.3217
+   },
+   "spectral_residual": {
+    "sha256": "fb3c4ba6994ea87b0b06a7f5da0ea4ba864e6b3e1ba8e9fd821647a13c54dc91",
+    "mean": 0.3997,
+    "over_half": 0.3863
+   },
+   "correlation": 0.513
+  },
+  "met_285608": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "858fe41f52e60e0521463de34453f4023f586fa12fb6f2b799e432839cb4c494",
+    "mean": 0.6202,
+    "over_half": 0.6175
+   },
+   "spectral_residual": {
+    "sha256": "1a75adaa94595ee376b0d78275cc949b8af00c5128b73b794b3860659074fb29",
+    "mean": 0.4365,
+    "over_half": 0.367
+   },
+   "correlation": -0.051
+  },
+  "met_286569": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "720d3ae3162656471cc2c7866f2cea752af0a0837f5ce4078f73ca054bd67231",
+    "mean": 0.345,
+    "over_half": 0.3474
+   },
+   "spectral_residual": {
+    "sha256": "4b06923171a17d2f35d3e163c48fba20c32489bfb18b9aabcea30d6c40ca0a2e",
+    "mean": 0.3843,
+    "over_half": 0.3377
+   },
+   "correlation": 0.743
+  },
+  "commons_guide_at_little_norway_blue_mounds_wis_lccn2017878934": {
+   "category": "photo",
+   "stratum": "photo_portrait",
+   "inspyrenet": {
+    "sha256": "0ce82bb050a014c9c911160d3f6eaf3b8aed1bb7d6b9a3ce456c71aa7eefc23d",
+    "mean": 0.6563,
+    "over_half": 0.6572
+   },
+   "spectral_residual": {
+    "sha256": "8083375838ed61a4bc3450ac07d603bb59cace6ff8d546ee0e96dc525894de8c",
+    "mean": 0.3258,
+    "over_half": 0.1885
+   },
+   "correlation": 0.397
+  },
+  "commons_fox_squirrell_51384470246": {
+   "category": "photo",
+   "stratum": "photo_animal",
+   "inspyrenet": {
+    "sha256": "2c4bfb1e09278a20d2e20ca360de8c26c53cd0e479a9c8a17e9df054c05be2cd",
+    "mean": 0.2396,
+    "over_half": 0.2392
+   },
+   "spectral_residual": {
+    "sha256": "ae068094236165e6695bc55f7d255a396f6259daaffaf5acf7d81787e4d26882",
+    "mean": 0.3799,
+    "over_half": 0.3716
+   },
+   "correlation": -0.157
+  },
+  "commons_dehydrated_key_deer_36952540200": {
+   "category": "photo",
+   "stratum": "photo_animal",
+   "inspyrenet": {
+    "sha256": "59c7f73c1641adc3cdddd81c597d14d14a9acd47703f298de348e1e95a9f5d91",
+    "mean": 0.2034,
+    "over_half": 0.2037
+   },
+   "spectral_residual": {
+    "sha256": "0b4fd28faf0d77ea8e8b6b1a357102f8b9823fefbe52e91db4f678705264d14f",
+    "mean": 0.3366,
+    "over_half": 0.2353
+   },
+   "correlation": 0.001
+  },
+  "commons_trumpeter_swan_at_seedskadee_national_wildlife_refuge_497247": {
+   "category": "photo",
+   "stratum": "photo_animal",
+   "inspyrenet": {
+    "sha256": "5d6b7a7dfce6e797f83c32675d9baf1a4767ceab26fc1d7dca642727fa967674",
+    "mean": 0.0338,
+    "over_half": 0.0337
+   },
+   "spectral_residual": {
+    "sha256": "1ad78955ab81c3d73eeae0c9244f1cb184411f2b382f70836f1f42a636f131ea",
+    "mean": 0.3453,
+    "over_half": 0.2714
+   },
+   "correlation": 0.395
+  },
+  "commons_short_eared_owl_at_funk_waterfowl_production_area_4100881413": {
+   "category": "photo",
+   "stratum": "photo_animal",
+   "inspyrenet": {
+    "sha256": "d6b784f5ce96b4c3ba6d8ca6cf568c1ea7f00362fd4d519eabd7d1b89c141e3b",
+    "mean": 0.1366,
+    "over_half": 0.1353
+   },
+   "spectral_residual": {
+    "sha256": "2ce5d181227a67b01a10df99f875b93dce0cf5f4d1ca77768070b4dc5a1ff68d",
+    "mean": 0.2253,
+    "over_half": 0.1594
+   },
+   "correlation": 0.588
+  },
+  "commons_ruddy_duck_scott_somershoe_49717209451": {
+   "category": "photo",
+   "stratum": "photo_animal",
+   "inspyrenet": {
+    "sha256": "720efae0fe443c74a14461d36b64ffa4f5b3e2fcff51050b3bc192160f9a10d5",
+    "mean": 0.0662,
+    "over_half": 0.0662
+   },
+   "spectral_residual": {
+    "sha256": "e4c6fe9fd8939388831e6119bac8703ae0878fd961cf79bee01044edc3cadc1c",
+    "mean": 0.1897,
+    "over_half": 0.1367
+   },
+   "correlation": 0.68
+  },
+  "commons_white_tailed_deer_53627568015": {
+   "category": "photo",
+   "stratum": "photo_animal",
+   "inspyrenet": {
+    "sha256": "2820e1be28fe14d751e9209f62733bade03afb010c34742c8be5c8879c2dff49",
+    "mean": 0.1646,
+    "over_half": 0.1631
+   },
+   "spectral_residual": {
+    "sha256": "fc435d6a8222fae64ef73f8e12e81184f27e7b01510f93d4c97acf6993049aee",
+    "mean": 0.3828,
+    "over_half": 0.3023
+   },
+   "correlation": 0.196
+  },
+  "commons_wild_turkey_52870186395": {
+   "category": "photo",
+   "stratum": "photo_animal",
+   "inspyrenet": {
+    "sha256": "f24616fc119b0c2fb12802a88ee24faed8e2e542370eb97f0a127a200da36cc6",
+    "mean": 0.5769,
+    "over_half": 0.5783
+   },
+   "spectral_residual": {
+    "sha256": "79d779490b028e1724c414aa325dd44ab67844b516f718d552dc4798d0cf1e3c",
+    "mean": 0.398,
+    "over_half": 0.3117
+   },
+   "correlation": 0.736
+  },
+  "commons_harrowing_a_field_with_a_diesel_tractor_seabrook_farm_bridge": {
+   "category": "photo",
+   "stratum": "photo_object",
+   "inspyrenet": {
+    "sha256": "2d42ff7b6cdcb8db3b2ed40dd1b57c5fc00353ed67d2d10cb36fd334ce96784d",
+    "mean": 0.0602,
+    "over_half": 0.0608
+   },
+   "spectral_residual": {
+    "sha256": "964a6ba47a3ed4aeab45c193797c44812c0ba945bf618a5040b2dab03b6f7e2e",
+    "mean": 0.2738,
+    "over_half": 0.1319
+   },
+   "correlation": 0.415
+  },
+  "commons_street_in_san_juan_1a34067v": {
+   "category": "photo",
+   "stratum": "photo_object",
+   "inspyrenet": {
+    "sha256": "313d4ee96e1999b39fe425e0175baf91652e2811a1f37eb73b8bd2242918c077",
+    "mean": 0.0386,
+    "over_half": 0.0387
+   },
+   "spectral_residual": {
+    "sha256": "4e5a9b32827444a271cfdd651b53415ceb68873d75c076af4e28da9b32bf8bf1",
+    "mean": 0.3996,
+    "over_half": 0.3663
+   },
+   "correlation": 0.34
+  },
+  "commons_door_and_window_in_a_spanish_american_home_1a34162v": {
+   "category": "photo",
+   "stratum": "photo_object",
+   "inspyrenet": {
+    "sha256": "021895bdaebae661998719cdde2743a397a3732a52478570f18e68b3973172b0",
+    "mean": 0.3197,
+    "over_half": 0.3198
+   },
+   "spectral_residual": {
+    "sha256": "f15894d7d95d4d2bdef9754024ef892373120d4f928ec4ab019a6a1179d819c8",
+    "mean": 0.2421,
+    "over_half": 0.0729
+   },
+   "correlation": 0.293
+  },
+  "commons_laundry_barbershop_and_stores_washington_d_c_1a34426v": {
+   "category": "photo",
+   "stratum": "photo_object",
+   "inspyrenet": {
+    "sha256": "1d09ccf4613ca4b300583347dd816751f6d45ab8bc0d2650677f27cc98379da3",
+    "mean": 0.1039,
+    "over_half": 0.1057
+   },
+   "spectral_residual": {
+    "sha256": "7094956619b1df712acf795e94943e017f9367b3f2dea9218237b142b0e946e1",
+    "mean": 0.3038,
+    "over_half": 0.1561
+   },
+   "correlation": -0.09
+  },
+  "commons_russellllanodesanjuan": {
+   "category": "photo",
+   "stratum": "photo_object",
+   "inspyrenet": {
+    "sha256": "1390eace314550591af41eac69c78676d5836bd5d38710a2bdd6dbe81c545a02",
+    "mean": 0.2706,
+    "over_half": 0.2712
+   },
+   "spectral_residual": {
+    "sha256": "eb1635ac302daafaa923062f8feed1c7dff113ac7bc41e5741452197ee43658d",
+    "mean": 0.5179,
+    "over_half": 0.5422
+   },
+   "correlation": 0.384
+  },
+  "commons_seed_and_feed_store_lincoln_nebraska1a34278v": {
+   "category": "photo",
+   "stratum": "photo_object",
+   "inspyrenet": {
+    "sha256": "bd1b8fd8b9f44b4ea665111c7c0e03bb09fada92d71d2b08d38ea05090411630",
+    "mean": 0.0415,
+    "over_half": 0.0422
+   },
+   "spectral_residual": {
+    "sha256": "b3465d8f9c1101077e40f1da7887d8a043340549549625752df6c1586f74aca2",
+    "mean": 0.4572,
+    "over_half": 0.4458
+   },
+   "correlation": 0.172
+  },
+  "commons_near_white_plains_ga_lccn2017877524": {
+   "category": "photo",
+   "stratum": "photo_scene",
+   "inspyrenet": {
+    "sha256": "fb455d84827cf4ab7342faacf484c6f39f6e746702858fe5d4b975318043eea9",
+    "mean": 0.5347,
+    "over_half": 0.5371
+   },
+   "spectral_residual": {
+    "sha256": "63a1f0db882ad5dbe057e9241e0b39f9bf824fced0aca8377a13852f3bb35b2a",
+    "mean": 0.2864,
+    "over_half": 0.1347
+   },
+   "correlation": -0.473
+  },
+  "commons_a_street_in_a_town_of_the_virgin_islands1a33999v": {
+   "category": "photo",
+   "stratum": "photo_scene",
+   "inspyrenet": {
+    "sha256": "02d29eee53ecbd71da0a7b00d5d75ec88857c8ee03cc365d7fd9e605409c7e03",
+    "mean": 0.0167,
+    "over_half": 0.0139
+   },
+   "spectral_residual": {
+    "sha256": "e38723dcf59eb07859f7a49378c7d451c67ddbda034aa7e0f99eb5fbaf8fe005",
+    "mean": 0.3615,
+    "over_half": 0.3199
+   },
+   "correlation": 0.295
+  },
+  "commons_scrap_and_salvage_depot_butte_mont_lccn2017878813": {
+   "category": "photo",
+   "stratum": "photo_scene",
+   "inspyrenet": {
+    "sha256": "547899d7144cb4ca2234590c3cf4860c30db573d95a45ef2aa04075f65ff31d8",
+    "mean": 0.0057,
+    "over_half": 0.0004
+   },
+   "spectral_residual": {
+    "sha256": "12a613a9e67bf1e422bf52bf9dc039aed2441f4e4fb12a37f636ce38360a35e2",
+    "mean": 0.5423,
+    "over_half": 0.5777
+   },
+   "correlation": 0.076
+  },
+  "commons_russell_lee_street_corner_dillon_montana": {
+   "category": "photo",
+   "stratum": "photo_scene",
+   "inspyrenet": {
+    "sha256": "006067d9a5d5b9221d41a95e6b65ec20ba354578e32109ca564f7cede7fbc57b",
+    "mean": 0.3044,
+    "over_half": 0.3033
+   },
+   "spectral_residual": {
+    "sha256": "d2e253fccec90e00781e43323135c1d3b9986eae891b84c8255db1235f503cf2",
+    "mean": 0.338,
+    "over_half": 0.2204
+   },
+   "correlation": 0.412
+  },
+  "commons_the_greensboro_lumber_co_greensboro_ga_lccn2017877531": {
+   "category": "photo",
+   "stratum": "photo_scene",
+   "inspyrenet": {
+    "sha256": "6b5094d3f901a9a4fcf2a4425fa9fc8bb3d1c810598804be31386d1e79a49f30",
+    "mean": 0.0017,
+    "over_half": 0.001
+   },
+   "spectral_residual": {
+    "sha256": "99da0cd7ca5bf075802817eb9d148de2ce4d5cf5ad1bdeee49ad3dd7fb485bef",
+    "mean": 0.2124,
+    "over_half": 0.0852
+   },
+   "correlation": 0.036
+  },
+  "commons_traffic_at_5_30_on_second_avenue_detroit_mich_lccn2017878611": {
+   "category": "photo",
+   "stratum": "photo_scene",
+   "inspyrenet": {
+    "sha256": "30e16d5704292f8ca8e1dc8de07493b16f2403a0e59e50e82d2d8036d55a0573",
+    "mean": 0.0082,
+    "over_half": 0.0007
+   },
+   "spectral_residual": {
+    "sha256": "a5353a825b437d6fc44eedcacf04229da41052fb2fa0a6b94c3a16d794602c37",
+    "mean": 0.4605,
+    "over_half": 0.4234
+   },
+   "correlation": 0.258
+  },
+  "commons_landscape_northeast_utah1a34285v": {
+   "category": "photo",
+   "stratum": "photo_scene",
+   "inspyrenet": {
+    "sha256": "3a6d515cea8deea5e0ebcb1a872e75821f8fe0d413f328e3aa26bd5cb7311604",
+    "mean": 0.0729,
+    "over_half": 0.0739
+   },
+   "spectral_residual": {
+    "sha256": "ad4d32952bc06d6376c0d67200bd2339f6e9d604934c7b0110453a93e3b26987",
+    "mean": 0.4238,
+    "over_half": 0.4042
+   },
+   "correlation": 0.494
+  },
+  "sdxl_00": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "b9ae8bc0df2e27a0a5ff20e32f1e56fe3ea1591d00eb5874cd25caad9b52fd0b",
+    "mean": 0.6798,
+    "over_half": 0.6797
+   },
+   "spectral_residual": {
+    "sha256": "ba79108f0a20d112c32d218edd9dbce6f7f7fb009b2b62ca096951e84faaf945",
+    "mean": 0.5102,
+    "over_half": 0.5253
+   },
+   "correlation": 0.603
+  },
+  "sdxl_01": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "ec1744f4e71e49f651130fc6d5d826ebd2a0dc80c5075d37f1d1b1a537d21a09",
+    "mean": 0.9305,
+    "over_half": 0.9334
+   },
+   "spectral_residual": {
+    "sha256": "531ba3c7ec09a9c0f8a52766aee5a8626ba1d27ca24e550965e12b767cfdc88a",
+    "mean": 0.2014,
+    "over_half": 0.0337
+   },
+   "correlation": -0.504
+  },
+  "sdxl_02": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "6d5f66d900afa0f7dc583050ff5400dc65c42929bed2bc0628fbb12a79088024",
+    "mean": 0.4794,
+    "over_half": 0.4794
+   },
+   "spectral_residual": {
+    "sha256": "a0c4518465699c463be97ab8e8494d72a2b7345c34be7570592066f7c0667abc",
+    "mean": 0.3919,
+    "over_half": 0.2941
+   },
+   "correlation": 0.529
+  },
+  "sdxl_03": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "634b4ef2d13e1412a0c70ae4198b81cdf9953a18ffedf2f7733b42111fd68e66",
+    "mean": 0.5574,
+    "over_half": 0.558
+   },
+   "spectral_residual": {
+    "sha256": "3d389bc4a6807d58f57bfc447307741f9499c04c31c9cfa663e1306e44cb89a6",
+    "mean": 0.3109,
+    "over_half": 0.0927
+   },
+   "correlation": 0.189
+  },
+  "sdxl_04": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "49956ed6fbdbaa7db22b4d0a6956af002ad7160fb3d8c91330896e9dc58cfce9",
+    "mean": 0.2366,
+    "over_half": 0.2367
+   },
+   "spectral_residual": {
+    "sha256": "38dbb79b18f867b2a982ec84757184eae720c9f148953d7cd8736461c55b4878",
+    "mean": 0.4843,
+    "over_half": 0.4841
+   },
+   "correlation": 0.184
+  },
+  "sdxl_05": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "c73be063b76a40af9552c9704be25f45f687ecf18da2624dd414ad8c00bae23d",
+    "mean": 0.337,
+    "over_half": 0.3325
+   },
+   "spectral_residual": {
+    "sha256": "acef498cdbc44d5c438530448f38d7ae5178cd78a1c151a2fce640c25628ddb1",
+    "mean": 0.4497,
+    "over_half": 0.4389
+   },
+   "correlation": 0.285
+  },
+  "sdxl_06": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "c0ceeca57c21f252e07f5715ed6fcda14766d87994ed472899f48fd68918eb27",
+    "mean": 0.2998,
+    "over_half": 0.2999
+   },
+   "spectral_residual": {
+    "sha256": "75cb5d69946a65fcee33944717a19755715c4a9fc679ed82883298ebb22115c8",
+    "mean": 0.4541,
+    "over_half": 0.3828
+   },
+   "correlation": 0.633
+  },
+  "sdxl_07": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "bc6b0a1a1e06dad8c47ba1cf7ced552ef1cd15059d8b004e22f2362b9904face",
+    "mean": 0.5658,
+    "over_half": 0.5653
+   },
+   "spectral_residual": {
+    "sha256": "79605c2bba8877167a5e62b1296000225c3ee40264488ccf0908c0aef889e143",
+    "mean": 0.2808,
+    "over_half": 0.1809
+   },
+   "correlation": 0.704
+  },
+  "sdxl_08": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "c5778f2cb40724474e301fb35c0d0c9ac45949f03453171d8e4f450480e38134",
+    "mean": 0.6501,
+    "over_half": 0.6496
+   },
+   "spectral_residual": {
+    "sha256": "c84016c81233a17f09130f1932d1219232815499a993b50b75661ec75080462f",
+    "mean": 0.4539,
+    "over_half": 0.3903
+   },
+   "correlation": 0.413
+  },
+  "sdxl_09": {
+   "category": "sdxl",
+   "stratum": "sdxl_portrait",
+   "inspyrenet": {
+    "sha256": "f9c722c2227a6893cd605528491a777a0a9f7a89e4709f737859bf5535abef45",
+    "mean": 0.6853,
+    "over_half": 0.6777
+   },
+   "spectral_residual": {
+    "sha256": "5d51255de138689d71a35cb551b983d7541bf1a7ae4a73aba7268dacb6817ce4",
+    "mean": 0.2795,
+    "over_half": 0.1565
+   },
+   "correlation": 0.489
+  },
+  "sdxl_10": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "3661bcfe565f0d369c0cc6d482baba748e486b8d5d0bef05b282d8e5f58830b9",
+    "mean": 0.0021,
+    "over_half": 0.0023
+   },
+   "spectral_residual": {
+    "sha256": "a6f9f63e462ec60d7a0859910cc2330af57ded5e62956069135f3e502caf861b",
+    "mean": 0.3783,
+    "over_half": 0.2742
+   },
+   "correlation": 0.043
+  },
+  "sdxl_11": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "1c16d36bb78c1a99eaef72fcee657d877dd0bf5979d731d1e76a9b3bf3ec9091",
+    "mean": 0.0036,
+    "over_half": 0.0002
+   },
+   "spectral_residual": {
+    "sha256": "456b45db08c3733c79af7e5467388a29ecc7aa7a7d33401a13a20db44e11ada4",
+    "mean": 0.2535,
+    "over_half": 0.1478
+   },
+   "correlation": 0.026
+  },
+  "sdxl_12": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "a73e8883d3cbe0f5a7402c536a3514b637a3c0e2fd69931de68b196186f88c3a",
+    "mean": 0.0115,
+    "over_half": 0.0099
+   },
+   "spectral_residual": {
+    "sha256": "c9cdbf8b6aeee7d4f581c9b5915789f1abf003b7ac2242d88daf64b904f8eec2",
+    "mean": 0.3946,
+    "over_half": 0.3092
+   },
+   "correlation": -0.01
+  },
+  "sdxl_13": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "a44dee8274bc1224a497610c3bf90762ac9189ad7db250775d0e003dad60f714",
+    "mean": 0.0492,
+    "over_half": 0.0497
+   },
+   "spectral_residual": {
+    "sha256": "1609f275d082a43de53a43d070fdbb2dabbee325094df3136044393c86530860",
+    "mean": 0.2152,
+    "over_half": 0.1368
+   },
+   "correlation": 0.644
+  },
+  "sdxl_14": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "95d6606ff60d20a10c2763daa11dc82df1770698ddabcf1c656d978592922b76",
+    "mean": 0.087,
+    "over_half": 0.0825
+   },
+   "spectral_residual": {
+    "sha256": "a3c5626cef1a5927e5a07702a63b55ca58ac3c9d25447e6eab642dd903846065",
+    "mean": 0.3213,
+    "over_half": 0.2392
+   },
+   "correlation": 0.414
+  },
+  "sdxl_15": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "a4d44e7eb9f0838c2ca573c92527c8b59a7d680dd7d63f3b23ce57ee1ada23fc",
+    "mean": 0.0456,
+    "over_half": 0.0459
+   },
+   "spectral_residual": {
+    "sha256": "1db2289dd1832121f8ba91f382cff665f26093e533b3e50c20f52a9670456033",
+    "mean": 0.4404,
+    "over_half": 0.4669
+   },
+   "correlation": -0.012
+  },
+  "sdxl_16": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "cb2d07c7b32c6d16d4fbdf51dc921475d2911b3234362aee1dfd5bdf49f19e73",
+    "mean": 0.2719,
+    "over_half": 0.2724
+   },
+   "spectral_residual": {
+    "sha256": "8fe3a61c43376b775a7d9babe544a7a2ce3650429d6d55dea48b69cc13480440",
+    "mean": 0.3218,
+    "over_half": 0.2796
+   },
+   "correlation": 0.765
+  },
+  "sdxl_17": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "a63430d7056a8a40c5254c4da06b7b0acfe007432efb3be74f7523f75bd9ec37",
+    "mean": 0.1093,
+    "over_half": 0.1103
+   },
+   "spectral_residual": {
+    "sha256": "dea21427ea9e653cb724f4e61aa96b1d552019517bd491e5f549c9d228dcaa35",
+    "mean": 0.3759,
+    "over_half": 0.3105
+   },
+   "correlation": 0.282
+  },
+  "sdxl_18": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "09f91f2e937d3f7dbaaae32968fd071060b4879e5cb6f31bfc7f1466c4995a5f",
+    "mean": 0.018,
+    "over_half": 0.0011
+   },
+   "spectral_residual": {
+    "sha256": "be3ab74533dbc364b433a0634fe8a853ea97a28ae2f2be20f69dc54203ddba87",
+    "mean": 0.2257,
+    "over_half": 0.1167
+   },
+   "correlation": -0.234
+  },
+  "sdxl_19": {
+   "category": "sdxl",
+   "stratum": "sdxl_scene",
+   "inspyrenet": {
+    "sha256": "341fb564d8fd01111c96a29d70fd8257796d2012dbe3c8336d111d996086a8c6",
+    "mean": 0.083,
+    "over_half": 0.064
+   },
+   "spectral_residual": {
+    "sha256": "a30ae263366a93429cf9a9c6bd8bca02552828d6374159b914eeefdcc9d4047a",
+    "mean": 0.5423,
+    "over_half": 0.577
+   },
+   "correlation": 0.245
+  },
+  "sdxl_20": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "9fa2b5410069cf609e7d413c8b1dcd6587ebc5279b96eaaf7cecc2c73284ac48",
+    "mean": 0.2326,
+    "over_half": 0.2326
+   },
+   "spectral_residual": {
+    "sha256": "2b9fb9ac5bda7a4310fb61f30d9d42a1a5cbeb54a0715c5a5a7b4e3f43067d90",
+    "mean": 0.3064,
+    "over_half": 0.1953
+   },
+   "correlation": 0.455
+  },
+  "sdxl_21": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "5a9f5055d6cce2c67dd51ea7e85f34347486691814b34bd7ad3e6c1d8092f02c",
+    "mean": 0.2816,
+    "over_half": 0.2803
+   },
+   "spectral_residual": {
+    "sha256": "b9c7e0a5299ef97ff95cb3ce7e9648ef88501a3bca5fbe23ed3dbeb5177abe50",
+    "mean": 0.3829,
+    "over_half": 0.3267
+   },
+   "correlation": 0.453
+  },
+  "sdxl_22": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "852129779ad1619772fdded0dafaaefc6094f4af910144492ab7b41d62a70fd3",
+    "mean": 0.2065,
+    "over_half": 0.2072
+   },
+   "spectral_residual": {
+    "sha256": "ff783668070012056bcfe9c1a5a52acb50dd5793e26ccce5deb6f8d7fafd3014",
+    "mean": 0.3394,
+    "over_half": 0.3026
+   },
+   "correlation": 0.606
+  },
+  "sdxl_23": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "d640771cf0b5297f8e0aaf2ff5c3377c1a4da6f5b26e3436643a446bb6107782",
+    "mean": 0.321,
+    "over_half": 0.321
+   },
+   "spectral_residual": {
+    "sha256": "503b8bd4660b41b71681a9e38a23d38d5ddd3b0b5b10fb90983f3099f9f5d850",
+    "mean": 0.3949,
+    "over_half": 0.342
+   },
+   "correlation": 0.451
+  },
+  "sdxl_24": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "c90af39e33b2a188be4c28ef618cc6b27f1ccfb808c598315e267d4a731b9951",
+    "mean": 0.1114,
+    "over_half": 0.1112
+   },
+   "spectral_residual": {
+    "sha256": "3dda84e21e2521169d307759d6c5fc5acf16fe0f9098b38a5e103ed7e05e3eb4",
+    "mean": 0.2749,
+    "over_half": 0.1913
+   },
+   "correlation": 0.697
+  },
+  "sdxl_25": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "93fc5751727e3e20cc66574e7eb6f602e71a9a960cda1db362a5cc89b8ea69d6",
+    "mean": 0.1208,
+    "over_half": 0.1238
+   },
+   "spectral_residual": {
+    "sha256": "3a1a640bd9b5d96938272f9d254022f033f07a4f17f57ce1b89aa8afd5b01000",
+    "mean": 0.4731,
+    "over_half": 0.476
+   },
+   "correlation": 0.235
+  },
+  "sdxl_26": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "c01276dcababdad270c4fe2138b4e33a0078ebc839c1b0b29f4726cce0e24872",
+    "mean": 0.4229,
+    "over_half": 0.423
+   },
+   "spectral_residual": {
+    "sha256": "ce4311c31303b29478fffb249fdde1e3e7ab9a7f17a36bbeead2014fab6b0889",
+    "mean": 0.4215,
+    "over_half": 0.3211
+   },
+   "correlation": 0.237
+  },
+  "sdxl_27": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "4956e862b6e4f9a3f725bb09c345414a56bfa3598adfa6189c7b669fe9e8a994",
+    "mean": 0.4554,
+    "over_half": 0.4568
+   },
+   "spectral_residual": {
+    "sha256": "a2c150d25029eaf0cbdd07222bb5f18f8ed82b0f5604b99681acb6afb2d0d243",
+    "mean": 0.4983,
+    "over_half": 0.4876
+   },
+   "correlation": 0.631
+  },
+  "sdxl_28": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "2ffd54ddf8720ccc7cc2be0aa05e5d55953293f5c463a8f937060ca683e30944",
+    "mean": 0.1589,
+    "over_half": 0.1609
+   },
+   "spectral_residual": {
+    "sha256": "9d004bbe7e9dead316b3cfd770bd50b02a3a08951e6601791cb9c526fe17f59f",
+    "mean": 0.4686,
+    "over_half": 0.4391
+   },
+   "correlation": 0.543
+  },
+  "sdxl_29": {
+   "category": "sdxl",
+   "stratum": "sdxl_object",
+   "inspyrenet": {
+    "sha256": "558c5c7f1752fb597a4357836adb93d0e11b1de40dceb7330f797954b0880147",
+    "mean": 0.3366,
+    "over_half": 0.3371
+   },
+   "spectral_residual": {
+    "sha256": "d2d91f5a7ae8170ad891ec08afe9b461e0a890de257c2f5b09176fa98744bcae",
+    "mean": 0.3626,
+    "over_half": 0.2574
+   },
+   "correlation": 0.491
+  }
+ }
+}
