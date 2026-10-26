@@ -23,6 +23,7 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [~] 025 [T-025] Evaluation saliency maps, InSPyReNet + spectral residual (M3)
 
 ## Fait
+- [x] 024 [T-024] Eval set curation (bloqué après 3 KO, terminé via T-034, 81b9ebc)
 - [x] 034 [T-034] Finish eval-set curation: review fixes + systematic audit (M3) (81b9ebc)
 - [x] 023 [T-023] Investigate late-training degradation of convention option A (M2, P2) (a9b1f8f)
 - [x] 022 [T-022] M3 plan and evaluation protocol design note (M3) (b904fcd)
@@ -49,4 +50,3 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [x] 001 [T-001] Project scaffold, pinned environment, config system, CI, M1 plan (e3b6324)
 
 ## Bloqué
-- [!] 024 [T-024] Eval set curation — 3 KO (regex FWS mort, bordures film, enfant identifiable) ; repris par T-034
