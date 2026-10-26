@@ -95,7 +95,7 @@ python -m scripts.build_eval_set check      # no image of the set equals / resem
   (children of the FSA series are excluded by the title rule and by the contact-sheet check).
 - *SDXL (30)*: Stable Diffusion XL base 1.0, revision `462165984030d82259a11f4367a4eed129e94a7b`, licence CreativeML Open RAIL++-M (Licensor
   claims no rights in the outputs; the use restrictions do not concern the prompts). The 30 outputs are dedicated to CC0 1.0. Settings are
-  the library defaults (`configs/eval/sdxl_prompts.yaml`); fp16 weights with model CPU offload; `diffusers` 0.42.0, `torch` 2.11.0+cu128.
+  the library defaults (`configs/eval/sdxl_prompts.yaml`, dependencies pinned in `requirements-gen.txt`); fp16 weights with model CPU offload; `diffusers` 0.42.0, `torch` 2.11.0+cu128.
   Measured on the RTX 5070: peak VRAM 5.3 GB allocated / 7.5 GB reserved, 20 to 32 s per image (20 s alone, 32 s with the CPU busy).
 
 **Selection (all mechanical, none looks at a method result).** `random.Random(22)`; per department or category the candidate ids sorted then
