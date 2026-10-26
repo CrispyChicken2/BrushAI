@@ -30,7 +30,7 @@ class Http:
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
                 with urllib.request.urlopen(  # noqa: S310
-                    req, context=self.ctx, timeout=180
+                    req, context=self.ctx, timeout=60
                 ) as resp:
                     return resp.read()  # type: ignore[no-any-return]
             except urllib.error.HTTPError as err:
