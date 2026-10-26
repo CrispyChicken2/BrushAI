@@ -392,4 +392,62 @@ LPIPS-Alex of a black/white canvas against the target 0.77 to 1.115 (all six max
 - The Metropolitan Museum of Art, *Open Access* and *Collection API* documentation, <https://metmuseum.github.io/> (CC0; accessed 2026-10-25).
 
 ## Amendments
-None yet.
+### 2026-10-26 (T-024, before any method run): realization of section 1
+
+No test-set number exists yet, so none of these is *post hoc*. What changed, and why:
+
+1. **Photograph sources (1.1, 1.2.5).** 8 of the 10 portraits are Met Open Access photographs (CC0, nineteenth century, monochrome or sepia;
+   they use 8 of the at most 10 greyscale photographs of 1.3), the 22 other photographs are Wikimedia Commons files with a public-domain tag from US
+   federal collections (Library of Congress FSA/OWI Kodachrome slides, US Fish and Wildlife Service, one Prokudin-Gorsky plate). Reason: a
+   colour portrait pool of enough clear faces was not available under a machine-readable licence. Sub-strata of the 20 other photographs: 7 animals, 6 objects, 7 scenes. Smithsonian Open Access is not used.
+2. **Border trimming (1.3).** Uniform black film or mat borders are cut by a mechanical rule (near-black flat rows/columns, scanned inward over at most a
+   quarter of the side; for scanned slides a row with 90 % of its pixels below 40), recorded as a `crop_box` in the manifest; the trimmed square must be at least 640 px (the 768 px floor stays the rule for
+   the untrimmed source). Reason: the dark film-holder edges of the slides would otherwise count as a frame over 5 % of the area.
+3. **Resize filter (1.3).** The box (area) filter of Pillow, not `center_crop_resize` (bicubic with antialiasing): it is the "area" filter
+   of the protocol and does not depend on the torch version, which keeps the SHA-256 of the prepared pixels stable.
+4. **Text rule (1.2.3).** Applied to captions, labels, watermarks and overlays. Inscriptions that are part of an East Asian painting or print are kept below a third of the area (one album leaf of calligraphy was rejected).
+5. **Asian and "other" strata.** 4 paintings + 4 woodblock prints; 4 Modern Art + 4 American Wing paintings (the American Wing has an empty classification: `objectName = Painting`).
+6. **Verification by pixels.** A source file whose bytes changed but whose decoded prepared pixels are identical passes (two Met files were re-encoded within a day); a pixel mismatch fails.
+
+Affected runs: none (the set did not exist). Record of the check against the tuning images: `docs/experiments/data/eval_set/overlap_check.json`.
+
+### 2026-10-26 (T-024, review round 1, still before any method run)
+
+Defects found by the review of the first realization, corrected and redrawn (the manifest, the dev split and the records changed; no run existed):
+
+1. **Dev to test leak.** Two views of one scene (same photographer, same shop, same car) were one dev and one test image. The curation now refuses a second
+   view of a series (same normalized photographer and a shared place category or a similar title; not applied to agency wildlife photographs) and the final set is checked for it (`build_eval_set check`, 0 pairs).
+2. **Frames, mats and calibration targets** over 5 % of the area were accepted for three Met images; rejected (the visual rejections list grew to 35 entries with reasons).
+3. **"Clear subjects".** Animal photographs with no animal or an animal a few pixels tall were rejected. The animal stratum is drawn from the US Fish and Wildlife Service
+   photographs, only if they carry a species category, name the animal in the title and mention no person, staff or event; images with a person who may be alive
+   are rejected on the contact sheet.
+4. **"At most 3 images per photographer"** now applies to normalized names (it was counted on the raw `Artist` string).
+5. Smaller points: the hand-coloured Met print is `colour: true`; dates of Commons files are cleaned of their Wikidata residue; the data card lists the dev count once per stratum;
+   `fetch_eval_set --sdxl` no longer hides a failure of the downloaded images behind the SDXL result.
+
+Affected runs: none. The replay of the curation (`python -m scripts.build_eval_set curate`, same cached API data and live Commons) reproduces the manifest.
+
+### 2026-10-26 (T-024, review round 2, still before any method run)
+
+1. **Dark film borders (1.2.3).** The trimming and the check scanned from the outermost row and stopped at a 1-2 px light edge line, so three slides kept 6.4 % of near-black
+   border while the record said 0.4 %. Both now skip up to three light edge lines (scaled to the source size) before the band; the three slides were redrawn or trimmed, the check
+   finds at most 4.7 % on the FSA slides, and the measure is applied to the slides only (dark backgrounds of paintings and animals are content).
+2. **Strata.** The keyword "mill" put a mountain scene in the object stratum: it is removed from the object words (a few object words added), and portraits, objects and scenes were re-verified on the contact sheets. Prokudin-Gorsky plates are dropped (sepia reproductions, not colour).
+   The cap per photographer is 4 (it was 3): without the Prokudin plates the FSA pool could not fill the strata at 3.
+3. **People in agency photographs.** The wording filter was not enough: the contact sheets still showed staff and visitors. A COCO person detector (torchvision Faster R-CNN MobileNetV3, score above 0.4, any size) now rejects any agency
+   photograph with a person, in the draw and again in `build_eval_set check` (0 detections on the final set). The word list of the filter matches substrings (it over-excludes, never under-excludes), left as is.
+
+Affected runs: none. The dev split was redrawn with the rest.
+
+### 2026-10-26 (T-034, finish of the curation: review round 3 and a systematic audit, still before any method run)
+
+Review round 3 found three more defects after two rounds of reactive fixes, so the set was audited systematically (`scripts/audit_eval_set.py`: every machine-checkable rule on every image, 0 violations; `docs/experiments/data/eval_set/visual_audit.md`: all 100 images looked at, one line each).
+
+1. **The agency word filter was dead** (two backspace characters instead of the word boundaries): none of the draws had applied "no word about people, staff or events". Repaired, with a test that matches the words and never matches "manatee"/"Mandarin"/"Dayton", and a test that no text file of the repository holds a control character. Words for non-animal titles (nest, fire, smoke, habitat, tracks) were added after the first redraw showed titles that name an animal that is not in the picture.
+2. **One border definition** for the trimming and the report: `flat` (near-black uniform lines) for paintings, prints and mats, `film` (mean luminance below 30, after a thin light edge line) for scanned slides; the report is computed on the cropped source at full resolution, and independently at 512 px for slides. A slide whose film bar sits next to a dark blue sky (`gus_worke`) cannot be told from its content by any rule and was rejected.
+3. **Children and possibly living persons.** The three views of Shulman's Market (children on the step and in the street) were rejected; the rule is applied to every FSA or agency photograph: no child, no person identifiable who may be alive (adults of a 1940-43 slide cannot be alive; the Met sitters are long dead, including one girl).
+4. **Identity of the files used.** Found by the audit and by the fetch from scratch: the Commons ids were the first 60 characters of the title, so four files of one series shared an id, and so a cache file; the manifest of one image held the hash, size and crop of a different file than its URL. Ids of colliding titles now carry a hash suffix; a cached file is only reused if its SHA-1 equals the one the API publishes (`audit_eval_set` checks it for every Commons image); the size in the manifest is that of the file used. Only that one image was affected (replaced).
+5. **Composition** (counts fixed by the protocol are unchanged): the colour photographs are 14 FSA/OWI slides and 7 US Fish and Wildlife Service photographs; the monochrome Met portraits are 9 (the portrait stratum has 9 + 1), because the FSA pool holds one usable colour portrait. Colour photographs: 21 (minimum 20), greyscale 8 (maximum 10). The visual rejections list holds 52 entries with reasons.
+
+Affected runs: none. The curation replay and the fetch from scratch reproduce the set.
+

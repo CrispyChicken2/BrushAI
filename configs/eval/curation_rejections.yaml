@@ -1,0 +1,61 @@
+# Visual rejections of the first draw, decided on the contact sheets before any method run (T-024).
+# An image is replaced by the next candidate of the seeded draw. Rules (evaluation.md 1.2): no identifiable living
+# person, no watermark / text block / frame over 5 % of the area, a clear subject, no near-duplicate, colour for
+# the Commons photographs (no sepia tint).
+met_436941: text band (inscription) over 5 % of the area
+met_54211: fragment on a grey mount, grey margins over 5 %
+met_10156: tonal study without a clear subject
+met_13199: gilt frame visible on three edges
+commons_pulling_invasive_species_9444966174: person who may be alive (modern US Fish and Wildlife photograph)
+commons_na_drezini_e_u_petrozavodska_po_murm_zh_d_handcar_20245v: colour-fringe border, duplicate of another view
+commons_little_norway_guide: same sitter as another candidate (near-duplicate subject)
+commons_prokudin_gorskii_12: tiny figure in a landscape, not a portrait
+commons_antique_dress_of_a_peasant_woman_from_olonetskaia_province_p: sepia tint, not a colour photograph
+commons_antique_dress_of_a_peasant_woman_from_the_olonetskaia_provin: sepia tint, not a colour photograph
+commons_1910_1911_02400_02448u_e1: sepia tint, not a colour photograph
+commons_virgin_redwood_864_years_old_1a35447v: text labels over the subject
+# second pass (contact sheets of the draw above, after the black-border trimming and the Met photographs were added)
+met_294515: stereo card, the same sitter tiled six times
+met_261454: decorative red and black mat over 5 % of the area, subject not a clear face or figure
+commons_vegetation_monitoring_9442178075: field workers who may be alive (US Fish and Wildlife photograph)
+commons_prokudin_gorsky_suna_river: tiny figure in a landscape, not a portrait
+commons_little_norway_guide2: same sitter as another candidate (near-duplicate subject)
+commons_thomas_white_two_bar_ranch_7096051473: no animal visible (animal stratum)
+commons_bands_of_s_cattle_on_the_gravelly_range_at_the_foot_of_black: animals too small to be the subject
+commons_a_fourth_of_july_celebration_st_helena_s_island_s_c_adjusted: no clear subject (faces cut by the crop)
+met_51803: album leaf where calligraphy covers about half of the area (inscriptions integral to a work are accepted below a third of the area)
+# review round 1 (fixes): checked on the prepared images, same rules as above
+commons_shulman_s_market_at_the_southeast_corner_of_n_street_and_uni: same scene as the dev image commons_rosskam_dc1 (same photographer, place and car), a dev to test leak
+met_261318: white card mount and handwriting over about 30 % of the area
+met_437548: wooden frame and stand visible on both sides (up to 8 % each)
+met_51686: calibration target and white mount margins (about 10 % of the width on one side)
+commons_street_corner_dillon_mont1a35017v: no animal visible (animal stratum)
+commons_in_the_flat_cattle_country_in_the_south_western_tip_1a34078v: animals a few pixels tall
+commons_horse_breeding_ranch_grant_co_oregon_lccn2017877601: animals a few pixels tall
+# round 1 (fixes), second look at the US Fish and Wildlife Service animals drawn after the series and people rules
+commons_bird_key_stono_seabird_sanctuary_red_knot_trapping_bbanding: people on a beach, animal not visible
+commons_posing_for_picture_with_bald_eagle_10594716994: two people who may be alive pose with the animal
+commons_tundra_swan_nest_20702138842: a nest on a marsh, no animal visible
+commons_snowy_owl_51712794491: animal a few pixels tall
+commons_long_tailed_duck_15423698505: animal under 5 % of the area
+commons_banding_cackling_geese_38430481896: a person in a jacket fills the frame, animal hidden
+commons_polar_bear_research_33331611273: a researcher who may be alive next to the animal
+# round 2 (fixes)
+commons_development_at_the_site_of_the_mill_for_the_mouat_chromite_m: a mountain range with a tiny site at the bottom, a scene and not an object
+commons_brown_pelican_and_sinker_8080500760: a person's arms and hands hold the bird over a quarter of the frame (handling shot)
+commons_display_of_home_canned_food1a35476v: dark film edge still 6 % of the prepared area after the trimming (measured by build_eval_set check)
+commons_side_view_of_an_antique_peasant_dress_prok_01900_01945v: sepia tint, not a colour photograph
+commons_low_flying_planes_from_which_dust_or_insecticide_is_spread_o: biplanes on a field, not a portrait (stratum by keyword)
+commons_snowy_owl_8456435162: animal a few pixels tall
+commons_cherry_orchards_farm_lands_and_irrigation_ditch_at_emmett_id: dark film edge over 5 % of the prepared area (measured by build_eval_set check)
+commons_landscape_on_the_jackson_farm_vicinity_of_white_plains_ga_lc: an empty field under a grey sky, no clear subject
+# T-034 (review round 3)
+commons_shulman_s_market_on_n_at_union_street_s_w_washington_d_c_lcc: a child sits on the step (born 1930s or 1940s, possibly alive and identifiable)
+commons_rosskam_dc1: a child walks at the lower left (same series, possibly alive and identifiable)
+commons_car_in_front_of_shulman_s_market_on_n_at_union_st_s_w_washin: same series, children in the frame
+commons_gus_worke_a_farmer_who_came_from_germany_40_years_ago1a35004: film bar with frame numbers beside a dark blue sky, the border cannot be told from the content (film definition 6.4 %)
+commons_moose_calf_51309029548: camera-trap frame with a data bar of text (about 3 % of the area) and the animal cut by the left edge, no clear subject
+commons_bald_eagle_nest_at_huron_national_wildlife_refuge_5000884034: a nest in a tree, the animal is not visible
+commons_birds_and_prescribed_burn_lake_andes_wetland_management_dist: smoke and sky, no animal visible
+commons_central_tower_from_which_cable_buckets_carry_materials_1a342: film border 6.9 % of the cropped source after the trimming (audit_eval_set)
+commons_first_snow_of_the_season_in_the_foothills_of_a88991e: film border 6.2 % of the cropped source (audit_eval_set); its first version was a cache-name collision between four files of one series, now each has its own id
