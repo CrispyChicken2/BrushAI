@@ -22,6 +22,7 @@ rules are kept. Rules (all mechanical, none looks at a method result):
 from __future__ import annotations
 
 import argparse
+import difflib
 import html
 import io
 import json
@@ -63,6 +64,9 @@ SDXL_PROMPTS = Path("configs/eval/sdxl_prompts.yaml")
 TUNING = [  # the images used for tuning so far (T-009 sweep, M1/M2 demos): never in the set
     "earth_apollo17", "great_wave", "kirkjufell", "mona_lisa", "pearl_earring", "starry_night",
 ]  # fmt: skip
+COLOUR_OVERRIDES = {
+    "met_263532": True
+}  # hand-coloured albumen print (contact sheet), not monochrome
 MET_EXCLUDED = {45434}  # The Great Wave off Kanagawa (Met impression), in the T-009 sweep
 TODAY = time.strftime("%Y-%m-%d")
 MET_LICENCE = "CC0 1.0 (Met Open Access, isPublicDomain)"
@@ -333,7 +337,7 @@ def draw_met(
                     source_id=str(oid),
                     width=w,
                     height=h,
-                    colour=not found[0].startswith("photo"),
+                    colour=COLOUR_OVERRIDES.get(f"met_{oid}", not found[0].startswith("photo")),
                     crop_box=box,
                     extra={
                         "classification": meta.get("classification", ""),
@@ -411,16 +415,115 @@ def commons_info(http: Http, titles: list[str]) -> dict[str, dict[str, Any]]:
     return out
 
 
-def photo_stratum(title: str, info: dict[str, Any]) -> str | None:
+def photo_text(title: str, info: dict[str, Any]) -> str:
     meta = {k: strip_html(v["value"]) for k, v in info["extmetadata"].items()}
-    text = " ".join(
+    return " ".join(
         [
             title,
             meta.get("ObjectName", ""),
             meta.get("ImageDescription", ""),
             meta.get("Categories", "").replace("|", " "),
         ]
-    )
+    ).replace("_", " ")
+
+
+# a species category of Commons ("Haliaeetus leucocephalus"): the subject is an animal, not an event
+FWS_BINOMIAL = re.compile(r"(^|\|)[A-Z][a-z]+ [a-z]+( [a-z]+)?(\||$)")
+FWS_PEOPLE_WORDS = [
+    "staff",
+    "volunteers?",
+    "visitors?",
+    "biologists?",
+    "crew",
+    "team",
+    "ceremony",
+    "release",
+    "released",
+    "releasing",
+    "event",
+    "events",
+    "day",
+    "days",
+    "workers?",
+    "photographer",
+    "group",
+    "wedding",
+    "officers?",
+    "agents?",
+    "director",
+    "chief",
+    "students?",
+    "people",
+    "person",
+    "man",
+    "woman",
+    "men",
+    "women",
+    "kids?",
+    "child",
+    "children",
+    "boy",
+    "girl",
+    "family",
+    "tour",
+    "festival",
+    "celebration",
+    "employees?",
+    "interns?",
+    "researchers?",
+    "hunters?",
+    "anglers?",
+    "fishermen",
+    "fisherman",
+    "public",
+    "crowd",
+    "portrait",
+    "handler",
+    "holding",
+    "handling",
+    "banding",
+    "survey",
+    "sampling",
+    "monitoring",
+    "collecting",
+    "tagging",
+    "stocking",
+    "food",
+    "fried",
+    "cooking",
+    "recipe",
+    "searches",
+    "searching",
+    "oiled",
+    "rescue",
+    "rehabilitation",
+    "scientists?",
+    "rangers?",
+    "demonstration",
+    "banded",
+    "manager",
+    "office",
+    "meeting",
+    "award",
+    "interview",
+    "conference",
+    "training",
+    "program",
+    "programme",
+    "hands?",
+    "capture",
+    "captured",
+    "netting",
+    "trapping",
+]
+FWS_PEOPLE = re.compile(
+    r"(" + "|".join(FWS_PEOPLE_WORDS) + r")",
+    re.I,
+)
+
+
+def photo_stratum(title: str, info: dict[str, Any]) -> str | None:
+    text = photo_text(title, info)
     if CHILD.search(text):
         return None
     if ANIMAL.search(text):
@@ -434,12 +537,65 @@ def photo_stratum(title: str, info: dict[str, Any]) -> str | None:
     return None
 
 
+GENERIC_CATEGORY = re.compile(
+    r"Farm Security Administration|Library of Congress|PD US|photographs? (by|of|from)|Images uploaded|"
+    r"\b(19|20)\d\d\b|United States|Color photographs|public domain|Files with|Files from",
+    re.I,
+)
+MAX_SERIES_CATEGORY = (
+    30  # a category shared by more candidates than this is not specific to one place or event
+)
+SERIES_TITLE_RATIO = 0.6
+
+
+def photographers(author: str) -> set[str]:
+    """Normalized photographer names of a Commons ``Artist`` string, so that "Lee, Russell, 1903-1986, photographer"
+    and "Russell Lee" are the same person: lower case, no dates or "photographer", word order ignored."""
+    names: set[str] = set()
+    for part in re.split(r"[;/]", author):
+        part = re.sub(
+            r"\([^)]*\)|\b(photographer|photo|by)\b|\d{4}(-\d{4})?", " ", part, flags=re.I
+        )
+        tokens = [w for w in re.split(r"[\s,.]+", part.lower()) if len(w) > 1]
+        if tokens:
+            names.add(" ".join(sorted(tokens)))
+    return names or {"unknown"}
+
+
+def title_stem(title: str) -> str:
+    return re.sub(
+        r"\s*(LCCN\d+|LOC \d+|\(cropped\))", "", title.removeprefix("File:").rsplit(".", 1)[0]
+    ).lower()
+
+
+def same_series(a: dict[str, Any], b: dict[str, Any], frequent: set[str]) -> bool:
+    """Two Commons photographs of the same photographer that share a place or event (a category that is neither generic
+    nor shared by many candidates) or have similar titles are views of one scene: only one may be in the set."""
+    if a.get("agency") or b.get("agency"):
+        return False  # agency wildlife photographs share species categories, not scenes
+    if not a["photographers"] & b["photographers"]:
+        return False
+    shared = {
+        c
+        for c in a["categories"] & b["categories"]
+        if c not in frequent and not GENERIC_CATEGORY.search(c)
+    }
+    ratio = difflib.SequenceMatcher(None, title_stem(a["title"]), title_stem(b["title"])).ratio()
+    return bool(shared) or ratio >= SERIES_TITLE_RATIO
+
+
+def clean_date(raw: str) -> str:
+    """The date of a Commons file without the Wikidata residue ("date QS:P571,...") or the "Taken on" prefix."""
+    text = re.split(r"date QS", strip_html(raw))[0].replace(" ", " ").strip()
+    return re.sub(r"^Taken on\s+", "", text)
+
+
 def commons_candidates(http: Http) -> list[tuple[str, str, str, dict[str, Any]]]:
     """(title, stratum, licence, info) of the files that pass the licence, format, size and subject rules."""
     out: list[tuple[str, str, str, dict[str, Any]]] = []
     seen: set[str] = set()
-    for category, licence, _label in COMMONS_SOURCES:
-        titles = commons_files(http, category, depth=0)
+    for category, licence, label in COMMONS_SOURCES:
+        titles = commons_files(http, category, depth=1 if label == "fws" else 0)
         print(f"  {category}: {len(titles)} files", flush=True)
         info = commons_info(http, sorted(set(titles)))
         for title, ii in sorted(info.items()):
@@ -459,6 +615,13 @@ def commons_candidates(http: Http) -> list[tuple[str, str, str, dict[str, Any]]]
             stratum = photo_stratum(title, ii)
             if stratum is None:
                 continue
+            if label == "fws" and (
+                stratum != "photo_animal"
+                or not ANIMAL.search(title.replace("_", " "))  # the animal is named in the title
+                or not FWS_BINOMIAL.search(ii["extmetadata"].get("Categories", {}).get("value", ""))
+                or FWS_PEOPLE.search(photo_text(title, ii))
+            ):
+                continue  # modern agency photographs: only wildlife, never anything that mentions people or events
             seen.update({title, stem})
             out.append((title, stratum, licence, ii))
     return out
@@ -478,6 +641,14 @@ def draw_photos(
     )
     out: list[EvalImage] = []
     per_photographer: dict[str, int] = {}
+    cat_count: dict[str, int] = {}
+    for c in cands:
+        for name in set(
+            strip_html(c[3]["extmetadata"].get("Categories", {}).get("value", "")).split("|")
+        ):
+            cat_count[name] = cat_count.get(name, 0) + 1
+    frequent = {c for c, n in cat_count.items() if n > MAX_SERIES_CATEGORY}
+    accepted: list[dict[str, Any]] = []
     for stratum, quota in QUOTAS["photo"].items():
         pool = {c[0]: c for c in cands if c[1] == stratum}
         kept = have.get(stratum, 0)
@@ -490,7 +661,18 @@ def draw_photos(
             )[:60].strip("_")
             meta = {k: strip_html(v["value"]) for k, v in ii["extmetadata"].items()}
             author = meta.get("Artist", "") or "unknown"
-            if fid in rejected or per_photographer.get(author, 0) >= MAX_PER_PHOTOGRAPHER:
+            who = photographers(author)
+            view = {
+                "photographers": who,
+                "categories": set(meta.get("Categories", "").split("|")),
+                "title": title,
+                "agency": licence == FWS,
+            }
+            if (
+                fid in rejected
+                or any(per_photographer.get(n, 0) >= MAX_PER_PHOTOGRAPHER for n in who)
+                or any(same_series(view, other, frequent) for other in accepted)
+            ):
                 continue
             data = download_image(http, ii["url"], RAW / "source" / f"{fid}.jpg")
             with Image.open(io.BytesIO(data)) as im:
@@ -501,16 +683,18 @@ def draw_photos(
             if not is_colour(pixels) or near_tuning(pixels, tuning):
                 continue
             tuning.append(thumb(pixels))
-            per_photographer[author] = per_photographer.get(author, 0) + 1
+            for n in who:
+                per_photographer[n] = per_photographer.get(n, 0) + 1
+            accepted.append(view)
             kept += 1
             out.append(
                 EvalImage(
                     id=fid, category="photo", stratum=stratum, source="commons", dev=False, licence=licence, retrieved=TODAY,
                     sha256=sha256_bytes(data), prepared_sha256=pixel_sha256(pixels), title=meta.get("ObjectName", "") or title.removeprefix("File:"),
-                    author=author, date=meta.get("DateTimeOriginal", "").split("<")[0].strip(),
+                    author=author, date=clean_date(ii["extmetadata"].get("DateTimeOriginal", {}).get("value", "")),
                     page_url="https://commons.wikimedia.org/wiki/" + urllib.parse.quote(title.replace(" ", "_")),
                     url=ii["url"], source_id=title, width=ii["width"], height=ii["height"], colour=True, crop_box=box,
-                    extra={"commons_sha1": ii["sha1"], "commons_licence": meta.get("LicenseShortName", "")},
+                    extra={"commons_sha1": ii["sha1"], "commons_licence": meta.get("LicenseShortName", ""), "commons_categories": meta.get("Categories", "")},
                 )
             )  # fmt: skip
             print(f"  {stratum}: {title[:70]!r} ({kept}/{quota})", flush=True)
@@ -542,6 +726,29 @@ def sdxl_entries() -> list[EvalImage]:
 # ----------------------------------------------------------------------------- stages
 
 
+def _old_header() -> dict[str, Any]:
+    return load_manifest(MANIFEST)[0] if MANIFEST.exists() else {}
+
+
+def carry_over_sdxl(entries: list[EvalImage], previous: Path) -> list[EvalImage]:
+    """Keep the generation results (hashes, retrieval date, regeneration log) of an existing manifest: the SDXL images
+    do not depend on the draw, and a redraw of the paintings and photographs must not erase them."""
+    if not previous.exists():
+        return entries
+    _, old = load_manifest(previous)
+    by_id = {im.id: im for im in old if im.category == "sdxl"}
+    for im in entries:
+        if im.id in by_id:
+            keep = by_id[im.id]
+            im.sha256, im.prepared_sha256, im.retrieved, im.extra = (
+                keep.sha256,
+                keep.prepared_sha256,
+                keep.retrieved,
+                keep.extra,
+            )
+    return entries
+
+
 def cmd_curate(args: argparse.Namespace) -> None:
     from brushstroke.eval.dataset import draw_dev_split
 
@@ -555,18 +762,20 @@ def cmd_curate(args: argparse.Namespace) -> None:
     for im in images:
         have[im.stratum] = have.get(im.stratum, 0) + 1
     images += draw_photos(http, rng, tuning, rejected, have)
-    images += sdxl_entries()
+    images += carry_over_sdxl(sdxl_entries(), MANIFEST)
     dev = draw_dev_split(images, rng)
     for im in images:
         im.dev = im.id in dev
     spec = yaml.safe_load(SDXL_PROMPTS.read_text(encoding="utf-8"))
+    old_versions = _old_header().get("sdxl", {}).get("versions")
+    sdxl_header = {**spec["settings"], **({"versions": old_versions} if old_versions else {})}
     header = {
         "protocol": "docs/design/evaluation.md section 1 (T-022), curated by scripts/build_eval_set.py (T-024)",
         "draw_seed": DRAW_SEED,
         "curated": TODAY,
         "size": 512,
         "preparation": "centre crop to a square (or crop_box), Pillow BOX (area) filter to 512x512; prepared_sha256 = SHA-256 of the uint8 RGB pixels",
-        "sdxl": spec["settings"],
+        "sdxl": sdxl_header,
     }
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
     dump_manifest(MANIFEST, header, images)
@@ -601,6 +810,43 @@ def cmd_sheets(args: argparse.Namespace) -> None:
     print(f"sheets in {out}")
 
 
+def frequent_categories(items: list[dict[str, Any]]) -> set[str]:
+    count: dict[str, int] = {}
+    for it in items:
+        for c in it["categories"]:
+            count[c] = count.get(c, 0) + 1
+    return {
+        c for c, n in count.items() if n > 3
+    }  # in the final set a category shared by more than 3 images is generic
+
+
+def dark_border_fraction(pixels: np.ndarray) -> float:
+    """Fraction of the area taken by near-black border rows and columns (>= 90 % of their pixels under 40)."""
+    dark = np.asarray(Image.fromarray(pixels).convert("L")) < 40
+    n = 0
+    top = bottom = left = right = 0
+    h, w = dark.shape
+    while top < h // 2 and dark[top].mean() >= 0.9:
+        top += 1
+    while bottom < h // 2 and dark[h - 1 - bottom].mean() >= 0.9:
+        bottom += 1
+    while left < w // 2 and dark[:, left].mean() >= 0.9:
+        left += 1
+    while right < w // 2 and dark[:, w - 1 - right].mean() >= 0.9:
+        right += 1
+    n = top * w + bottom * w + (left + right) * (h - top - bottom)
+    return n / (h * w)
+
+
+def photographer_counts(images: list[EvalImage]) -> dict[str, int]:
+    count: dict[str, int] = {}
+    for im in images:
+        if im.source == "commons":
+            for n in photographers(im.author):
+                count[n] = count.get(n, 0) + 1
+    return dict(sorted(count.items(), key=lambda kv: -kv[1]))
+
+
 def cmd_check(args: argparse.Namespace) -> None:
     """No image of the set is, or looks like, an image used for tuning (T-009 sweep, M1/M2 demos)."""
     from brushstroke.eval.dataset import validate_manifest
@@ -615,6 +861,31 @@ def cmd_check(args: argparse.Namespace) -> None:
             raise SystemExit(f"{path} is missing: run python -m scripts.fetch_eval_set first")
         t = thumb(np.asarray(Image.open(path).convert("RGB")))
         worst[im.id] = max((float((t * u).mean()) for u in tuning), default=0.0)
+    commons = [
+        {
+            "id": im.id,
+            "photographers": photographers(im.author),
+            "categories": set(str(im.extra.get("commons_categories", "")).split("|")),
+            "title": im.source_id,
+            "agency": im.licence == FWS,
+        }
+        for im in images
+        if im.source == "commons"
+    ]
+    series = [
+        (a["id"], b["id"])
+        for k, a in enumerate(commons)
+        for b in commons[k + 1 :]
+        if same_series(a, b, frequent_categories(commons))
+    ]
+    dark = {
+        im.id: dark_border_fraction(
+            np.asarray(Image.open(RAW / "prepared" / f"{im.id}.png").convert("RGB"))
+        )
+        for im in images
+        if im.source
+        == "commons"  # scanned slides: dark backgrounds of paintings are content, not borders
+    }
     ids = {im.source_id for im in images if im.source == "met"}
     excluded = sorted(str(i) for i in MET_EXCLUDED if str(i) in ids)
     overlap = {k: round(v, 3) for k, v in worst.items() if v > 0.9}
@@ -625,13 +896,17 @@ def cmd_check(args: argparse.Namespace) -> None:
         "max_thumbnail_correlation": round(max(worst.values()), 3),
         "near_duplicates_of_tuning_images": overlap,
         "excluded_met_objects_present": excluded,
+        "same_series_pairs": series,
+        "max_dark_border_area": round(max(dark.values()), 4),
+        "dark_border_over_5_percent": {k: round(v, 4) for k, v in dark.items() if v > 0.05},
+        "photographers_per_name": photographer_counts(images),
         "manifest_problems": problems,
     }
     out = Path("docs/experiments/data/eval_set")
     out.mkdir(parents=True, exist_ok=True)
     (out / "overlap_check.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps(report, indent=1))
-    if overlap or excluded or problems:
+    if overlap or excluded or problems or series or report["dark_border_over_5_percent"]:
         raise SystemExit(1)
 
 
@@ -645,8 +920,11 @@ def cmd_card(args: argparse.Namespace) -> None:
     count = Counter((i.category, i.stratum, i.licence) for i in images)
     dev = Counter((i.category, i.stratum) for i in images if i.dev)
     lines = ["| category | stratum | n | dev | licence |", "|---|---|---|---|---|"]
+    shown: set[tuple[str, str]] = set()
     for (cat, stratum, lic), n in sorted(count.items()):
-        lines.append(f"| {cat} | {stratum} | {n} | {dev.get((cat, stratum), 0)} | {lic} |")
+        n_dev = "" if (cat, stratum) in shown else str(dev.get((cat, stratum), 0))
+        shown.add((cat, stratum))
+        lines.append(f"| {cat} | {stratum} | {n} | {n_dev} | {lic} |")
     lines += [
         "",
         "| id | category / stratum | title | author | date | dev |",

@@ -3,9 +3,10 @@
     python -m scripts.fetch_eval_set [--out data/raw/eval] [--check] [--insecure] [--sdxl]
 
 For each Met / Wikimedia Commons image of ``configs/eval/eval_set.yaml``: download the source file to
-``<out>/source/<id>.<ext>`` unless it is already there, check its SHA-256 against the manifest (a mismatch is an
-error, never silently accepted), prepare the 512 x 512 image (centre crop or the manifest ``crop_box``, box filter)
-and check the SHA-256 of its pixels, then write ``<out>/prepared/<id>.png``. The 30 SDXL images are not downloaded:
+``<out>/source/<id>.<ext>`` unless it is already there, prepare the 512 x 512 image (centre crop or the manifest
+``crop_box``, box filter) and check the SHA-256 of its pixels against the manifest: a pixel mismatch is an error, never
+silently accepted. The SHA-256 of the file is compared too; a museum can re-encode a file without changing a pixel, so a
+file mismatch with identical pixels is reported ("file bytes differ") and accepted. Then write ``<out>/prepared/<id>.png``. The 30 SDXL images are not downloaded:
 ``--sdxl`` runs ``python -m scripts.generate_eval_sdxl`` (which verifies their hashes); without it they are only verified
 if they already exist. ``--check`` downloads nothing and reports what is missing or wrong. The files are never committed.
 """
@@ -91,22 +92,22 @@ def main(argv: list[str] | None = None) -> None:
     if problems:
         raise SystemExit("invalid manifest:\n  " + "\n  ".join(problems))
     http = None if args.check else Http(args.insecure)
-    bad = 0
+    bad_files = bad_sdxl = (
+        0  # the failures of the downloaded images are never masked by the SDXL result
+    )
     for im in images:
-        status = (
-            verify_sdxl(im, args.out) if im.category == "sdxl" else fetch_one(im, args.out, http)
-        )
-        bad += not status.startswith("ok")
+        is_sdxl = im.category == "sdxl"
+        status = verify_sdxl(im, args.out) if is_sdxl else fetch_one(im, args.out, http)
+        ok = status.startswith("ok")
+        bad_sdxl += is_sdxl and not ok
+        bad_files += not is_sdxl and not ok
         print(f"{im.id}: {status}")
     if args.sdxl and not args.check:
         subprocess.run(
             [sys.executable, "-m", "scripts.generate_eval_sdxl", "--out", str(args.out)], check=True
         )
-        bad = (
-            0
-            if all(verify_sdxl(im, args.out) == "ok" for im in images if im.category == "sdxl")
-            else 1
-        )
+        bad_sdxl = sum(verify_sdxl(im, args.out) != "ok" for im in images if im.category == "sdxl")
+    bad = bad_files + bad_sdxl
     print(f"{len(images)} images, {bad} not ok")
     if bad:
         raise SystemExit(1)

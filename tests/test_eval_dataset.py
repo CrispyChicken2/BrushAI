@@ -255,3 +255,114 @@ def test_fetch_verifies_checksums_and_prepares_the_image(tmp_path: Path) -> None
     assert "prepared" in fetch.fetch_one(im, tmp_path, None)
     path.unlink()
     assert fetch.fetch_one(im, tmp_path, None) == "missing"
+
+
+def test_photographer_names_are_normalized_before_the_cap_is_counted() -> None:
+    same = [
+        "Russell Lee",
+        "Lee, Russell, 1903-1986, photographer",
+        "Russell Lee (American, 1903-1986)",
+    ]
+    assert {frozenset(build.photographers(a)) for a in same} == {frozenset({"lee russell"})}
+    both = build.photographers(
+        "Delano, Jack, photographer; Wolcott, Marion Post, 1910-1990, photographer"
+    )
+    assert both == {"delano jack", "marion post wolcott"}
+    assert build.photographers("Marion Post Wolcott") <= both
+    assert build.photographers("") == {"unknown"}
+    assert build.photographers("U.S. Fish and Wildlife Service") == {"and fish service wildlife"}
+
+
+def test_two_views_of_one_scene_are_one_series() -> None:
+    def view(title: str, cats: set[str], who: str = "Louise Rosskam", agency: bool = False) -> dict:
+        return {
+            "photographers": build.photographers(who),
+            "categories": cats,
+            "title": title,
+            "agency": agency,
+        }
+
+    shared = {
+        "Southwest, Washington, D.C.",
+        "Demolished buildings in Washington, D.C.",
+        "PD US FSA/OWI",
+    }
+    a = view("File:Rosskam-dc1.jpg", shared)
+    b = view("File:Shulman's Market at the corner.jpg", shared | {"1931 Chevrolet automobiles"})
+    assert build.same_series(a, b, frequent=set())
+    assert not build.same_series(
+        a, view("File:Other.jpg", shared, who="Jack Delano"), frequent=set()
+    )
+    generic = {"PD US FSA/OWI", "Color photographs from the Farm Security Administration"}
+    assert not build.same_series(
+        view("File:A one.jpg", generic), view("File:Zzz.jpg", generic), frequent=set()
+    )
+    assert not build.same_series(
+        a, b, frequent=set(shared)
+    )  # categories shared by many files are not specific
+    assert build.same_series(
+        view("File:Barn, Vermont LCCN1.jpg", set()),
+        view("File:Barn, Vermont LCCN2.jpg", set()),
+        frequent=set(),
+    )
+    assert not build.same_series(
+        a, view("File:Rosskam-dc2.jpg", shared, agency=True), frequent=set()
+    )  # agency photos
+
+
+def test_commons_dates_lose_the_wikidata_residue() -> None:
+    raw = 'August 1940<div style="display: none;">date QS:P571,+1940-08-00T00:00:00Z/10</div>'
+    assert build.clean_date(raw) == "August 1940"
+    assert build.clean_date("1941-02") == "1941-02"
+    assert build.clean_date("Taken on 22 June 2007, 14:32:20") == "22 June 2007, 14:32:20"
+
+
+def test_the_dark_border_measure_sees_black_bars_only() -> None:
+    img = np.full((100, 100, 3), 150, dtype=np.uint8)
+    assert build.dark_border_fraction(img) == 0.0
+    img[:10] = 0
+    img[:, -5:] = 0
+    assert build.dark_border_fraction(img) == pytest.approx((10 * 100 + 5 * 90) / 10_000)
+
+
+def test_a_redraw_keeps_the_sdxl_generation_results(tmp_path: Path) -> None:
+    header, images = valid_set()
+    old = tmp_path / "old.yaml"
+    ds.dump_manifest(old, header, images)
+    fresh = [
+        EvalImage(
+            id=im.id, category="sdxl", stratum=im.stratum, source="sdxl", dev=False,
+            licence=im.licence, retrieved="", sha256="", prepared_sha256="",
+            prompt="p", seed=im.seed,
+        )
+        for im in images
+        if im.category == "sdxl"
+    ]  # fmt: skip
+    kept = build.carry_over_sdxl(fresh, old)
+    originals = {im.id: im for im in images}
+    assert all(k.sha256 == originals[k.id].sha256 and k.retrieved == "2026-10-26" for k in kept)
+    assert build.carry_over_sdxl(fresh, tmp_path / "missing.yaml") == fresh
+
+
+def test_a_mismatch_of_a_downloaded_image_is_not_masked_by_the_sdxl_result(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    header, images = valid_set()
+    monkeypatch.setattr(fetch, "load_manifest", lambda path: (header, images))
+    monkeypatch.setattr(fetch, "validate_manifest", lambda h, i: [])
+    monkeypatch.setattr(
+        fetch,
+        "fetch_one",
+        lambda im, out, http: (
+            "SHA-256 MISMATCH (prepared pixels)"
+            if im.id.endswith("_00") and im.category == "painting"
+            else "ok"
+        ),
+    )
+    monkeypatch.setattr(fetch, "verify_sdxl", lambda im, out: "ok")
+    monkeypatch.setattr(fetch.subprocess, "run", lambda *a, **k: None)
+    with pytest.raises(SystemExit) as exc:
+        fetch.main(["--out", str(tmp_path), "--sdxl"])
+    assert exc.value.code == 1  # the SDXL regeneration succeeded, the paintings still fail
+    monkeypatch.setattr(fetch, "fetch_one", lambda im, out, http: "ok")
+    fetch.main(["--out", str(tmp_path), "--sdxl"])  # all ok: no exit
