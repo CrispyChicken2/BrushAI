@@ -1,0 +1,140 @@
+{
+ "T19_seed0": {
+  "spikes": [
+   37450,
+   46850,
+   52025,
+   61600,
+   73425
+  ],
+  "steps": 112640
+ },
+ "T19_seed1": {
+  "spikes": [
+   35625,
+   48550,
+   62675,
+   72625
+  ],
+  "steps": 112640
+ },
+ "T19_seed2": {
+  "spikes": [],
+  "steps": 112640
+ },
+ "A_s0": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.8126999735832214,
+  "theta_abs_max": 1.2361539602279663
+ },
+ "A_s1": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.8051537871360779,
+  "theta_abs_max": 1.205172061920166
+ },
+ "A_s2": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.7823882102966309,
+  "theta_abs_max": 2.335463762283325
+ },
+ "A_s0v": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.8139029145240784,
+  "theta_abs_max": 2.4495956897735596
+ },
+ "A_s1v": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.8084283471107483,
+  "theta_abs_max": 1.172104835510254
+ },
+ "A_s5": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.7922319769859314,
+  "theta_abs_max": 1.2403241395950317
+ },
+ "A_s6": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.7777757048606873,
+  "theta_abs_max": 1.321547031402588
+ },
+ "R_s0": {
+  "spike": null,
+  "scan": [],
+  "steps": 60000,
+  "enc_std_min": 0.8166669607162476,
+  "theta_abs_max": 1.2405802011489868
+ },
+ "T19_s0": {
+  "scan": [],
+  "steps": 48000
+ },
+ "T19_s1": {
+  "scan": [],
+  "steps": 48000
+ },
+ "onset_seed0": {
+  "departure": 20900,
+  "alerts": [
+   33175,
+   35475,
+   37425,
+   41900,
+   46825
+  ],
+  "first_crossings": {
+   "total": 33175,
+   "pixel": 33175,
+   "gt": null,
+   "w": 33175,
+   "decision": 33575
+  }
+ },
+ "onset_seed1": {
+  "departure": 31100,
+  "alerts": [
+   31175,
+   35625,
+   38425,
+   41650,
+   45625
+  ],
+  "first_crossings": {
+   "total": 31175,
+   "pixel": 31125,
+   "gt": null,
+   "w": 31175,
+   "decision": 31750
+  }
+ },
+ "alerts_healthy": {
+  "T19_seed2": [],
+  "A_s0": [],
+  "A_s1": [],
+  "A_s2": [],
+  "A_s0v": [],
+  "A_s1v": [],
+  "A_s5": [
+   58735
+  ],
+  "A_s6": [
+   59583
+  ],
+  "R_s0": [],
+  "T19_s0": [],
+  "T19_s1": []
+ }
+}

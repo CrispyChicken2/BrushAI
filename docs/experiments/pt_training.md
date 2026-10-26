@@ -220,7 +220,7 @@ Stroke metrics of the same models:
 - **The classes.** Exactly equivalent for the renderer: `theta` mod 2 and `(w, h, theta + 1) = (-w, -h, theta)` (alpha error 0 with the training brushes, 5e-5 with the inference ones). The mirror class (`h -> -h`) is *not* exact: 14.4 % of the stroke area differs. The Gaussian `D_W` is blind to the whole swap class, so only the parameter L1 prefers the ground-truth convention.
 - **H2 (invariant `D_L1`): holds at the `mirror`, `rot180` and `swap` levels for both T-014 groups, not at `exact`** (the T-014 outlier seed uses the mirror, not the exact class). `mirror` is the primary level: its bias on clean models is 0.1 %, against 3.2 % (`rot180`) and 17.4 % (`swap`), which lower clean models too. The clean-bias column was added after a first look at the numbers, not pre-registered.
 - **H1, official recipe: met by A and C, not by B.** A and C: 0 / 3 outlier seeds, invariant total 3.753 against 3.767 (baseline), t = -0.43 and -0.57, so no quality cost and no gain beyond noise (3 seeds). B keeps the sign free by design (the invariant L1 removes the penalty): 2 / 3 seeds end with negative signs (one `h < 0`, one `w < 0`), its raw `D_L1` is 0.255 but its invariant total is as good as the others. Best option by the pre-registered rule: **A** (3.7526 against C's 3.7533, a difference far inside the seed noise; A is also the only one that makes the convention hold by construction).
-- **Negative result, stretched recipe: option A is unstable.** Seeds 0 and 1 degrade in the second half of the run (total from about 4.2 to about 6.1 and 6.8 in the training log, held-out invariant total 9.5 and 9.0, `L_pixel` 0.110, all 8 strokes of every patch painted), seed 2 behaves (3.549, better than the baseline's 3.556 +- 0.014). The pre-registered Welch rule reads t = +1.99 < 2.13, hence "not worse" and **H1 met on paper**; this is the test's lack of power on a bimodal 3-seed outcome, not evidence of equivalence. Our verdict: **A does not hold on the stretched recipe** (2 / 3 divergent seeds against 0 / 3 for the baseline). The cause was not investigated (candidates: the softplus floor on `w`, `h` giving vanishing gradients for small strokes, the unbounded `theta - floor(theta)` jump in the matching cost, the constant learning rate of 1e-4 over 400 epochs). The other options were not run stretched (protocol: best option only), so whether C is stable there is unknown.
+- **Negative result, stretched recipe: option A is unstable.** Seeds 0 and 1 degrade in the second half of the run (total from about 4.2 to about 6.1 and 6.8 in the training log, held-out invariant total 9.5 and 9.0, `L_pixel` 0.110, all 8 strokes of every patch painted), seed 2 behaves (3.549, better than the baseline's 3.556 +- 0.014). The pre-registered Welch rule reads t = +1.99 < 2.13, hence "not worse" and **H1 met on paper**; this is the test's lack of power on a bimodal 3-seed outcome, not evidence of equivalence. Our verdict: **A does not hold on the stretched recipe** (2 / 3 divergent seeds against 0 / 3 for the baseline). The cause was not found in T-023 (the degradation did not reproduce in 9 replicates; see the T-023 section; candidates: the softplus floor on `w`, `h` giving vanishing gradients for small strokes, the unbounded `theta - floor(theta)` jump in the matching cost, the constant learning rate of 1e-4 over 400 epochs). The other options were not run stretched (protocol: best option only), so whether C is stable there is unknown.
 - **Practical outcome.** The invariant `D_L1` (mirror level) is what to report from now on. For training, A or C remove the convention outliers on the official recipe; on the stretched recipe none of the options is validated.
 
 ## T-020: a usable validation curve (BatchNorm statistics of the validation)
@@ -247,3 +247,68 @@ Diagnostic run of 8000 steps (seed 0, official recipe, validation every 100 step
 - Training weights (40 steps on the CPU, batch 16, SHA-256 of the state dict): `running` d700ab75d5d5497c, `recalibrate` d700ab75d5d5497c, `batch` d700ab75d5d5497c -> **identical**.
 
 <!-- END BN -->
+
+## T-023: late-training degradation of convention option A on the stretched recipe
+
+**Verdict: root cause not found; the degradation did not reproduce.** Option A (`model.convention=positive`) on the stretched recipe (`schedule.n_epochs=400`) degraded in 2 of the 3 T-019 runs and in none of the 9 option-A replicates run here (7 traces with seeds 0, 1, 2, 5 and 6, and the exact T-019 command re-run for seeds 0 and 1 up to step 48,000; the raw-convention control is a tenth run, also without spike). Hypotheses H1 to H4 could therefore not be tested by a causal branch experiment (no checkpoint before a spike could be captured), and no fix is proposed.
+
+![Total loss of the T-019 runs and of the replicates](pt_instability.png)
+
+### Onset, from the stored T-019 logs
+
+- **The 1.25x rule is a late marker.** Its first crossings are at 37,450 (seed 0) and 35,625 (seed 1), then about every 10,000 steps (5 and 4 spikes in 112,640 steps); seed 2 has none. The departure from the same-seed rerun (`T19_s*`, 100-step mean of the total loss more than 0.1 above it; the largest difference in the first 20,000 steps is 0.05) is far earlier: **step 31,100 for seed 1** (4,500 steps before its spike) and **step 20,900 for seed 0**, which is a stall (total 4.30 to 4.38 while the rerun and the healthy seed 2 go down to 4.10 to 4.18) followed by excursions at about 30,800 and 33,175 before the spike. So seed 1 is an abrupt excursion, seed 0 a slow stall that ends in excursions: "abrupt jump" does not describe seed 0.
+- **First-moving term.** With the early alert (100-step mean more than 4 standard deviations above the median of the previous 2000 steps; table below), the first excursion of each seed shows the same order at the resolution of the log (25 steps): the `pixel` and `w` (Wasserstein) terms cross first (seed 1: pixel 31,125, total and `w` 31,175; seed 0: pixel, `w` and total at 33,175), the `decision` term follows 400 to 575 steps later (seed 1: 31,750; seed 0: 33,575) and the `gt` term (L1 on the parameters) never crosses. The later excursions do not keep this order (simultaneous within 25 to 75 steps, or only the `decision` term moves), so it is a property of the first excursion only, on 2 seeds. Read as a hint, not a result: the shape terms (position and size of the strokes, `pixel`, `w`) degrade before the stroke-count decision, and the parameter L1 that carries the `theta` wrap does not lead, which weighs against the `theta` discontinuity in the L1 (H2) and says nothing about the matching cost.
+- The same scan finds no spike in the controls of T-019/T-021: option A on the official length (3 seeds) and the raw convention on the stretched recipe (3 seeds), and none in the raw-convention trace here. The early alert fires on neither healthy T-019 run nor on the exact-command reruns before 48,000 steps.
+- Final state of the two degraded runs (stored `latest.pt`): the network outputs an input-independent constant for every stroke and patch. The CNN and 1x1-conv activations still vary (std about 0.57) but the `transformer.encoder` output is nearly constant (std below 0.01 on a batch of 64 patches, 0.0003 to 0.008 depending on the batch, against 0.72 for the healthy seed 2): a rank collapse of the transformer encoder. `softplus(w)`, `softplus(h)` are not saturated (about 0.41 and 0.40). Seed 0 has a raw `theta` of about -46.5.
+
+### Replicates (0 spike out of 9)
+
+The replicates are not 9 independent draws: `A_s0`, `A_s0v` and `T19_s0` share seed 0 (and likewise for seed 1), so the effective number of independent runs is 5 (seeds 0, 1, 2, 5, 6) and the probabilities below are optimistic.
+
+Same recipe and seeds as T-019, instrumented per step (gradient norm per group, Adam update ratio, `enc_std`, raw `theta`, fraction of `theta` within 0.02 of the wrap boundary). GPU training is not bitwise reproducible, and the replicates share the T-019 data seeds, yet seed 1 follows T-019 until about step 31,000 and seed 0 until about 21,000, and both then stay on a healthy path (total about 4.0 at 45,000 against 4.5 and 4.2 for T-019 on the same steps). In the table, `validation: T-019` means the periodic validation with running BatchNorm statistics that the T-019 runs had; `T19_s*` are runs of the exact `scripts.train_pt` command of T-019 (stopped at 48,000 steps), so the difference with T-019 is not my training loop, nor the validation. The code paths used for training are unchanged since T-019 (the later commits only touch validation and a comment).
+
+If the spike rate were the 2 / 3 seen in T-019, 0 / 9 would have probability (1/3)^9 = 5e-5 (with 5 independent seeds, (1/3)^5 = 0.004); pooling the three T-019 runs with the nine replicates, the T-019 outcome (2 spikes in 3 runs) has probability about 0.045 under a common rate (hypergeometric, 2 / 12). So the T-019 failure is either a rare event (rate of the order of 10 to 20 %) or due to a condition of that session that I could not recover (concurrent load, GPU state, driver); the logs do not contain it.
+
+### Verdict per hypothesis
+
+| hypothesis | verdict | evidence |
+|---|---|---|
+| H1: saturation of the positive activation | **not supported** | softplus outputs of the collapsed models are about 0.4, far from the floor; the collapse is in the transformer encoder, not at the head. No causal test (no spike to branch from) |
+| H2: `theta` wrap discontinuity | **not supported, not excluded** | the parameter L1 (`gt`, which carries `theta`) is the last term to move and never crosses at the first excursions, while `pixel` and `w` lead; in healthy runs raw `theta` stays within about 1 to 2.5 and at most 6 % of the angles are near the boundary, without damage; the raw -46 of seed 0 appears in the collapsed state, so it is a consequence. No causal test |
+| H3: constant learning rate of the stretched recipe | **not supported** | official and stretched recipes have identical lr for steps < 51,200 and the first spikes are at 35,625 and 37,450; no replicate spikes under the same lr to step 60,000; the raw control and option A on the official length never spike |
+| H4: BatchNorm statistics / numerics | **not supported, not excluded** | the replicates and the exact-command runs use the same fp32 BatchNorm path as T-019 and stay healthy; no causal test |
+
+Other observations: gradient norms of the healthy runs reach 430 to 630 against a median of 40 to 45 (a factor 10 to 15) without any consequence, so a single large gradient is not sufficient to trigger the collapse. The transformer encoder output std of healthy replicates is 0.78 to 0.89.
+
+### What would be needed
+
+A branch from a checkpoint before the onset, with one factor changed at a time (`--lr-scale`, `--theta none`, `--wh exp`, `--bn-eval`, `--grad-clip`, `--beta1`; implemented and unit-tested in `scripts/exp_pt_instability.py branch`, including an end-to-end test). The first version of the tool could not give that branch point: the 1.25x rule fires 4,500 steps (seed 1) to more than 4,200 steps (seed 0) after the onset, and 4,000 steps of checkpoints were kept. The tool now has an online early alert (the score above), which fires at 31,175 for seed 1, 75 steps after its departure at 31,100, and at 33,175 for seed 0. The first alert of an episode freezes the checkpoint rotation for 10,000 steps (the spike follows the first alert by 4,300 to 4,500 steps in the two stored runs, so the hold must be well above that; with a hold of 4,000 it expired just before the spike, and the branch point was then taken from the second alert, inside the excursion). `summary.json` records `alert_before_spike`, the first alert of the episode that led to the spike, and `alerts`, all of them. The rotation keeps the last 28 checkpoints (14,000 steps, 28 files of 109 MB), and `branch --back 2000` (default) starts 2,000 steps before that first alert: for seed 1 that is `ckpt_29000`, before the departure at 31,100. The seed-0 stall (departure at 20,900, which is 12,275 steps before its first alert) is only reachable with `--back 12500` (`ckpt_20500`, the oldest retained one being `ckpt_19500`): a live run has no same-seed rerun, so the stall itself raises no alert, and a stall longer than about 13,000 steps before the first alert cannot be branched from before its onset with this tool. The alert has false alarms on healthy runs: 2 of the 11 healthy logs (`A_s5` at 58,735 and `A_s6` at 59,583, both transients of a few steps); they cost only a pause of the rotation.
+
+Proposed ticket (P3): run option A stretched over many seeds in the background (about 10 runs of 60,000 steps at the observed rate, 3 hours each when two run side by side), stop at the first spike following an alert, then run the single-factor branches from the retained checkpoints; or accept that option A is not validated on the stretched recipe, as stated in T-019 (the official recipe is unaffected).
+
+### Replicate table (generated: `python -m scripts.exp_pt_instability report`)
+
+<!-- BEGIN T023 -->
+
+| run | source | convention | validation | steps | spikes (first) | `enc_std` (min / median) | raw theta max (median / max) |
+|---|---|---|---|---|---|---|---|
+| T-019 seed 0 | stored log | positive | T-019 | 112640 | 5 (37450) | - | - |
+| T-019 seed 1 | stored log | positive | T-019 | 112640 | 4 (35625) | - | - |
+| T-019 seed 2 | stored log | positive | T-019 | 112640 | 0 (-) | - | - |
+| A_s0 | trace (this study) | positive | none | 60000 | 0 (-) | 0.813 / 0.848 | 0.95 / 1.24 |
+| A_s1 | trace (this study) | positive | none | 60000 | 0 (-) | 0.805 / 0.844 | 0.96 / 1.21 |
+| A_s2 | trace (this study) | positive | none | 60000 | 0 (-) | 0.782 / 0.820 | 1.45 / 2.34 |
+| A_s0v | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.814 / 0.849 | 1.18 / 2.45 |
+| A_s1v | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.808 / 0.844 | 0.88 / 1.17 |
+| A_s5 | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.792 / 0.835 | 0.98 / 1.24 |
+| A_s6 | trace (this study) | positive | T-019 | 60000 | 0 (-) | 0.778 / 0.819 | 0.79 / 1.32 |
+| R_s0 | trace (this study) | raw | none | 60000 | 0 (-) | 0.817 / 0.850 | 0.85 / 1.24 |
+| T19_s0 | `scripts.train_pt`, T-019 command | positive | T-019 | 48000 | 0 (-) | - | - |
+| T19_s1 | `scripts.train_pt`, T-019 command | positive | T-019 | 48000 | 0 (-) | - | - |
+
+| T-019 seed | departs from its rerun | first alerts (before 48,000) | first step with score > 4, per term at the first alert (total / pixel / gt / w / decision) | first 1.25x spike |
+|---|---|---|---|---|
+| 0 | 20900 | 33175, 35475, 37425, 41900, 46825 | 33175 / 33175 / None / 33175 / 33575 | 37450 |
+| 1 | 31100 | 31175, 35625, 38425, 41650, 45625 | 31175 / 31125 / None / 31175 / 31750 | 35625 |
+
+<!-- END T023 -->
