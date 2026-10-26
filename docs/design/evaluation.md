@@ -426,3 +426,15 @@ Defects found by the review of the first realization, corrected and redrawn (the
    `fetch_eval_set --sdxl` no longer hides a failure of the downloaded images behind the SDXL result.
 
 Affected runs: none. The replay of the curation (`python -m scripts.build_eval_set curate`, same cached API data and live Commons) reproduces the manifest.
+
+### 2026-10-26 (T-024, review round 2, still before any method run)
+
+1. **Dark film borders (1.2.3).** The trimming and the check scanned from the outermost row and stopped at a 1-2 px light edge line, so three slides kept 6.4 % of near-black
+   border while the record said 0.4 %. Both now skip up to three light edge lines (scaled to the source size) before the band; the three slides were redrawn or trimmed, the check
+   finds at most 4.7 % on the FSA slides, and the measure is applied to the slides only (dark backgrounds of paintings and animals are content).
+2. **Strata.** The keyword "mill" put a mountain scene in the object stratum: it is removed from the object words (a few object words added), and portraits, objects and scenes were re-verified on the contact sheets. Prokudin-Gorsky plates are dropped (sepia reproductions, not colour).
+   The cap per photographer is 4 (it was 3): without the Prokudin plates the FSA pool could not fill the strata at 3.
+3. **People in agency photographs.** The wording filter was not enough: the contact sheets still showed staff and visitors. A COCO person detector (torchvision Faster R-CNN MobileNetV3, score above 0.4, any size) now rejects any agency
+   photograph with a person, in the draw and again in `build_eval_set check` (0 detections on the final set). The word list of the filter matches substrings (it over-excludes, never under-excludes), left as is.
+
+Affected runs: none. The dev split was redrawn with the rest.

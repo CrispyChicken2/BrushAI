@@ -270,7 +270,7 @@ def test_photographer_names_are_normalized_before_the_cap_is_counted() -> None:
     assert both == {"delano jack", "marion post wolcott"}
     assert build.photographers("Marion Post Wolcott") <= both
     assert build.photographers("") == {"unknown"}
-    assert build.photographers("U.S. Fish and Wildlife Service") == {"and fish service wildlife"}
+    assert build.photographers("U.S. Fish and Wildlife Service") == {"fish service wildlife"}
 
 
 def test_two_views_of_one_scene_are_one_series() -> None:
@@ -366,3 +366,38 @@ def test_a_mismatch_of_a_downloaded_image_is_not_masked_by_the_sdxl_result(
     assert exc.value.code == 1  # the SDXL regeneration succeeded, the paintings still fail
     monkeypatch.setattr(fetch, "fetch_one", lambda im, out, http: "ok")
     fetch.main(["--out", str(tmp_path), "--sdxl"])  # all ok: no exit
+
+
+def test_a_thin_light_edge_line_in_front_of_a_dark_film_band_is_seen_through() -> None:
+    img = np.full((512, 512, 3), 160, dtype=np.uint8)
+    img[:, :18] = 8  # a 18 px black film edge on the left ...
+    img[:, 0] = 200  # ... behind a 1 px light line at the very edge
+    img[:21] = 8
+    img[0] = 180
+    assert build.dark_border_fraction(img) == pytest.approx((21 * 512 + 18 * (512 - 21)) / 512**2)
+    big = Image.fromarray(np.kron(img, np.ones((4, 4, 1), dtype=np.uint8)))  # 2048 px source
+    ok, box = build.border_crop_box(big, lenient=True)
+    assert ok and box is not None and box[0] >= 18 * 4 and box[1] >= 21 * 4
+    plain = Image.fromarray(np.full((900, 900, 3), 150, dtype=np.uint8))
+    assert build.border_crop_box(plain, lenient=True) == (True, None)
+    assert (
+        build.edge_band(np.array([False, False, False, False, True, True]), 6) == 0
+    )  # light zone too thick
+    assert build.edge_band(np.array([False, True, True, False]), 6) == 3
+
+
+def test_a_detected_person_is_what_has_person_reports(monkeypatch: pytest.MonkeyPatch) -> None:
+    import torch
+
+    def detector(scores: list[float], labels: list[int]) -> object:
+        return lambda batch: [{"scores": torch.tensor(scores), "labels": torch.tensor(labels)}]
+
+    img = np.zeros((32, 32, 3), dtype=np.uint8)
+    monkeypatch.setattr(build, "person_detector", lambda: detector([0.9, 0.2], [1, 1]))
+    assert build.has_person(img)
+    monkeypatch.setattr(build, "person_detector", lambda: detector([0.3], [1]))
+    assert not build.has_person(img)  # below the threshold
+    monkeypatch.setattr(build, "person_detector", lambda: detector([0.95], [18]))
+    assert not build.has_person(img)  # a dog is not a person
+    monkeypatch.setattr(build, "person_detector", lambda: detector([], []))
+    assert not build.has_person(img)

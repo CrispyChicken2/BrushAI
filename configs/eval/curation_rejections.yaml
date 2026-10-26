@@ -40,3 +40,12 @@ commons_snowy_owl_51712794491: animal a few pixels tall
 commons_long_tailed_duck_15423698505: animal under 5 % of the area
 commons_banding_cackling_geese_38430481896: a person in a jacket fills the frame, animal hidden
 commons_polar_bear_research_33331611273: a researcher who may be alive next to the animal
+# round 2 (fixes)
+commons_development_at_the_site_of_the_mill_for_the_mouat_chromite_m: a mountain range with a tiny site at the bottom, a scene and not an object
+commons_brown_pelican_and_sinker_8080500760: a person's arms and hands hold the bird over a quarter of the frame (handling shot)
+commons_display_of_home_canned_food1a35476v: dark film edge still 6 % of the prepared area after the trimming (measured by build_eval_set check)
+commons_side_view_of_an_antique_peasant_dress_prok_01900_01945v: sepia tint, not a colour photograph
+commons_low_flying_planes_from_which_dust_or_insecticide_is_spread_o: biplanes on a field, not a portrait (stratum by keyword)
+commons_snowy_owl_8456435162: animal a few pixels tall
+commons_cherry_orchards_farm_lands_and_irrigation_ditch_at_emmett_id: dark film edge over 5 % of the prepared area (measured by build_eval_set check)
+commons_landscape_on_the_jackson_farm_vicinity_of_white_plains_ga_lc: an empty field under a grey sky, no clear subject

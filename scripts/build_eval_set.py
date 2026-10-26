@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import functools
 import html
 import io
 import json
@@ -73,7 +74,7 @@ MET_LICENCE = "CC0 1.0 (Met Open Access, isPublicDomain)"
 LOC_FSA = "Public domain (US government work, Library of Congress FSA/OWI)"
 FWS = "Public domain (US government work, US Fish and Wildlife Service)"
 COMMONS_PD = "Public domain (Wikimedia Commons licence tag)"
-MAX_PER_PHOTOGRAPHER = 3
+MAX_PER_PHOTOGRAPHER = 4
 MAX_FILE_BYTES = 40_000_000
 
 PORTRAIT_TAGS = {"Portraits"}
@@ -96,7 +97,9 @@ ANIMAL = re.compile(
 )
 OBJECT = re.compile(
     r"\b(truck|tractor|automobile|car|sign|machine|plow|barn|wagon|bridge|locomotive|train|boat|ship|lantern|"
-    r"bottle|store|church|mill|pump|tool|windmill|silo|tent|trailer|bicycle|gate|fence|shed|shack|cabin)\b",
+    r"bottle|store|church|pump|tool|windmill|silo|tent|trailer|bicycle|gate|fence|shed|shack|cabin|poster|"
+    r"jars?|barrel|basket|chair|door|window|stove|clock|radio|lamp|table|furniture|quilt|doll|wheel|bucket|"
+    r"crate|sack|hat|shoes?|saddle|harness|plane|airplane|biplane|market|shop|barbershop|laundry)\b",
     re.I,
 )
 SCENE = re.compile(
@@ -161,30 +164,40 @@ def near_tuning(pixels: np.ndarray, tuning: list[np.ndarray]) -> bool:
     return any(float((t * u).mean()) > 0.9 for u in tuning)
 
 
+def edge_band(flags: np.ndarray, limit: int, max_skip: int = 3) -> int:
+    """Width of the border band at the start of ``flags`` (True = border line), light edge lines included: scans leave
+    out up to ``max_skip`` light lines at the very edge (a scanned slide often has a 1-2 px bright line before its
+    black film edge), then count the consecutive border lines, at most ``limit`` of them."""
+    start = next((k for k in range(min(max_skip + 1, len(flags))) if flags[k]), None)
+    if start is None:
+        return 0
+    n = start
+    while n < limit and n < len(flags) and flags[n]:
+        n += 1
+    return n
+
+
 def border_crop_box(
     im: Image.Image, min_side: int = 640, lenient: bool = False
 ) -> tuple[bool, list[int] | None]:
-    """Square crop box (source pixels) that leaves out uniform black borders (film-holder edges of scanned
-    slides, mat bars), or ``None`` for the plain centre crop. A border row/column is near black (mean < 28) and
-    flat (std < 6), scanned inward from each edge over at most a quarter of the side; dark but textured paintings
-    are never trimmed (``lenient``, for scanned slides, also accepts a row where 90 % of the pixels are near black:
-    the film edge carries frame numbers). Returns ``(ok, box)``; ``ok`` is False if the trimmed square is under ``min_side`` pixels."""
+    """Square crop box (source pixels) that leaves out uniform black borders (film-holder edges of scanned slides,
+    mat bars), or ``None`` for the plain centre crop. A border row/column is near black (mean < 28) and flat
+    (std < 6), scanned inward from each edge over at most a quarter of the side after a thin light edge line;
+    dark but textured paintings are never trimmed (``lenient``, for scanned slides, also accepts a row where 90 % of
+    the pixels are near black: the film edge carries frame numbers). Returns ``(ok, box)``; ``ok`` is False if
+    the trimmed square is under ``min_side`` pixels."""
     grey = np.asarray(im.convert("L"), dtype=np.float32)
     h, w = grey.shape
+    skip = max(3, round(3 * min(h, w) / 512))  # 3 px at the prepared size, scaled to the source
 
-    def is_border(line: np.ndarray) -> bool:
+    def flags(lines: np.ndarray) -> np.ndarray:
         if lenient:
-            return bool((line < 40).mean() >= 0.9)
-        return bool(line.mean() < 28 and line.std() < 6)
+            return (lines < 40).mean(axis=1) >= 0.9
+        return (lines.mean(axis=1) < 28) & (lines.std(axis=1) < 6)
 
-    def edge(lines: np.ndarray, limit: int) -> int:
-        n = 0
-        while n < limit and is_border(lines[n]):
-            n += 1
-        return n
-
-    top, bottom = edge(grey, h // 4), edge(grey[::-1], h // 4)
-    left, right = edge(grey.T, w // 4), edge(grey.T[::-1], w // 4)
+    rows, cols = flags(grey), flags(grey.T)
+    top, bottom = edge_band(rows, h // 4, skip), edge_band(rows[::-1], h // 4, skip)
+    left, right = edge_band(cols, w // 4, skip), edge_band(cols[::-1], w // 4, skip)
     if top + bottom + left + right == 0:
         return True, None
     tw, th = w - left - right, h - top - bottom
@@ -362,8 +375,7 @@ def _size_of(http: Http, url: str, dest: Path) -> tuple[int, int]:
 
 COMMONS_SOURCES = [  # (category, licence string, label)
     ("Category:Color photographs from the Farm Security Administration", LOC_FSA, "fsa"),
-    ("Category:Sergey Prokudin-Gorsky", COMMONS_PD, "prokudin"),
-    ("Category:Photographs by Sergey Prokudin-Gorsky", COMMONS_PD, "prokudin"),
+    # Prokudin-Gorsky files were tried and dropped: most are sepia-toned reproductions, not colour photographs
     ("Category:United States Fish and Wildlife Service", FWS, "fws"),
 ]
 
@@ -413,6 +425,29 @@ def commons_info(http: Http, titles: list[str]) -> dict[str, dict[str, Any]]:
             if "imageinfo" in page:
                 out[page["title"]] = page["imageinfo"][0]
     return out
+
+
+@functools.lru_cache(maxsize=1)
+def person_detector() -> Any:
+    """COCO Faster R-CNN (MobileNetV3, torchvision) used only to keep people out of the modern agency photographs."""
+    from torchvision.models.detection import (
+        FasterRCNN_MobileNet_V3_Large_FPN_Weights,
+        fasterrcnn_mobilenet_v3_large_fpn,
+    )
+
+    return fasterrcnn_mobilenet_v3_large_fpn(
+        weights=FasterRCNN_MobileNet_V3_Large_FPN_Weights.DEFAULT
+    ).eval()
+
+
+def has_person(pixels: np.ndarray, threshold: float = 0.4) -> bool:
+    """True if a COCO "person" is detected with a score above ``threshold``, whatever its size or position."""
+    import torch
+
+    img = torch.from_numpy(pixels).permute(2, 0, 1).float() / 255.0
+    with torch.no_grad():
+        out = person_detector()([img])[0]
+    return bool(((out["labels"] == 1) & (out["scores"] > threshold)).any())
 
 
 def photo_text(title: str, info: dict[str, Any]) -> str:
@@ -556,7 +591,11 @@ def photographers(author: str) -> set[str]:
         part = re.sub(
             r"\([^)]*\)|\b(photographer|photo|by)\b|\d{4}(-\d{4})?", " ", part, flags=re.I
         )
-        tokens = [w for w in re.split(r"[\s,.]+", part.lower()) if len(w) > 1]
+        tokens = [
+            w
+            for w in re.split(r"[\s,.]+", part.lower())
+            if len(w) > 1 and w not in {"and", "the", "of"}
+        ]
         if tokens:
             names.add(" ".join(sorted(tokens)))
     return names or {"unknown"}
@@ -682,6 +721,8 @@ def draw_photos(
                 pixels = prepare_image(im, box)
             if not is_colour(pixels) or near_tuning(pixels, tuning):
                 continue
+            if licence == FWS and has_person(pixels):
+                continue  # modern photographs: nobody who may be alive, detected, not only judged by eye
             tuning.append(thumb(pixels))
             for n in who:
                 per_photographer[n] = per_photographer.get(n, 0) + 1
@@ -821,21 +862,14 @@ def frequent_categories(items: list[dict[str, Any]]) -> set[str]:
 
 
 def dark_border_fraction(pixels: np.ndarray) -> float:
-    """Fraction of the area taken by near-black border rows and columns (>= 90 % of their pixels under 40)."""
+    """Fraction of the area taken by near-black border rows and columns (>= 90 % of their pixels under 40), after a
+    thin light edge line of up to 3 px (the same rule as the trimming)."""
     dark = np.asarray(Image.fromarray(pixels).convert("L")) < 40
-    n = 0
-    top = bottom = left = right = 0
     h, w = dark.shape
-    while top < h // 2 and dark[top].mean() >= 0.9:
-        top += 1
-    while bottom < h // 2 and dark[h - 1 - bottom].mean() >= 0.9:
-        bottom += 1
-    while left < w // 2 and dark[:, left].mean() >= 0.9:
-        left += 1
-    while right < w // 2 and dark[:, w - 1 - right].mean() >= 0.9:
-        right += 1
-    n = top * w + bottom * w + (left + right) * (h - top - bottom)
-    return n / (h * w)
+    rows, cols = dark.mean(axis=1) >= 0.9, dark.mean(axis=0) >= 0.9
+    top, bottom = edge_band(rows, h // 2), edge_band(rows[::-1], h // 2)
+    left, right = edge_band(cols, w // 2), edge_band(cols[::-1], w // 2)
+    return float((top * w + bottom * w + (left + right) * (h - top - bottom)) / (h * w))
 
 
 def photographer_counts(images: list[EvalImage]) -> dict[str, int]:
@@ -883,9 +917,15 @@ def cmd_check(args: argparse.Namespace) -> None:
             np.asarray(Image.open(RAW / "prepared" / f"{im.id}.png").convert("RGB"))
         )
         for im in images
-        if im.source
-        == "commons"  # scanned slides: dark backgrounds of paintings are content, not borders
+        if im.licence
+        == LOC_FSA  # scanned slides: dark backgrounds of paintings and animals are content
     }
+    people = [
+        im.id
+        for im in images
+        if im.licence == FWS
+        and has_person(np.asarray(Image.open(RAW / "prepared" / f"{im.id}.png").convert("RGB")))
+    ]
     ids = {im.source_id for im in images if im.source == "met"}
     excluded = sorted(str(i) for i in MET_EXCLUDED if str(i) in ids)
     overlap = {k: round(v, 3) for k, v in worst.items() if v > 0.9}
@@ -897,6 +937,7 @@ def cmd_check(args: argparse.Namespace) -> None:
         "near_duplicates_of_tuning_images": overlap,
         "excluded_met_objects_present": excluded,
         "same_series_pairs": series,
+        "person_detected_in_agency_photographs": people,
         "max_dark_border_area": round(max(dark.values()), 4),
         "dark_border_over_5_percent": {k: round(v, 4) for k, v in dark.items() if v > 0.05},
         "photographers_per_name": photographer_counts(images),
@@ -906,7 +947,7 @@ def cmd_check(args: argparse.Namespace) -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "overlap_check.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps(report, indent=1))
-    if overlap or excluded or problems or series or report["dark_border_over_5_percent"]:
+    if overlap or excluded or problems or series or people or report["dark_border_over_5_percent"]:
         raise SystemExit(1)
 
 
