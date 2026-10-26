@@ -7,7 +7,16 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] M3 suite : tickets T-024.. à écrire après la note de protocole T-022
+- [ ] 024 [T-024] Eval set curation, Met CC0 + CC0 photos + SDXL, dev split (M3)
+- [ ] 025 [T-025] Evaluation saliency maps, InSPyReNet + spectral residual (M3)
+- [ ] 026 [T-026] Evaluation harness: metrics, anytime AUC, SW-LPIPS, stats (M3)
+- [ ] 027 [T-027] Renderer bounding-box rasterization speed-up (M3)
+- [ ] 028 [T-028] Learning to Paint study + Bezier and neural renderer (M3)
+- [ ] 029 [T-029] Learning to Paint DDPG training on CC0 subset (M3)
+- [ ] 030 [T-030] Learning to Paint inference + published-number check (M3)
+- [ ] 031 [T-031] PT-init + per-patch refinement baseline variant (M3)
+- [ ] 032 [T-032] Full baseline evaluation run on test split + tables (M3)
+- [ ] 033 [T-033] M3 gate review (M3)
 - [ ] M4 Contribution : allocation sémantique puis ordre pictural, ablations complètes
 - [ ] M5 Front-end SDXL + app Gradio + HF Space
 - [ ] M6 Rapport technique + polish README
