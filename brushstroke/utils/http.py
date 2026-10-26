@@ -6,6 +6,7 @@ import json
 import ssl
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -20,6 +21,9 @@ class Http:
         self.pause = pause
 
     def get(self, url: str, retries: int = 6) -> bytes:
+        url = urllib.parse.quote(
+            url, safe=":/?&=%+,;@~#"
+        )  # spaces in file names (Met), no double encoding
         for attempt in range(retries):
             time.sleep(self.pause)
             try:
