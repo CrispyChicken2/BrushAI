@@ -187,3 +187,51 @@ def test_branch_runs_end_to_end_and_refuses_a_raw_parent_with_a_positive_factor(
     args.theta = "none"  # tiny_config is a raw-convention model
     with pytest.raises(SystemExit):
         exp.cmd_branch(args)
+
+
+@needs_brushes
+def test_the_branch_point_is_before_the_first_alert_of_the_episode_that_led_to_the_spike(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """alert, quiet stretch, second alert, spike: the hold must not expire in between."""
+
+    class Alerts(exp.AlertDetector):
+        def update(self, step: int, total: float) -> bool:
+            return step in (4, 9)
+
+    class SpikeAtTen(exp.SpikeDetector):
+        def update(self, step: int, total: float) -> bool:
+            if step == 10:
+                self.spike = step
+                return True
+            return False
+
+    monkeypatch.setattr(exp, "AlertDetector", Alerts)
+    monkeypatch.setattr(exp, "SpikeDetector", SpikeAtTen)
+    monkeypatch.setattr(exp, "CKPT_EVERY", 1)
+    monkeypatch.setattr(exp, "CKPT_KEEP", 20)
+    monkeypatch.setattr(exp, "AFTER_SPIKE", 0)
+    ctx = _Context(tiny_config(tmp_path))
+    out = tmp_path / "trace"
+    summary = exp.run_loop(ctx, out, 12)
+    assert (
+        summary["alerts"] == [4, 9]
+        and summary["alert_before_spike"] == 4
+        and summary["spike"] == 10
+    )
+    assert exp.last_good_checkpoint(out, 2) == out / "ckpt_2.pt"
+    monkeypatch.setattr(exp, "ALERT_HOLD", 2)  # an episode that expires before the spike
+    ctx = _Context(tiny_config(tmp_path / "b"))
+    summary = exp.run_loop(ctx, tmp_path / "b" / "trace", 12)
+    assert summary["alert_before_spike"] == 9  # the second alert starts a new episode
+
+
+def test_last_good_checkpoint_keeps_the_oldest_retained_step_in_reach(tmp_path: Path) -> None:
+    for step in (1000, 1500, 2000):
+        (tmp_path / f"ckpt_{step}.pt").write_bytes(b"")
+    (tmp_path / "summary.json").write_text(
+        json.dumps({"spike": 3000, "alert_before_spike": 2400}), encoding="utf-8"
+    )
+    assert exp.last_good_checkpoint(tmp_path, 500) == tmp_path / "ckpt_1500.pt"
+    with pytest.raises(SystemExit):
+        exp.last_good_checkpoint(tmp_path, 1500)  # 900: nothing retained that far back

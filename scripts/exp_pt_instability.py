@@ -2,7 +2,7 @@
 
     python -m scripts.exp_pt_instability trace  --name A_s0 --seed 0 [--convention positive]
         # option A (or raw) on the stretched recipe, every step logged with gradient/Adam/activation
-        # diagnostics, rotating checkpoints (the last 12,000 steps, frozen by an early alert), stops 600
+        # diagnostics, rotating checkpoints (the last 14,000 steps, frozen by an early alert), stops 600
         # steps after the first loss spike
     python -m scripts.exp_pt_instability branch --name ctl1 --from-trace A_s0 --steps 6000 --data-seed 1 [factor flags]
         # resume from the checkpoint --back steps before the early alert, change ONE factor, record alerts and spikes
@@ -48,11 +48,13 @@ ROOT = Path("outputs/pt_instab")
 CONFIG = Path("configs/stroke_model/pt.yaml")
 STRETCHED = ["schedule.n_epochs=400", "schedule.n_epochs_decay=40"]  # the T-019 stretched recipe
 SPIKE_FACTOR, SPIKE_WINDOW, SPIKE_BASE, SPIKE_WARMUP = 1.25, 100, 1000, 5000
-AFTER_SPIKE, CKPT_EVERY, CKPT_KEEP = 600, 500, 24  # 24 x 500: the 12,000 steps before an alert
+AFTER_SPIKE, CKPT_EVERY, CKPT_KEEP = 600, 500, 28  # 28 x 500: the 14,000 steps before an alert
 # early alert: the 100-step mean of the total loss is more than ALERT_Z standard deviations above the
 # median of the previous 2000 steps. It fires at the onset of an excursion, thousands of steps before
 # the 1.25x rule of the spike (seed 1 of T-019: 31,175 against 35,625), and freezes the checkpoint rotation.
-ALERT_Z, ALERT_BASE, ALERT_HOLD = 4.0, 2000, 4000
+# The freeze lasts ALERT_HOLD steps from the first alert of an episode: the spike follows its first alert by
+# 4,300 to 4,500 steps in the stored T-019 logs, and a shorter hold would expire before it.
+ALERT_Z, ALERT_BASE, ALERT_HOLD = 4.0, 2000, 10_000
 GROUPS = ("cnn", "tr_enc", "tr_dec", "head", "embed")
 
 
@@ -237,9 +239,10 @@ def run_loop(
             lr = float(ctx.scheduler.get_last_lr()[0])
             row = traced_step(ctx, batch, tap)
             writer.writerow({"step": ctx.step, "lr": lr, **row})
-            if alarm.update(ctx.step, row["total"]) and alert_at is None:
-                alert_at = ctx.step
+            if alarm.update(ctx.step, row["total"]):
                 alerts.append(ctx.step)
+                if alert_at is None:  # the first alert of an episode is the one that is kept
+                    alert_at = ctx.step
                 print(f"alert at step {ctx.step}", flush=True)
             if alert_at is not None and detector.spike is None and ctx.step - alert_at > ALERT_HOLD:
                 alert_at = None  # no spike followed: resume the rotation
@@ -262,7 +265,7 @@ def run_loop(
     summary = {
         "steps": ctx.step,
         "spike": detector.spike,
-        "alert": alert_at if detector.spike is not None else None,
+        "alert_before_spike": alert_at if detector.spike is not None else None,
         "alerts": alerts,
         "convention": ctx.cfg.model.convention,
     }
@@ -331,9 +334,9 @@ def cmd_trace(args: argparse.Namespace) -> None:
 
 def last_good_checkpoint(trace: Path, back: int) -> Path:
     """The checkpoint at least ``back`` steps before the alert that preceded the spike of ``trace`` (the
-    spike itself for a summary without alert): the rotation keeps the 12,000 steps before the alert."""
+    spike itself for a summary without alert): the rotation keeps the 14,000 steps before the alert."""
     info = json.loads((trace / "summary.json").read_text(encoding="utf-8"))
-    spike = info.get("alert") or info["spike"]
+    spike = info.get("alert_before_spike") or info["spike"]
     if spike is None:
         raise SystemExit(f"{trace} has no spike")
     steps = sorted(int(p.stem.split("_")[1]) for p in trace.glob("ckpt_*.pt"))
@@ -671,7 +674,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--back",
         type=int,
         default=2000,
-        help="checkpoint at least this many steps before the early alert (up to 11000 are kept)",
+        help="checkpoint at least this many steps before the early alert (up to 13500 are kept)",
     )
     b.add_argument("--steps", type=int, default=6000)
     b.add_argument("--data-seed", type=int, default=1)
