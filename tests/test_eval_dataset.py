@@ -317,14 +317,6 @@ def test_commons_dates_lose_the_wikidata_residue() -> None:
     assert build.clean_date("Taken on 22 June 2007, 14:32:20") == "22 June 2007, 14:32:20"
 
 
-def test_the_dark_border_measure_sees_black_bars_only() -> None:
-    img = np.full((100, 100, 3), 150, dtype=np.uint8)
-    assert build.dark_border_fraction(img) == 0.0
-    img[:10] = 0
-    img[:, -5:] = 0
-    assert build.dark_border_fraction(img) == pytest.approx((10 * 100 + 5 * 90) / 10_000)
-
-
 def test_a_redraw_keeps_the_sdxl_generation_results(tmp_path: Path) -> None:
     header, images = valid_set()
     old = tmp_path / "old.yaml"
@@ -368,24 +360,6 @@ def test_a_mismatch_of_a_downloaded_image_is_not_masked_by_the_sdxl_result(
     fetch.main(["--out", str(tmp_path), "--sdxl"])  # all ok: no exit
 
 
-def test_a_thin_light_edge_line_in_front_of_a_dark_film_band_is_seen_through() -> None:
-    img = np.full((512, 512, 3), 160, dtype=np.uint8)
-    img[:, :18] = 8  # a 18 px black film edge on the left ...
-    img[:, 0] = 200  # ... behind a 1 px light line at the very edge
-    img[:21] = 8
-    img[0] = 180
-    assert build.dark_border_fraction(img) == pytest.approx((21 * 512 + 18 * (512 - 21)) / 512**2)
-    big = Image.fromarray(np.kron(img, np.ones((4, 4, 1), dtype=np.uint8)))  # 2048 px source
-    ok, box = build.border_crop_box(big, lenient=True)
-    assert ok and box is not None and box[0] >= 18 * 4 and box[1] >= 21 * 4
-    plain = Image.fromarray(np.full((900, 900, 3), 150, dtype=np.uint8))
-    assert build.border_crop_box(plain, lenient=True) == (True, None)
-    assert (
-        build.edge_band(np.array([False, False, False, False, True, True]), 6) == 0
-    )  # light zone too thick
-    assert build.edge_band(np.array([False, True, True, False]), 6) == 3
-
-
 def test_a_detected_person_is_what_has_person_reports(monkeypatch: pytest.MonkeyPatch) -> None:
     import torch
 
@@ -401,3 +375,53 @@ def test_a_detected_person_is_what_has_person_reports(monkeypatch: pytest.Monkey
     assert not build.has_person(img)  # a dog is not a person
     monkeypatch.setattr(build, "person_detector", lambda: detector([], []))
     assert not build.has_person(img)
+
+
+def test_a_thin_light_edge_line_in_front_of_a_dark_film_band_is_seen_through() -> None:
+    img = np.full((512, 512, 3), 160, dtype=np.uint8)
+    img[:, :18] = 8  # an 18 px black film edge on the left ...
+    img[:, 0] = 200  # ... behind a 1 px light line at the very edge
+    img[:21] = 8
+    img[0] = 180
+    assert ds.border_area_fraction(img, "film") == pytest.approx(
+        (21 * 512 + 18 * (512 - 21)) / 512**2
+    )
+    big = Image.fromarray(np.kron(img, np.ones((4, 4, 1), dtype=np.uint8)))  # 2048 px source
+    ok, box = ds.border_crop_box(big, kind="film")
+    assert ok and box is not None and box[0] >= 18 * 4 and box[1] >= 21 * 4
+    plain = Image.fromarray(np.full((900, 900, 3), 150, dtype=np.uint8))
+    assert ds.border_crop_box(plain, kind="film") == (True, None)
+    assert ds.edge_band(np.array([False, False, False, False, True, True]), 6) == 0
+    assert ds.edge_band(np.array([False, True, True, False]), 6) == 3
+
+
+def test_the_film_rule_sees_a_soft_inner_edge_and_the_flat_rule_never_trims_texture() -> None:
+    img = np.full((512, 512, 3), 140, dtype=np.uint8)
+    img[:, :12] = 4
+    img[:, 12:20] = 25  # the soft inner edge of a film bar: mean luminance below 30
+    img[:, 20:24] = 90
+    assert ds.border_area_fraction(img, "film") == pytest.approx(20 / 512, abs=1e-3)
+    textured = np.random.default_rng(0).integers(0, 40, (512, 512, 3), dtype=np.uint8)
+    assert ds.border_area_fraction(textured, "flat") == 0.0  # dark but textured: content
+    with pytest.raises(ValueError):
+        ds.border_flags(np.zeros((4, 4), dtype=np.float32), "nope")
+
+
+def test_the_agency_word_filter_is_a_valid_pattern_that_matches_the_words() -> None:
+    assert not any(ord(c) < 32 for c in build.FWS_PEOPLE.pattern)  # no control character
+    for text in ("Staff at work", "Oiled bird cleaning", "gannets in rehab", "rehabilitation"):
+        assert build.FWS_PEOPLE.search(text), text
+    for text in ("manatee", "Mandarin duck", "Dayton marsh", "Haliaeetus leucocephalus"):
+        assert not build.FWS_PEOPLE.search(text), text
+
+
+def test_no_text_file_of_the_repository_holds_a_control_character() -> None:
+    suffixes = {".py", ".md", ".yaml", ".yml", ".json", ".toml", ".txt", ".cfg"}
+    skip = {".venv", "outputs", "data", ".git", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+    bad = []
+    for path in Path(".").rglob("*"):
+        if not path.is_file() or path.suffix not in suffixes or set(path.parts) & skip:
+            continue
+        if any(b < 32 and b not in (9, 10, 12, 13) for b in path.read_bytes()):
+            bad.append(str(path))
+    assert bad == []

@@ -260,3 +260,89 @@ def validate_manifest(header: dict[str, Any], images: Sequence[EvalImage]) -> li
     if header.get("draw_seed") != DRAW_SEED:
         problems.append(f"draw_seed {header.get('draw_seed')} != {DRAW_SEED}")
     return problems
+
+
+# ----------------------------------------------------------------------------- borders (one
+# definition, used to trim and to report)
+
+BORDER_MAX_AREA = 0.05  # protocol 1.2.3: no frame or foreign element over 5 % of the area
+FLAT_LUMA, FLAT_STD = (
+    28.0,
+    6.0,
+)  # "flat" border line: near black and uniform (paintings, prints, mats)
+FILM_LUMA = (
+    30.0  # "film" border line (scanned slides): mean luminance below this, frame numbers included
+)
+BORDER_SKIP = 3  # thin light edge lines (px at 512) skipped before the band
+
+
+def border_flags(grey: np.ndarray, kind: str) -> np.ndarray:
+    """True for each row of ``grey`` (H, W; 0-255) that is a border line of the given ``kind``.
+
+    ``flat``: a near-black, uniform line (mean < 28 and std < 6), so a dark but textured painting is
+    never a border. ``film``: any line whose mean luminance is below 30 (the black film edge of a
+    scanned slide, with its frame numbers and soft inner edge). Pass ``grey.T`` for the columns."""
+    if kind == "film":
+        return np.asarray(grey.mean(axis=1) < FILM_LUMA)
+    if kind == "flat":
+        return np.asarray((grey.mean(axis=1) < FLAT_LUMA) & (grey.std(axis=1) < FLAT_STD))
+    raise ValueError(f"border kind {kind!r}: expected 'flat' or 'film'")
+
+
+def edge_band(flags: np.ndarray, limit: int, max_skip: int = BORDER_SKIP) -> int:
+    """Width of the border band at the start of ``flags`` (True = border line).
+
+    The thin light edge lines in front of the band are included: up to ``max_skip`` light lines are
+    left out (a scanned slide often has a 1-2 px bright line before its black film edge), then the
+    consecutive border lines are counted, at most ``limit`` of them."""
+    start = next((k for k in range(min(max_skip + 1, len(flags))) if flags[k]), None)
+    if start is None:
+        return 0
+    n = start
+    while n < limit and n < len(flags) and flags[n]:
+        n += 1
+    return n
+
+
+def border_widths(grey: np.ndarray, kind: str, limit: float = 0.25) -> tuple[int, int, int, int]:
+    """(top, bottom, left, right) widths of the border bands of ``grey`` (at most ``limit`` of
+    each side). The light-line
+    tolerance is 3 px at 512 px and scales with the image."""
+    h, w = grey.shape
+    skip = max(BORDER_SKIP, round(BORDER_SKIP * min(h, w) / SIZE))
+    rows, cols = border_flags(grey, kind), border_flags(grey.T, kind)
+    return (
+        edge_band(rows, int(h * limit), skip),
+        edge_band(rows[::-1], int(h * limit), skip),
+        edge_band(cols, int(w * limit), skip),
+        edge_band(cols[::-1], int(w * limit), skip),
+    )
+
+
+def border_area_fraction(pixels: np.ndarray, kind: str) -> float:
+    """Fraction of the area of a prepared image taken by its border bands (the figure reported
+    against the 5 % rule)."""
+    grey = np.asarray(Image.fromarray(pixels).convert("L"), dtype=np.float32)
+    top, bottom, left, right = border_widths(grey, kind, limit=0.5)
+    h, w = grey.shape
+    return float((top * w + bottom * w + (left + right) * (h - top - bottom)) / (h * w))
+
+
+def border_crop_box(
+    im: Image.Image, min_side: int = 640, kind: str = "flat"
+) -> tuple[bool, list[int] | None]:
+    """Square crop box (source pixels) that leaves out the border bands (same definition as the
+    report), or ``None``
+    for the plain centre crop. ``ok`` is False if the trimmed square is under ``min_side``
+    pixels."""
+    grey = np.asarray(im.convert("L"), dtype=np.float32)
+    h, w = grey.shape
+    top, bottom, left, right = border_widths(grey, kind)
+    if top + bottom + left + right == 0:
+        return True, None
+    tw, th = w - left - right, h - top - bottom
+    side = min(tw, th)
+    if side < min_side:
+        return False, None
+    x0, y0 = left + (tw - side) // 2, top + (th - side) // 2
+    return True, [x0, y0, x0 + side, y0 + side]
