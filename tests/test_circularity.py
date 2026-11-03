@@ -13,7 +13,8 @@ FORBIDDEN = re.compile(r"inspyrenet|eval\.saliency|eval import saliency", re.IGN
 METHOD_PACKAGES = (
     "baselines", "contribution", "renderer", "stroke_model", "animation", "generation", "utils",
 )  # fmt: skip
-ALLOWED_SCRIPTS = {"fetch_inspyrenet.py", "compute_saliency.py"}
+# the saliency tooling, and the harness (it only checks the recorded hashes of the maps)
+ALLOWED_SCRIPTS = {"fetch_inspyrenet.py", "compute_saliency.py", "eval_run.py"}
 
 
 def test_no_method_code_uses_the_evaluation_saliency_model() -> None:

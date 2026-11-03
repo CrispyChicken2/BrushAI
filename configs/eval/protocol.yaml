@@ -1,0 +1,40 @@
+# Evaluation protocol constants (docs/design/evaluation.md sections 3-6), loaded by brushstroke.eval.protocol.
+# Changing any value below needs an amendment of the protocol note (and, after test numbers exist, is labelled post hoc).
+checkpoints: [0, 25, 50, 100, 150, 200, 250, 350, 500, 750, 1000, 1250, 1500, 1750, 2000]   # section 3.1
+budgets: [250, 500, 1000, 2000]                 # reporting budgets, all in the grid
+headline_budget: 2000                           # AUC@2000 is the headline anytime score
+auc_log_start: 25                               # the log-spaced AUC integrates log n over [25, B]
+auc_late_start: 250                             # robustness AUC over n >= 250 (section 3.3, canvas colour)
+sw_lambdas: [0.0, 0.1, 0.3]                     # saliency-weighted LPIPS: 0.1 headline, the others sensitivity (4.1)
+headline_lambda: 0.1
+saliency_methods: [inspyrenet, spectral_residual]   # evaluator and control (4.2)
+saliency_dir: outputs/saliency                  # maps of T-025 (fetched/computed outside git)
+eval_set: configs/eval/eval_set.yaml
+eval_root: data/raw/eval                        # prepared 512 x 512 targets (scripts.fetch_eval_set)
+size: 512
+low_res_size: 128                               # secondary evaluation at Learning to Paint's native size (7.4)
+vgg_chunk: 2                                    # LPIPS-VGG canvases per call (section 2.3)
+blur_sigma: 1.0                                 # the "blur" control (2.2)
+seeds: [0, 1, 2]                                # replicates (section 6.1)
+bootstrap: {resamples: 10000, seed: 22, confidence: 0.95}   # section 6.3
+effect_threshold: 0.3                           # |rank-biserial r| needed besides significance (6.4)
+gpu_contention_gb: 1.0                          # refuse a timed run if another process uses more VRAM (2.3)
+# the three endpoints of the confirmatory families (6.5)
+endpoints: {P1: lpips_alex@1000, P2: auc@2000, P3: sw_lpips@1000}
+# strokes-to-target (section 5): tau = median over the dev images of the LPIPS-Alex the strongest baseline reaches at the
+# budget. Written by `python -m scripts.eval_run tau` from DEV runs only, before any test run.
+tau:
+  status: provisional      # from the baselines available on the dev split (optim, pt); final values are written when Learning to Paint (T-030) is in, before the test run
+  strongest_baseline: optim
+  values: {500: 0.4394, 1000: 0.3634, 2000: 0.2806}
+# producers (section 7)
+producers:
+  optim:
+    config: configs/baseline_optim.yaml          # the optimization baseline (2037 strokes), seed = initialization seed
+    replicate_kind: init seed
+    dagger_metrics: [l1, lpips_vgg]              # in its loss (2.1)
+  pt:
+    checkpoints: {0: outputs/pt_long/seed0/latest.pt, 1: outputs/pt_long/seed1/latest.pt, 2: outputs/pt_long/seed2/latest.pt}
+    config: configs/paint_pt.yaml                # inference settings; the sequence is rendered with the generic PT renderer
+    replicate_kind: training seed
+    dagger_metrics: []

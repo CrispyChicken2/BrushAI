@@ -2,6 +2,11 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-026] Evaluation harness
+
+- `brushstroke/eval/{protocol,curves,stats,metrics,producers,runner,report}.py`, `scripts/eval_run.py` (`run`, `report`, `tau`), `configs/eval/protocol.yaml`: the `Producer`/`PaintResult` interface with adapters for the optimization baseline and Paint Transformer; the 15-checkpoint grid, AUC@B (linear, log, late), SW-LPIPS (lambda 0 / 0.1 / 0.3, evaluator and control maps), strokes-to-target with right-censoring, controls, runtime/VRAM; Wilcoxon, rank-biserial, bootstrap, Holm; tables B1-B5 and the anytime figure.
+- Dev smoke run on two methods: `docs/experiments/eval_harness_smoke.md` + `.png` (not a result). Provisional tau values written from it. Details left open by the protocol are an amendment of `docs/design/evaluation.md`.
+
 ## [T-025] Evaluation saliency maps
 
 - `brushstroke/eval/saliency.py`: spectral-residual control (Hou and Zhang 2007) and the pinned InSPyReNet SwinB (DUTS-TR) wrapper; `configs/eval/saliency.yaml` pins the code commit, 15 file hashes and the checkpoint SHA-256; `scripts/fetch_inspyrenet.py`, `scripts/compute_saliency.py` (maps of the 100 eval images in `outputs/saliency`, recorded hashes in `docs/experiments/data/saliency/saliency_maps.json`, `--verify`, sanity sheet `docs/experiments/saliency_sanity.png`).
