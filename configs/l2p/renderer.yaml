@@ -1,0 +1,11 @@
+# Neural renderer of Learning to Paint (T-028): the official training schedule
+# (baseline/train_renderer.py): batch 64, Adam, lr 1e-4 / 1e-5 / 1e-6, 500,000 steps, fresh initialization.
+seed: 0
+steps: 500000
+batch_size: 64
+lr_stages: [1.0e-4, 1.0e-5, 1.0e-6]
+stage_steps: [200000, 400000]   # the lr changes after these steps
+log_every: 1000
+eval_strokes: 1000              # held-out random strokes for the periodic validation
+output_dir: outputs/l2p_renderer
+device: auto
