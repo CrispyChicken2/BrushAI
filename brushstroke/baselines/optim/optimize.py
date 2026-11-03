@@ -57,9 +57,21 @@ def _reset_state_rows(opt: torch.optim.Optimizer, param: torch.Tensor, rows: tor
             value[:, rows] = 0
 
 
+# render options added after the M1 sequences were hashed: left out of the hash at their
+# default, so a run that does not use them keeps its config hash (and sequence meta)
+_HASH_DEFAULTS = {"bbox": False, "bbox_chunk": 0, "bbox_max_fraction": 0.75}
+
+
 def config_hash(*cfgs: object) -> str:
     """Short stable hash of dataclass configs (stored in the sequence meta)."""
-    blob = json.dumps([dataclasses.asdict(c) for c in cfgs], sort_keys=True)  # type: ignore[call-overload]
+    parts = []
+    for c in cfgs:
+        d = dataclasses.asdict(c)  # type: ignore[call-overload]
+        for key, default in _HASH_DEFAULTS.items():
+            if key in d and d[key] == default:
+                del d[key]
+        parts.append(d)
+    blob = json.dumps(parts, sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()[:12]
 
 
