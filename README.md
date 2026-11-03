@@ -6,8 +6,8 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 
 **Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)); M3 (evaluation harness and baseline
 numbers) is under way: the evaluation protocol is fixed in advance in [docs/design/evaluation.md](docs/design/evaluation.md), its plan
-is [docs/plan/M3.md](docs/plan/M3.md), the 100-image evaluation set is curated and audited (see [Evaluation set](#evaluation-set-m3)), and the evaluation saliency maps are computed (T-025).
-No method has been run on it yet.** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
+is [docs/plan/M3.md](docs/plan/M3.md), the 100-image evaluation set is curated and audited (see [Evaluation set](#evaluation-set-m3)), the evaluation saliency maps are computed (T-025), and the evaluation harness is built and smoke-tested on the dev split (T-026).
+No method has been run on the test split yet.** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is reviewed at its gate, and the closing decision is the chef's: the study note is
 [docs/design/paint_transformer.md](docs/design/paint_transformer.md), the plan is [docs/plan/M2.md](docs/plan/M2.md), and the
@@ -457,6 +457,15 @@ The model is reserved for evaluation: the M4 contribution must not use it (the c
 The maps are computed outside git (`python -m scripts.fetch_inspyrenet`, then `python -m scripts.compute_saliency`), about 0.1 s
 and 0.7 GB of GPU memory per image; their hashes are in `docs/experiments/data/saliency/saliency_maps.json`. The model needs the
 extra packages of `requirements-eval.txt`, installed on top of the main requirements.
+
+**Evaluation harness (T-026).** `python -m scripts.eval_run` runs the methods (`run`), writes the tables and the anytime-quality
+figure (`report`), and computes the strokes-to-target threshold (`tau`). The metrics are L1, SSIM, LPIPS-VGG and LPIPS-Alex (the
+held-out metric), saliency-weighted LPIPS with the evaluator map and the control map, the anytime AUC at 250 to 2000 strokes, and the
+strokes needed to reach a target; the statistics are paired Wilcoxon tests with Holm correction and bootstrap intervals. The protocol
+constants are in `configs/eval/protocol.yaml`. The only run so far is a smoke run on ten dev images with two methods (the optimization
+baseline and the Paint Transformer). It checks the harness; its numbers are not a result, and the threshold `tau` is provisional until
+Learning to Paint is in. The test split has not been run. The smoke report is
+[docs/experiments/eval_harness_smoke.md](docs/experiments/eval_harness_smoke.md).
 
 ## License
 
