@@ -7,7 +7,6 @@ Légende : `[~]` en cours, `[x]` fait, `[!]` bloqué (raison indiquée).
 Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BRIEF.md). Tickets = GitHub Issues #NNN.
 
 ## À faire
-- [ ] 028 [T-028] Learning to Paint study + Bezier and neural renderer (M3)
 - [ ] 029 [T-029] Learning to Paint DDPG training on CC0 subset (M3)
 - [ ] 030 [T-030] Learning to Paint inference + published-number check (M3)
 - [ ] 031 [T-031] PT-init + per-patch refinement baseline variant (M3)
@@ -18,9 +17,10 @@ Projet : BrushStroke (cahier des charges complet : Brush-agents/tasks/PROJECT_BR
 - [ ] M6 Rapport technique + polish README
 
 ## En cours
-- [~] 027 [T-027] Renderer bounding-box rasterization speed-up (M3)
+- [~] 028 [T-028] Learning to Paint study + Bezier and neural renderer (M3)
 
 ## Fait
+- [x] 027 [T-027] Renderer bounding-box rasterization speed-up (M3) (d793f07)
 - [x] 026 [T-026] Evaluation harness: metrics, anytime AUC, SW-LPIPS, stats (M3) (93e6eb9)
 - [x] 025 [T-025] Evaluation saliency maps, InSPyReNet + spectral residual (M3) (fc13c5a)
 - [x] 024 [T-024] Eval set curation (bloqué après 3 KO, terminé via T-034, 81b9ebc)
