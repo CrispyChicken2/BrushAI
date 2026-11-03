@@ -20,6 +20,7 @@ render:
   dtype: auto
   sampler: grid_sample
   min_size: 0.001
+  bbox: false        # T-027: 1.95x faster, same quality within tolerance, different sequence; see docs/design/renderer.md
 
 loss:
   l1: 1.0

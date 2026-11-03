@@ -21,6 +21,9 @@ canvas:
 
 render:
   chunk_size: 64         # strokes composited at once (memory ~ chunk_size * H * W)
+  bbox: false            # rasterize each chunk only inside its strokes' union bounding box (T-027; same output within 2e-4)
+  bbox_chunk: 0          # chunk size of the bbox path (0 = chunk_size)
+  bbox_max_fraction: 0.75  # chunks whose box covers more of the canvas use the full path
   use_checkpoint: false  # recompute chunk activations in backward (less memory, slower)
   brush_seed: 0          # seed of the per-stroke brush variant choice
   dtype: auto            # compositing dtype: auto (= params dtype) | float32 | float64 | bfloat16

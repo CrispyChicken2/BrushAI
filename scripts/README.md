@@ -6,6 +6,7 @@ Entry points, run from the repo root: `python -m scripts.<name>` or `python scri
 |--------|---------|
 | `preview_brushes` | contact sheet of the brush masks and the canvas texture (T-002) |
 | `bench_renderer` | renderer time and peak VRAM table (T-003) |
+| `bench_bbox`, `bench_bbox_e2e` | bounding-box renderer: per-sequence step time / VRAM, and end-to-end baseline run (T-027) |
 | `paint_optim` | paint an image with baseline (a) (T-005) |
 | `animate` | stroke-by-stroke animation of a `StrokeSequence` to MP4 / WebM / GIF (T-006) |
 | `fetch_data` | download the evaluation images and verify their checksums (T-009) |

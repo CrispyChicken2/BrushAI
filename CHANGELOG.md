@@ -2,6 +2,11 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-027] Renderer bounding-box path
+
+- `render.bbox` (default off): each chunk is rasterized and composited only inside the union box of its strokes (`rasterize.stroke_boxes`, `rasterize_window`, `pipeline._composite_chunk_bbox`); dense chunks fall back to the full path (`bbox_max_fraction`). Equivalence tests (forward, gradients, borders, rotations, outside strokes, determinism): `tests/test_renderer_bbox.py`. Design note: `docs/design/renderer.md`.
+- Measured: 2.4x on forward+backward of 2037 strokes, 1.95x end to end on the optimization baseline (589 s -> 302 s, 3.38 -> 2.70 GB); flag off keeps the sequence hash `ee4dd8ac823f` and the config hash. `scripts/bench_bbox.py`, `scripts/bench_bbox_e2e.py`, `docs/experiments/renderer_bbox_bench.md`.
+
 ## [T-026] Evaluation harness
 
 - `brushstroke/eval/{protocol,curves,stats,metrics,producers,runner,report}.py`, `scripts/eval_run.py` (`run`, `report`, `tau`), `configs/eval/protocol.yaml`: the `Producer`/`PaintResult` interface with adapters for the optimization baseline and Paint Transformer; the 15-checkpoint grid, AUC@B (linear, log, late), SW-LPIPS (lambda 0 / 0.1 / 0.3, evaluator and control maps), strokes-to-target with right-censoring, controls, runtime/VRAM; Wilcoxon, rank-biserial, bootstrap, Holm; tables B1-B5 and the anytime figure.
