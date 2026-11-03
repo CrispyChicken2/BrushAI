@@ -138,3 +138,16 @@ def test_the_figure_is_written_small_and_with_tau(run_dir: Path, tmp_path: Path)
     path = rp.figure(rp.Results(res.records, res.controls, proto), tmp_path / "fig.png")
     assert path.exists() and 5_000 < path.stat().st_size < 500_000
     assert SIZE == 64
+
+
+def test_the_runtime_table_leaves_out_the_warm_up_image(run_dir: Path) -> None:
+    res = results(run_dir)
+    b5 = rp.table_b5(res)
+    row = next(ln for ln in b5.splitlines() if ln.startswith("| fake |"))
+    assert "18 of 20" in row  # 10 images x 2 seeds, the first image of each seed is the warm-up
+    short = next(ln for ln in b5.splitlines() if ln.startswith("| short |"))
+    assert "9 of 10" in short
+    old = res.records[0]
+    assert res.is_warmup({k: v for k, v in old.items() if k != "warmup"}) == (
+        old["image_id"] == min(res.ok[old["method"]])
+    )  # records written before the flag existed: the first image in sorted order

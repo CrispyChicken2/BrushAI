@@ -101,6 +101,25 @@ def environment() -> dict[str, Any]:
     }
 
 
+def gpu_memory_used_gb() -> float | None:
+    """Total VRAM in use on GPU 0 (``nvidia-smi``, all processes and the desktop), in GB, or ``None``.
+
+    Recorded at the start of a run: where the per-process figure is unavailable (Windows), an unusually high value tells
+    a reader that the GPU was not idle.
+    """
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits", "-i", "0"],
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=True,
+        ).stdout.strip()
+        return float(out) / 1024.0
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
 def derive_auc(
     cps: Sequence[int], metrics: dict[str, list[float]], refs: dict[str, float], proto: Protocol
 ) -> dict[str, Any]:
@@ -137,6 +156,7 @@ def derive_auc(
 def content_hash(record: dict[str, Any]) -> str:
     """SHA-256 of everything in a record except the timings, the environment and the hash itself."""
     skip = {
+        "warmup",
         "runtime_s",
         "peak_vram_gb",
         "peak_vram_reserved_gb",
@@ -157,8 +177,13 @@ def run_one(
     proto: Protocol,
     controls: dict[str, Any],
     env: dict[str, Any],
+    warmup: bool = False,
 ) -> dict[str, Any]:
-    """One record: paint, score every canvas, derive the AUCs. Failures are recorded, not raised."""
+    """One record: paint, score every canvas, derive the AUCs. Failures are recorded, not raised.
+
+    ``warmup`` marks the first image a producer paints for a replicate in a run: its runtime is a warm-up (protocol 2.3)
+    and the runtime statistics leave it out; its metrics count like any other.
+    """
     record: dict[str, Any] = {
         "schema": SCHEMA_VERSION,
         "method": producer.name,
@@ -169,6 +194,7 @@ def run_one(
         "dagger_metrics": list(producer.dagger_metrics),
         "env": env,
         "status": "ok",
+        "warmup": warmup,
     }
     try:
         result = measured_paint(producer, ctx.target, proto.checkpoints, seed)
@@ -235,8 +261,10 @@ def run_harness(
             f"another process uses {other:.1f} GB of VRAM (limit {proto.gpu_contention_gb} GB): a timed run needs an idle GPU"
         )
     env["other_gpu_processes_gb"] = other
+    env["gpu_memory_used_gb_at_start"] = gpu_memory_used_gb() if torch.cuda.is_available() else None
     write_json(out / "environment.json", env)
     counts = {"ran": 0, "skipped": 0, "failed": 0}
+    warmed: set[tuple[str, int]] = set()  # (producer, seed) already painted once in this call
     for ctx in sorted(images, key=lambda c: c.id):
         controls_path = out / "controls" / f"{ctx.id}.json"
         if controls_path.exists() and not force:
@@ -250,7 +278,11 @@ def run_harness(
                 if path.exists() and not force:
                     counts["skipped"] += 1
                     continue
-                record = run_one(producer, ctx, seed, proto, controls, env)
+                key = (producer.name, seed)
+                record = run_one(
+                    producer, ctx, seed, proto, controls, env, warmup=key not in warmed
+                )
+                warmed.add(key)
                 write_json(path, record)
                 counts["ran" if record["status"] == "ok" else "failed"] += 1
                 log(

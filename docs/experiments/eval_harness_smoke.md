@@ -89,10 +89,10 @@ SW-LPIPS AUC@2000 (normalized by the per-image blank-canvas SW-LPIPS):
 
 ## B5 runtime and VRAM
 
-| method | runs | runtime s, median [IQR] | peak VRAM GB (allocated) | reserved GB | min strokes emitted |
+| method | timed runs (warm-up excluded) | runtime s, median [IQR] | peak VRAM GB (allocated) | reserved GB | min strokes emitted |
 |---|---|---|---|---|---|
-| optim | 10 | 583.54 [583.24, 584.24] | 3.44 [3.44, 3.44] | 3.60 [3.60, 3.60] | 2037 |
-| pt | 30 | 21.71 [21.57, 21.84] | 1.19 [1.19, 1.20] | 3.60 [3.60, 3.60] | 2787 |
+| optim | 9 of 10 | 583.43 [583.23, 584.24] | 3.44 [3.44, 3.44] | 3.60 [3.60, 3.60] | 2037 |
+| pt | 27 of 30 | 21.71 [21.56, 21.84] | 1.19 [1.19, 1.20] | 3.60 [3.60, 3.60] | 2787 |
 
 ## Paired statistics
 

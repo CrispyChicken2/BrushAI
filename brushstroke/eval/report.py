@@ -115,6 +115,18 @@ class Results:
         """A per-record extractor of the AUC of ``key`` (``norm``, ``raw``, ``log`` or ``late``) at ``budget``."""
         return lambda rec: self.auc(rec, key, budget, kind)
 
+    def is_warmup(self, rec: dict[str, Any]) -> bool:
+        """True for the warm-up image of a (method, seed): flagged by the runner or, for records written before the flag
+        existed, the first image in sorted id order (the order a run processes them in)."""
+        if "warmup" in rec:
+            return bool(rec["warmup"])
+        ids = [
+            i
+            for i, rs in self.ok[rec["method"]].items()
+            if any(r["seed"] == rec["seed"] for r in rs)
+        ]
+        return bool(rec["image_id"] == min(ids))
+
     def max_n(self, method: str) -> int:
         return min((r["n_total"] for rs in self.ok[method].values() for r in rs), default=0)
 
@@ -382,21 +394,31 @@ def table_b5(res: Results) -> str:
     rows = []
     for method in res.methods:
         recs = [r for rs in res.ok[method].values() for r in rs]
-        run = [r["runtime_s"] for r in recs]
-        vram = [r["peak_vram_gb"] for r in recs]
-        res_gb = [r["peak_vram_reserved_gb"] for r in recs]
+        timed = [
+            r for r in recs if not res.is_warmup(r)
+        ]  # protocol 2.3: the warm-up image is not in the statistic
+        run = [r["runtime_s"] for r in timed] or [float("nan")]
+        vram = [r["peak_vram_gb"] for r in timed] or [float("nan")]
+        res_gb = [r["peak_vram_reserved_gb"] for r in timed] or [float("nan")]
 
         def iqr(x: list[float]) -> str:
             q = np.quantile(x, [0.25, 0.5, 0.75])
             return f"{q[1]:.2f} [{q[0]:.2f}, {q[2]:.2f}]"
 
         rows.append(
-            [method, str(len(recs)), iqr(run), iqr(vram), iqr(res_gb), f"{res.max_n(method)}"]
+            [
+                method,
+                f"{len(timed)} of {len(recs)}",
+                iqr(run),
+                iqr(vram),
+                iqr(res_gb),
+                f"{res.max_n(method)}",
+            ]
         )
     return table(
         [
             "method",
-            "runs",
+            "timed runs (warm-up excluded)",
             "runtime s, median [IQR]",
             "peak VRAM GB (allocated)",
             "reserved GB",

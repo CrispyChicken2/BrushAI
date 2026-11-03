@@ -475,7 +475,15 @@ The harness (`brushstroke/eval/{protocol,curves,stats,metrics,producers,runner,r
 6. **Strokes-to-target**: a per-image `n*` is the mean over the replicates (censored replicates counted at 2000); the reached fraction is the share of replicates that cross. The values `tau_500/1000/2000` in `configs/eval/protocol.yaml` are **provisional**: computed by `scripts.eval_run tau` from the dev records of the baselines available now (optimization baseline, Paint Transformer; strongest = the optimization baseline, dev mean LPIPS-Alex at 1000 strokes 0.366 against 0.551): 0.4394, 0.3634, 0.2806. They are re-derived with Learning to Paint (T-030) and frozen before the test run.
 7. **Producers**: the optimization baseline is `configs/baseline_optim.yaml` (2037 strokes, replicate = initialization seed); Paint Transformer is the generic render of its `StrokeSequence` for the three checkpoints `outputs/pt_long/seed{0,1,2}` (replicate = training seed, official final layer, no refinement). The pipeline canvas differs from the sequence render by 0.0065 mean absolute value on the dev images (the control row).
 8. **Exact Wilcoxon and Holm**: with n = 10 images the smallest two-sided exact p is 0.00195; Holm over the F1 family (9 tests when three baselines exist) is therefore reachable but strict, as the protocol caveat says.
-9. **Controls** per image: blank black, blank white, and the target blurred with a Gaussian of sigma 1 px (kernel radius 3 sigma, reflect padding).
+9. **Controls** per image: blank black, blank white, and the target blurred with a Gaussian of sigma 1 px (kernel radius 3 sigma, padding by reflection without repeating the border pixel: scipy `mode="mirror"`, torch `reflect`).
 
 Affected runs: none. `docs/experiments/eval_harness_smoke.md` is the dev smoke run (10 dev images, optimization baseline seed 0, Paint Transformer seeds 0 to 2): not a result, a test of the harness.
+
+### 2026-11-03 (T-026, review round 1, still before any test run)
+
+1. **Warm-up image (2.3).** Runtime statistics exclude the first image a producer paints for a replicate in a run, as the protocol says; the runner flags it (`warmup` in the record, outside the content hash) and the runtime table counts "timed runs (warm-up excluded)". Records written before the flag existed (the dev smoke run) are read as if the first image in sorted id order were the warm-up, which is how a run processes them. The metrics of that image count like any other. (Item 4 of the T-026 entry above did not say this; the rule itself is unchanged.)
+2. **Targets.** `scripts.eval_run` checks every target against the manifest `prepared_sha256` before scoring (a stale `data/raw/eval` was not detected, only the saliency maps were).
+3. **Idle GPU.** The per-process check stays unavailable on this Windows driver. The run now also records the total VRAM in use at its start (`gpu_memory_used_gb_at_start`, desktop included), so a contended run is visible in the record. A refusal rule on that figure was not added: the desktop alone uses about 3 GB here, so any threshold would be arbitrary; the idle GPU stays an operator assertion, recorded.
+
+Affected runs: none (dev smoke only; its report is regenerated with the warm-up excluded).
 

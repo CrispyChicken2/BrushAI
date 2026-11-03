@@ -27,7 +27,7 @@ import torch
 from PIL import Image
 
 from brushstroke.eval import report
-from brushstroke.eval.dataset import load_manifest
+from brushstroke.eval.dataset import load_manifest, pixel_sha256
 from brushstroke.eval.producers import OptimProducer, Producer, PTProducer
 from brushstroke.eval.protocol import PROTOCOL, Protocol, load_protocol
 from brushstroke.eval.runner import ImageContext, run_harness
@@ -50,6 +50,10 @@ def load_images(
             Image.open(Path(proto.eval_root) / "prepared" / f"{im.id}.png").convert("RGB"),
             dtype=np.float32,
         )
+        if pixel_sha256(pixels.astype(np.uint8)) != im.prepared_sha256:
+            raise SystemExit(
+                f"target {im.id} differs from the manifest prepared_sha256 (stale data/raw/eval: python -m scripts.fetch_eval_set)"
+            )
         target = torch.from_numpy(pixels / 255.0).permute(2, 0, 1).contiguous().to(device)
         maps = {}
         for name in proto.saliency_methods:

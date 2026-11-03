@@ -264,3 +264,34 @@ def test_a_contended_gpu_refuses_a_timed_run(
     monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
     with pytest.raises(RuntimeError, match="idle GPU"):
         rn.run_harness([FakeProducer(600)], [context()], {"fake": [0]}, PROTO, tmp_path, timed=True)
+
+
+def test_the_first_image_of_each_producer_and_seed_is_flagged_as_the_warm_up(
+    tmp_path: Path,
+) -> None:
+    images = [context("c", 2), context("a", 0), context("b", 1)]
+    rn.run_harness(
+        [FakeProducer(600)],
+        images,
+        {"fake": [0, 1]},
+        PROTO,
+        tmp_path,
+        log=lambda _: None,
+        timed=False,
+    )
+    flags = {
+        (img, seed): json.loads(rn.record_path(tmp_path, "fake", img, seed).read_text())["warmup"]
+        for img in ("a", "b", "c")
+        for seed in (0, 1)
+    }
+    assert flags == {
+        ("a", 0): True,
+        ("a", 1): True,
+        ("b", 0): False,
+        ("b", 1): False,
+        ("c", 0): False,
+        ("c", 1): False,
+    }
+    # the warm-up flag is not part of the content hash: it depends on the order of a run, not on the painting
+    first = json.loads(rn.record_path(tmp_path, "fake", "a", 0).read_text())
+    assert first["content_hash"] == rn.content_hash({**first, "warmup": False})
