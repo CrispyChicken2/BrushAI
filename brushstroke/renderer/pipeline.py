@@ -9,8 +9,9 @@ keeps only one ``(B, 3, H, W)`` canvas per chunk boundary.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import torch
 from torch.utils.checkpoint import checkpoint
@@ -19,14 +20,20 @@ from brushstroke.renderer.brushes import BrushBank
 from brushstroke.renderer.compositing import composite_parallel
 from brushstroke.renderer.params import B as BLUE
 from brushstroke.renderer.params import R as RED
-from brushstroke.renderer.params import check_params
+from brushstroke.renderer.params import canonicalize, check_params
 from brushstroke.renderer.pt import (
     PT_MODES,
     cached_pt_brushes,
     ours_to_pt,
     render_pt_progressive,
 )
-from brushstroke.renderer.rasterize import brush_masks, default_brush_index, render_alphas
+from brushstroke.renderer.rasterize import (
+    brush_masks,
+    default_brush_index,
+    rasterize_window,
+    render_alphas,
+    stroke_boxes,
+)
 
 _DTYPES: dict[str, torch.dtype | None] = {
     "auto": None,
@@ -54,6 +61,15 @@ class RenderConfig:
     )
     pt_brush_dir: str = (
         "data/raw/pt_brush"  # pt mode: official brush PNGs (scripts/fetch_pt_brushes.py)
+    )
+    bbox: bool = (
+        False  # composite each chunk only inside the union bounding box of its strokes (T-027)
+    )
+    bbox_chunk: int = (
+        0  # chunk size of the bounding-box path (0 = chunk_size); smaller = tighter boxes
+    )
+    bbox_max_fraction: float = (
+        0.75  # a chunk whose box covers more of the canvas takes the full path
     )
 
 
@@ -95,6 +111,50 @@ def _composite_chunk(
     colors = chunk[..., RED : BLUE + 1]
     out = composite_parallel(canvas.to(dtype), alphas.to(dtype), colors.to(dtype))
     return out.to(canvas.dtype)
+
+
+def _composite_chunk_bbox(
+    canvas: torch.Tensor,
+    chunk: torch.Tensor,
+    masks: torch.Tensor,
+    index: torch.Tensor,
+    box: tuple[int, int, int, int],
+    height: int,
+    width: int,
+    dtype: torch.dtype,
+    sampler: str,
+) -> torch.Tensor:
+    """:func:`_composite_chunk` restricted to the window ``box``: the strokes are rasterized and composited on the crop
+    only and the result is pasted back (outside the box every alpha is exactly 0, so the canvas is unchanged there)."""
+    y0, y1, x0, x1 = box
+    b, n = chunk.shape[:2]
+    flat = canonicalize(chunk, height, width).reshape(b * n, -1)
+    sel = masks[index.reshape(-1)]
+    alphas = rasterize_window(flat, sel, height, width, box, sampler).reshape(
+        b, n, 1, y1 - y0, x1 - x0
+    )
+    colors = chunk[..., RED : BLUE + 1]
+    crop = canvas[:, :, y0:y1, x0:x1].to(dtype)
+    out = composite_parallel(crop, alphas.to(dtype), colors.to(dtype)).to(canvas.dtype)
+    result = canvas.clone()
+    result[:, :, y0:y1, x0:x1] = out
+    return result
+
+
+def _chunk_box(
+    boxes: torch.Tensor, done: int, end: int, height: int, width: int, max_fraction: float
+) -> tuple[int, int, int, int] | None | bool:
+    """Union box of strokes ``done:end`` over the batch: ``None`` if every stroke is off the canvas (nothing to paint),
+    ``False`` if it covers more than ``max_fraction`` of the canvas (the full path is then cheaper), else the box."""
+    part = boxes[:, done:end].reshape(-1, 4)
+    live = part[(part[:, 1] > part[:, 0]) & (part[:, 3] > part[:, 2])]
+    if len(live) == 0:
+        return None
+    y0, y1 = int(live[:, 0].min()), int(live[:, 1].max())
+    x0, x1 = int(live[:, 2].min()), int(live[:, 3].max())
+    if (y1 - y0) * (x1 - x0) > max_fraction * height * width:
+        return False
+    return (y0, y1, x0, x1)
 
 
 def _render_pt_mode(
@@ -173,23 +233,51 @@ def render_progressive(
     wanted = sorted(set(checkpoints))
     snapshots: dict[int, torch.Tensor] = {}
     done = 0
+    step = cfg.bbox_chunk if cfg.bbox and cfg.bbox_chunk > 0 else cfg.chunk_size
+    boxes = None
+    if cfg.bbox:
+        boxes = stroke_boxes(params, (masks.shape[-2], masks.shape[-1]), height, width)
     for target in wanted:
         while done < target:
-            end = min(done + cfg.chunk_size, target)
-            args = (
-                current,
-                params[:, done:end],
-                masks,
-                brush_index[:, done:end],
-                height,
-                width,
-                dtype,
-                cfg.sampler,
+            end = min(done + step, target)
+            box = (
+                _chunk_box(boxes, done, end, height, width, cfg.bbox_max_fraction)
+                if boxes is not None
+                else False
             )
-            if cfg.use_checkpoint and torch.is_grad_enabled():
-                current = checkpoint(_composite_chunk, *args, use_reentrant=False)
+            if box is None:  # every stroke of the chunk lies outside the canvas
+                done = end
+                continue
+            fn: Callable[..., torch.Tensor]
+            if box is False:
+                fn = _composite_chunk
+                args: tuple[Any, ...] = (
+                    current,
+                    params[:, done:end],
+                    masks,
+                    brush_index[:, done:end],
+                    height,
+                    width,
+                    dtype,
+                    cfg.sampler,
+                )
             else:
-                current = _composite_chunk(*args)
+                fn = _composite_chunk_bbox
+                args = (
+                    current,
+                    params[:, done:end],
+                    masks,
+                    brush_index[:, done:end],
+                    box,
+                    height,
+                    width,
+                    dtype,
+                    cfg.sampler,
+                )
+            if cfg.use_checkpoint and torch.is_grad_enabled():
+                current = checkpoint(fn, *args, use_reentrant=False)
+            else:
+                current = fn(*args)
             done = end
         snapshots[target] = current
     return torch.stack([snapshots[k] for k in checkpoints], dim=1)

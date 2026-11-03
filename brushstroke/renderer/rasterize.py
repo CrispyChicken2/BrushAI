@@ -209,3 +209,83 @@ def render_alphas(
     flat = canonicalize(params, height, width).reshape(b * n, -1)
     sel = masks[brush_index.to(params.device).reshape(-1)]
     return rasterize_flat(flat, sel, height, width, sampler).reshape(b, n, 1, height, width)
+
+
+# ----------------------------------------------------------------------------- bounding boxes (T-027)
+
+
+def stroke_boxes(
+    params: torch.Tensor, mask_hw: tuple[int, int], height: int, width: int
+) -> torch.Tensor:
+    """Pixel bounding boxes ``(B, N, 4)`` int64 ``[y0, y1, x0, x1)`` on the CPU, clipped to the canvas.
+
+    The box holds **every pixel at which the stroke's alpha can be non-zero, and its gradient**: the rotated
+    rectangle of the (canonicalized) stroke, grown by the half texel of bilinear sampling on each side. The
+    sampler reads zero outside the mask, but a pixel whose brush coordinate is within one texel outside
+    ``[-1, 1]`` still interpolates the border texel with the zero padding, so the extent in brush coordinates is
+    ``1 + 1 / w_mask`` along x and ``1 + 1 / h_mask`` along y. A pixel belongs to the box if its centre
+    ``(i + 0.5)`` lies in the axis-aligned extent of that rectangle; one extra pixel of margin absorbs rounding.
+    A stroke that lies wholly outside the canvas gets an empty box (``y1 <= y0``).
+
+    Args:
+        params: ``(B, N, 9)`` stroke parameters (canonicalized here, like the rasterizer).
+        mask_hw: ``(h, w)`` size of the brush masks in texels.
+        height, width: canvas size in pixels.
+    """
+    p = canonicalize(params.detach(), height, width).to(torch.float64)
+    hm, wm = mask_hw
+    half_u = (
+        p[..., W] * width * 0.5 * (1.0 + 1.0 / wm)
+    )  # half extent along the local x axis, in pixels
+    half_v = p[..., H] * height * 0.5 * (1.0 + 1.0 / hm)
+    t = math.pi * p[..., THETA]
+    c, s = torch.cos(t).abs(), torch.sin(t).abs()
+    ex = c * half_u + s * half_v
+    ey = s * half_u + c * half_v
+    cx, cy = p[..., X] * width, p[..., Y] * height
+    x0 = torch.floor(cx - ex - 0.5) - 1
+    x1 = torch.floor(cx + ex - 0.5) + 2  # exclusive
+    y0 = torch.floor(cy - ey - 0.5) - 1
+    y1 = torch.floor(cy + ey - 0.5) + 2
+    boxes = torch.stack([y0, y1, x0, x1], dim=-1)
+    lim = torch.tensor([height, height, width, width], dtype=boxes.dtype, device=boxes.device)
+    return boxes.clamp(min=0).minimum(lim).to(torch.int64).cpu()
+
+
+def _axis(n: int, a: int, b: int, like: torch.Tensor) -> torch.Tensor:
+    """Entries ``a:b`` of the normalized pixel-centre coordinates ``F.affine_grid`` uses along an axis of ``n`` pixels
+    (``align_corners=False``): the same arithmetic, so the window grid equals the slice of the full grid."""
+    v = torch.linspace(-1, 1, n, dtype=like.dtype, device=like.device)
+    return (v * ((n - 1) / n))[a:b]
+
+
+def rasterize_window(
+    params: torch.Tensor,
+    masks: torch.Tensor,
+    height: int,
+    width: int,
+    box: tuple[int, int, int, int],
+    sampler: str = "grid_sample",
+) -> torch.Tensor:
+    """:func:`rasterize_flat` restricted to the pixel window ``box = (y0, y1, x0, x1)``: ``(M, 1, y1 - y0, x1 - x0)``.
+
+    The value at a pixel is the one the full-canvas rasterization gives at that pixel (same grid arithmetic,
+    same sampler); only the work outside the window is skipped.
+    """
+    y0, y1, x0, x1 = box
+    hc, wc = y1 - y0, x1 - x0
+    xs, ys = _axis(width, x0, x1, params), _axis(height, y0, y1, params)
+    base = torch.stack(
+        [xs[None, :].expand(hc, wc), ys[:, None].expand(hc, wc), torch.ones(hc, wc).to(xs)], dim=-1
+    ).reshape(1, hc * wc, 3)
+    theta = stroke_affine(params, height, width)  # (M, 2, 3)
+    grid = base.expand(params.shape[0], -1, -1).bmm(theta.transpose(1, 2)).reshape(-1, hc, wc, 2)
+    if sampler == "gather":
+        cover = sample_bilinear_gather(masks, grid)
+    elif sampler == "grid_sample":
+        cover = F.grid_sample(
+            masks, grid, mode="bilinear", padding_mode="zeros", align_corners=False
+        )
+    else:
+        raise ValueError(f"unknown sampler {sampler!r}; expected one of {SAMPLERS}")
+    return cover * params[:, A].view(-1, 1, 1, 1)

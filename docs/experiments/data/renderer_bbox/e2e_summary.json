@@ -1,0 +1,26 @@
+{
+ "off": {
+  "sequence_sha256": "ee4dd8ac823f132ab99f549d1c0dc1c60876bbb039e835fed37df695369d7bad",
+  "config_hash": "ca81f6d7540a",
+  "l1": 0.07115461677312851,
+  "psnr": 20.310882642925105,
+  "ssim": 0.2669127285480499,
+  "lpips_vgg": 0.3581494390964508,
+  "lpips_alex": 0.43162256479263306,
+  "num_strokes": 2037.0,
+  "runtime_seconds": 589.3388755000001,
+  "peak_vram_mb": 3376.0791015625
+ },
+ "on": {
+  "sequence_sha256": "e6dc327ee6244b9592fd66a6cafc1f7d53788e1287aaec6b7bbde8b4b57ca719",
+  "config_hash": "1d713a6f4c09",
+  "l1": 0.07081235945224762,
+  "psnr": 20.354591424042102,
+  "ssim": 0.2734519839286804,
+  "lpips_vgg": 0.3474466800689697,
+  "lpips_alex": 0.416593998670578,
+  "num_strokes": 2037.0,
+  "runtime_seconds": 301.8322978000001,
+  "peak_vram_mb": 2700.23779296875
+ }
+}

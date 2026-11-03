@@ -107,9 +107,44 @@ Without checkpointing, 1024 strokes at 512^2 forward+backward measured 11.3 GB p
 the table above; timings in that regime were dominated by driver paging and are not reported). With checkpointing it
 is 0.65 GB and 0.76 s.
 
+## Bounding-box path (T-027)
+`render.bbox: true` rasterizes and composites each chunk only inside the **union pixel box** of its strokes, then pastes the
+result back into the canvas (`rasterize.stroke_boxes`, `rasterize_window`, `pipeline._composite_chunk_bbox`).
+- **Box.** Per stroke, the axis-aligned extent of the rotated (canonicalized) rectangle, grown by the half-texel of bilinear
+  sampling (`1 + 1/w_mask`, `1 + 1/h_mask` in brush coordinates) and one pixel of margin, clipped to the canvas. Tested: no pixel
+  outside the box has non-zero alpha, for every rotation, strokes crossing borders and strokes wholly outside (empty box, skipped).
+- **Same semantics.** Outside the box every alpha is exactly 0, so the canvas is unchanged there (`C (1 - 0) + c * 0`). Inside, the
+  window grid is the slice of the full pixel grid (same `stroke_affine`, same sampler, `grid_sample` or `gather`); the composite is
+  the same closed form on the crop. Gradients flow through the crop and the paste (`use_checkpoint` works unchanged).
+- **Tolerance.** The window grid comes from a matrix product instead of `F.affine_grid`, so sampling coordinates differ by float32
+  rounding: image deviation <= 2e-4 (measured 1.8e-7 to 8e-5), gradient deviation <= 2e-3 of the largest entry (measured <= 4e-6
+  on the real sequence). Not bitwise equal; each path is deterministic (same bits on rerun).
+- **Chunking.** `bbox_chunk` (0 = `chunk_size`) sets the chunk the box is a union over; a chunk whose box covers more than
+  `bbox_max_fraction` (0.75) of the canvas takes the full path, so large strokes cost nothing extra. Smaller chunks give tighter
+  boxes but more kernel launches and canvas pastes: measured slower below 64 (table), so 64 = `chunk_size` is the setting.
+- **Default: off** (`bbox: false`), so every existing sequence, hash and metric is unchanged; the optimization baseline's config
+  hash ignores the three bbox fields while they hold their default (test: equals the hash `main` computed before T-027).
+
+Benchmark (RTX 5070, idle, real 2037-stroke sequence of the M1 landscape demo, 512^2, forward+backward of the first N strokes,
+checkpointing as the baseline chooses; `python -m scripts.bench_bbox`, full table `docs/experiments/renderer_bbox_bench.md`):
+
+| strokes | full | bbox (chunk 64) | speed-up | peak VRAM full / bbox |
+|---|---|---|---|---|
+| 64 | 39 ms | 39 ms | 1.0x | 1.15 / 1.16 GB |
+| 256 | 152 ms | 138 ms | 1.1x | 3.18 / 2.70 GB |
+| 1024 | 771 ms | 378 ms | 2.0x | 1.15 / 1.11 GB |
+| 2037 | 1514 ms | 641 ms | 2.4x | 1.19 / 1.16 GB |
+
+The coarse strokes of the first levels are large and gain nothing; the fine strokes dominate the cost of the baseline.
+End to end (`python -m scripts.bench_bbox_e2e`, M1 landscape demo, seed 0, 512^2, 2037 strokes, `cudnn_deterministic`):
+**589 s -> 302 s (1.95x)**, peak allocated VRAM 3.38 -> 2.70 GB. Flag off reproduces the committed sequence hash `ee4dd8ac823f`. With
+the flag on the optimization trajectory diverges after the first float-rounding differences (the optimizer is chaotic), so the
+sequence is different, with equivalent quality: L1 0.0712 -> 0.0708, PSNR 20.31 -> 20.35, LPIPS-VGG 0.358 -> 0.347, LPIPS-Alex
+0.432 -> 0.417 (one image, one seed: a tolerance check, not a claim of improvement; `docs/experiments/data/renderer_bbox/`).
+
 ## Limitations
-- Per-stroke memory is O(H W) regardless of stroke size (every stroke is rasterized over the whole canvas); a
-  bounding-box crop would speed up small strokes a lot (possible optimization ticket).
+- Per-stroke memory is O(H W) regardless of stroke size on the default path (every stroke is rasterized over the whole
+  canvas); the bounding-box path below removes this for chunks of small strokes.
 - Timings above are measured on a Windows (WDDM) GPU: when the allocator approaches 12 GB the driver may page, which
   makes close-to-limit cases much slower; checkpointed cases stay well below.
 - The brush index is not differentiable (nor the canonicalization switch at `w W = h H`, where texture direction jumps).
