@@ -121,7 +121,10 @@ result back into the canvas (`rasterize.stroke_boxes`, `rasterize_window`, `pipe
   on the real sequence). Not bitwise equal; each path is deterministic (same bits on rerun).
 - **Chunking.** `bbox_chunk` (0 = `chunk_size`) sets the chunk the box is a union over; a chunk whose box covers more than
   `bbox_max_fraction` (0.75) of the canvas takes the full path, so large strokes cost nothing extra. Smaller chunks give tighter
-  boxes but more kernel launches and canvas pastes: measured slower below 64 (table), so 64 = `chunk_size` is the setting.
+  boxes but more kernel launches and canvas pastes. At 1024 and 2037 strokes (the regime of the baseline) chunk 32 is 1.6x and
+  chunk 16 0.8x the speed of chunk 64, so 64 = `chunk_size` is the setting. At 64 and 256 strokes chunk 32 is faster (1.3x and
+  1.2x) and uses less memory (0.60 GB against 1.16 GB at 64 strokes, 1.76 GB against 2.70 GB at 256), but those counts are not
+  the regime the baseline runs in.
 - **Default: off** (`bbox: false`), so every existing sequence, hash and metric is unchanged; the optimization baseline's config
   hash ignores the three bbox fields while they hold their default (test: equals the hash `main` computed before T-027).
 
@@ -135,7 +138,9 @@ checkpointing as the baseline chooses; `python -m scripts.bench_bbox`, full tabl
 | 1024 | 771 ms | 378 ms | 2.0x | 1.15 / 1.11 GB |
 | 2037 | 1514 ms | 641 ms | 2.4x | 1.19 / 1.16 GB |
 
-The coarse strokes of the first levels are large and gain nothing; the fine strokes dominate the cost of the baseline.
+The speed-up grows with the stroke count. The first strokes of a sequence are the large ones of the coarse levels: their chunks
+cover more than `bbox_max_fraction` of the canvas and take the full path, so they gain nothing. This is the mechanism; the
+table reports only the counts shown, not the levels of the baseline run.
 End to end (`python -m scripts.bench_bbox_e2e`, M1 landscape demo, seed 0, 512^2, 2037 strokes, `cudnn_deterministic`):
 **589 s -> 302 s (1.95x)**, peak allocated VRAM 3.38 -> 2.70 GB. Flag off reproduces the committed sequence hash `ee4dd8ac823f`. With
 the flag on the optimization trajectory diverges after the first float-rounding differences (the optimizer is chaotic), so the

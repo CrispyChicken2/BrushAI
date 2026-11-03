@@ -19,7 +19,8 @@ The stroke-convention options of T-019 are off in the default configs (the offic
 
 `pt/` holds the Paint Transformer configs: `model.yaml` (the architecture, `brushstroke.stroke_model.PTModelConfig`),
 `loss_official.yaml` and `loss_paper.yaml` (the two loss presets, `PTLossConfig`), and `brushes.yaml`, the manifest of the
-official brush images (URLs at a pinned commit, licence, SHA-256), read by `scripts/fetch_pt_brushes.py`. The PT-compatible rendering mode is switched in `default.yaml` (`render.mode: pt`).
+official brush images (URLs at a pinned commit, licence, SHA-256), read by `scripts/fetch_pt_brushes.py`. The PT-compatible rendering mode is switched in `default.yaml` (`render.mode: pt`). The bounding-box renderer path is `render.bbox`
+(off by default, T-027; `bbox_chunk` and `bbox_max_fraction` set its chunks), in `default.yaml` and `baseline_optim.yaml`.
 
 `paint_pt.yaml` configures the multi-scale Paint Transformer inference (`scripts/paint_pt.py`): the checkpoint, the final-layer
 variant, `|h|`, and the per-patch refinement (off by default).

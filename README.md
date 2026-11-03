@@ -6,7 +6,8 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 
 **Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)); M3 (evaluation harness and baseline
 numbers) is under way: the evaluation protocol is fixed in advance in [docs/design/evaluation.md](docs/design/evaluation.md), its plan
-is [docs/plan/M3.md](docs/plan/M3.md), the 100-image evaluation set is curated and audited (see [Evaluation set](#evaluation-set-m3)), the evaluation saliency maps are computed (T-025), and the evaluation harness is built and smoke-tested on the dev split (T-026).
+is [docs/plan/M3.md](docs/plan/M3.md), the 100-image evaluation set is curated and audited (see [Evaluation set](#evaluation-set-m3)), the evaluation saliency maps are computed (T-025), and the evaluation harness is built and smoke-tested on the dev split (T-026). The renderer has an opt-in bounding-box path
+(T-027, `render.bbox`, off by default: 1.95x faster end to end on the optimization baseline, a different sequence; every result so far was produced with it off).
 No method has been run on the test split yet.** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is reviewed at its gate, and the closing decision is the chef's: the study note is
@@ -119,7 +120,7 @@ Do not `pip install -e .`: run scripts from the repo root (`python -m scripts.<n
 ```
 brushstroke/          Python package
   renderer/           brush masks and canvas texture (T-002); differentiable batched stroke renderer (T-003);
-                      Paint Transformer-compatible mode `render.mode: pt` (T-011)
+                      Paint Transformer-compatible mode `render.mode: pt` (T-011); bounding-box path `render.bbox` (T-027)
   stroke_model/       stroke predictor (M2): Paint Transformer model (T-012), losses (T-012), training pipeline (T-013, T-014),
                       synthetic stroke generator (T-011)
   contribution/       semantic allocation and painterly ordering (M4)
@@ -177,6 +178,13 @@ image = render(params, bank, 256, 256, cfg=cfg.render)  # (2, 3, 256, 256)
 Rendering settings are in the `render:` section (`chunk_size`, `use_checkpoint`, `sampler`, `dtype`). The
 benchmark (time and peak VRAM) is `.venv\Scripts\python -m scripts.bench_renderer`, which writes
 `outputs/bench_renderer.md`.
+
+The bounding-box path (T-027) is off by default. With `render.bbox=true` each chunk is rasterized and composited only inside
+the union box of its strokes (`bbox_chunk`, `bbox_max_fraction`): the forward image agrees within 2e-4 and the gradients
+within 2e-3 of the largest entry, and the optimization baseline runs 1.95x faster end to end. The sequence is not the same
+(the optimizer diverges after float rounding), so keep the flag off to reproduce the committed results. The benchmarks are
+`.venv\Scripts\python -m scripts.bench_bbox --sequence <sequence.npz>` (per-stroke-count table) and `scripts.bench_bbox_e2e`
+(end to end, GPU); see [docs/design/renderer.md](docs/design/renderer.md).
 
 Stroke sequences: a painting as an ordered list of strokes with its metadata is `brushstroke.strokes.StrokeSequence`
 (schema, `.npz` format and versioning in [docs/design/stroke_sequence.md](docs/design/stroke_sequence.md)). It is the
