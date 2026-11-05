@@ -1,8 +1,9 @@
 # Learning to Paint neural renderer (T-028)
 
 Training: `python -m scripts.train_l2p_renderer` (`configs/l2p/renderer.yaml`: official schedule, 500,000 steps, batch 64, Adam, lr 1e-4 / 1e-5 / 1e-6, fresh
-initialization, MSE against the analytic rasterizer, 14,149 s on an RTX 5070). Report: `python -m scripts.l2p_renderer_report`, data in
-`docs/experiments/data/l2p/renderer_report.json`. Test strokes: 1,000 uniform random strokes, seed 777 (no training batch uses it).
+initialization, MSE against the analytic rasterizer, 14,149 s on an RTX 5070). Report: `python -m scripts.l2p_renderer_report --weights outputs/l2p_renderer/renderer.pt --official data/raw/l2p_official/renderer.pkl
+--actor data/raw/l2p_official/actor.pkl --image data/raw/l2p_official/image/lisa.png --out docs/experiments/data/l2p/renderer_report.json`
+(the script writes JSON; this page is written from it by hand), data in `docs/experiments/data/l2p/renderer_report.json`. Test strokes: 1,000 uniform random strokes, seed 777 (no training batch uses it).
 
 ## Error against the analytic rasterizer (equal to the official cv2 `draw`)
 
@@ -33,5 +34,5 @@ Training curve (validation on 1,000 held-out strokes, `outputs/l2p_renderer/hist
 | 2000 | 0.000541 | 0.000548 |
 | 4250 | 0.000404 | 0.000410 |
 
-The two renderers give the same behaviour of the released actor within a few per cent, which supports using our renderer in T-029. One image only: a plumbing check of the
+The two renderers give the same behaviour of the released actor within about 7 per cent at every checkpoint (largest gap at 25 strokes), which supports using our renderer in T-029. One image only: a plumbing check of the
 rollout and the producer skeleton, not a comparison of methods. Parity of the rollout with `test.py` is established on CPU by a transcription test (see the design note, section 5).
