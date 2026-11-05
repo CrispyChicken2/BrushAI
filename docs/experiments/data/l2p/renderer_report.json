@@ -21,20 +21,24 @@
   "official_renderer": {
    "l2_after_0_strokes": 0.18368098139762878,
    "l2_after_5_strokes": 0.022539367899298668,
-   "l2_after_25_strokes": 0.007331090047955513,
-   "l2_after_100_strokes": 0.0031312229111790657,
-   "l2_after_500_strokes": 0.001055101864039898,
-   "l2_after_1700_strokes": 0.0004981397069059312,
-   "n_total": 1700
+   "l2_after_25_strokes": 0.007589859422296286,
+   "l2_after_100_strokes": 0.0029322903137654066,
+   "l2_after_500_strokes": 0.001131291501224041,
+   "l2_after_1700_strokes": 0.0005790445138700306,
+   "l2_after_2000_strokes": 0.0005412775790318847,
+   "l2_after_4250_strokes": 0.0004039471969008446,
+   "n_total": 4250
   },
   "our_renderer": {
    "l2_after_0_strokes": 0.18368098139762878,
    "l2_after_5_strokes": 0.02311469241976738,
-   "l2_after_25_strokes": 0.006877504289150238,
-   "l2_after_100_strokes": 0.0030038475524634123,
-   "l2_after_500_strokes": 0.0010682385182008147,
-   "l2_after_1700_strokes": 0.0005156166153028607,
-   "n_total": 1700
+   "l2_after_25_strokes": 0.0070898509584367275,
+   "l2_after_100_strokes": 0.003017089096829295,
+   "l2_after_500_strokes": 0.0011786359827965498,
+   "l2_after_1700_strokes": 0.0005978015251457691,
+   "l2_after_2000_strokes": 0.0005479647079482675,
+   "l2_after_4250_strokes": 0.00041020382195711136,
+   "n_total": 4250
   }
  }
 }

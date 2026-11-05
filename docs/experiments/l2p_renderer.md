@@ -20,16 +20,18 @@ Training curve (validation on 1,000 held-out strokes, `outputs/l2p_renderer/hist
 
 ## Smoke run of the released actor (not a result)
 
-`data/raw/l2p_official/image/lisa.png` (official sample), 512 x 512, 1,700 strokes, `RolloutConfig()` defaults. l2 to the target (mean squared pixel error on [0, 1]):
+`data/raw/l2p_official/image/lisa.png` (official sample, a 128 x 128 image upscaled to 512 x 512), `RolloutConfig()` defaults (`max_step` 100, 4,250 strokes). l2 to the target (mean squared pixel error on [0, 1]):
 
 | Strokes | official renderer | our renderer |
 |---------|-------------------|--------------|
 | 0 | 0.1837 | 0.1837 |
 | 5 | 0.02254 | 0.02311 |
-| 25 | 0.00733 | 0.00688 |
-| 100 | 0.00313 | 0.00300 |
-| 500 | 0.001055 | 0.001068 |
-| 1700 | 0.000498 | 0.000516 |
+| 25 | 0.00759 | 0.00709 |
+| 100 | 0.00293 | 0.00302 |
+| 500 | 0.001131 | 0.001179 |
+| 1700 | 0.000579 | 0.000598 |
+| 2000 | 0.000541 | 0.000548 |
+| 4250 | 0.000404 | 0.000410 |
 
 The two renderers give the same behaviour of the released actor within a few per cent, which supports using our renderer in T-029. One image only: a plumbing check of the
-rollout and the producer skeleton, not a comparison of methods. The official `test.py` was not run (refused by the sandbox; see the limitation in the design note).
+rollout and the producer skeleton, not a comparison of methods. Parity of the rollout with `test.py` is established on CPU by a transcription test (see the design note, section 5).

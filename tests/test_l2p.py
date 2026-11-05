@@ -147,6 +147,112 @@ def test_official_weights_load_strictly_and_approximate_the_analytic_strokes() -
     net = load_renderer(OFFICIAL / "renderer.pkl")
     s = random_strokes(200, torch.Generator().manual_seed(5), "cpu")
     err = renderer_error(net, s)
-    assert err["mse"] < 2e-3  # measured 5.8e-4 on 1000 strokes (docs/design/learning_to_paint.md)
+    assert err["mse"] < 2e-3  # measured 6.1e-4 on 1000 strokes (docs/design/learning_to_paint.md)
     if (OFFICIAL / "actor.pkl").exists():
         load_actor(OFFICIAL / "actor.pkl")
+
+
+@needs_official
+def test_rollout_matches_a_transcription_of_the_official_test_script() -> None:
+    """CPU, float inputs: every global-stroke canvas and every divided-step canvas equals a line-by-line transcription of
+    ``baseline/test.py`` (divide 2, max_step 8). On CUDA the closed loop drifts at kernel-level float noise, hence CPU."""
+    cv2 = pytest.importorskip("cv2")
+    img = OFFICIAL / "image" / "lisa.png"
+    if not (OFFICIAL / "actor.pkl").exists() or not img.exists():
+        pytest.skip("official actor or sample image not fetched")
+    width, divide, max_step = 128, 2, 8
+    actor, dec = load_actor(OFFICIAL / "actor.pkl"), load_renderer(OFFICIAL / "renderer.pkl")
+    imgf = cv2.resize(cv2.imread(str(img), cv2.IMREAD_COLOR), (256, 256)).astype(np.float32) / 255.0
+    origin = (256, 256)
+    r = torch.arange(width, dtype=torch.float32) / (width - 1.0)
+    coord = torch.stack([r[:, None].expand(width, width), r[None, :].expand(width, width)])[None]
+
+    def odecode(x: torch.Tensor, canvas: torch.Tensor) -> tuple[torch.Tensor, list[torch.Tensor]]:
+        x = x.view(-1, 13)
+        stroke = (1 - dec(x[:, :10])).view(-1, width, width, 1)
+        cs = (stroke * x[:, -3:].view(-1, 1, 1, 3)).permute(0, 3, 1, 2)
+        stroke = stroke.permute(0, 3, 1, 2).reshape(-1, 5, 1, width, width)
+        cs = cs.reshape(-1, 5, 3, width, width)
+        out = []
+        for i in range(5):
+            canvas = canvas * (1 - stroke[:, i]) + cs[:, i]
+            out.append(canvas)
+        return canvas, out
+
+    def smooth(a: np.ndarray) -> np.ndarray:
+        n = divide * width
+
+        def sp(tx: int, ty: int) -> None:
+            if tx in (0, n - 1) or ty in (0, n - 1):
+                return
+            a[tx, ty] = (
+                a[tx, ty]
+                + a[tx + 1, ty]
+                + a[tx, ty + 1]
+                + a[tx - 1, ty]
+                + a[tx, ty - 1]
+                + a[tx + 1, ty - 1]
+                + a[tx - 1, ty + 1]
+                + a[tx - 1, ty - 1]
+                + a[tx + 1, ty + 1]
+            ) / 9
+
+        for p in range(divide):
+            for q in range(divide):
+                x, y = p * width, q * width
+                for k in range(width):
+                    sp(x + k, y + width - 1)
+                    if q != divide - 1:
+                        sp(x + k, y + width)
+                for k in range(width):
+                    sp(x + width - 1, y + k)
+                    if p != divide - 1:
+                        sp(x + width, y + k)
+        return a
+
+    def l2s(x: np.ndarray) -> np.ndarray:
+        x = x.reshape(divide, width, divide, width, 3)
+        return np.transpose(x, (0, 2, 1, 3, 4)).reshape(divide * divide, width, width, 3)
+
+    def nchw(x: np.ndarray) -> torch.Tensor:
+        return torch.tensor(np.transpose(x, (0, 3, 1, 2))).float()
+
+    steps = max_step // 2
+    ones = torch.ones(1, 1, width, width)
+    with torch.no_grad():
+        patch = nchw(l2s(cv2.resize(imgf, (width * divide, width * divide))))
+        im = nchw(cv2.resize(imgf, (width, width))[None])
+        canvas = torch.zeros(1, 3, width, width)
+        ref: dict[int, np.ndarray] = {}
+        for i in range(steps):
+            a = actor(torch.cat([canvas, im, ones * i / steps, coord], 1))
+            canvas, res = odecode(a, canvas)
+            for j, c in enumerate(res):
+                ref[5 * i + j + 1] = cv2.resize(np.transpose(c[0].numpy(), (1, 2, 0)), origin)
+        c = nchw(l2s(cv2.resize(np.transpose(canvas[0].numpy(), (1, 2, 0)), (256, 256))))
+        n1 = 5 * steps
+        for i in range(steps):
+            a = actor(
+                torch.cat(
+                    [
+                        c,
+                        patch,
+                        ones.expand(divide**2, 1, width, width) * i / steps,
+                        coord.expand(divide**2, 2, width, width),
+                    ],
+                    1,
+                )
+            )
+            c, res = odecode(a, c)
+            big = (
+                np.transpose(res[4].numpy(), (0, 2, 3, 1))
+                .reshape(divide, divide, width, width, 3)
+                .transpose(0, 2, 1, 3, 4)
+                .reshape(divide * width, divide * width, 3)
+            )
+            ref[n1 + (i + 1) * divide**2 * 5] = cv2.resize(smooth(big), origin)
+        target = torch.from_numpy(imgf).permute(2, 0, 1)
+        painting = rollout(actor, dec, target, RolloutConfig(max_step=max_step, divide=divide))
+    for k, want in ref.items():
+        got = painting.canvas(k).permute(1, 2, 0).numpy()
+        assert float(np.abs(np.clip(want, 0, 1) - got).max()) < 1e-6, k

@@ -10,7 +10,7 @@ On ``--strokes`` (default 1000) fresh uniform random strokes (a seed no training
 official weights, the error against the analytic rasterizer :func:`brushstroke.baselines.l2p.bezier.stroke_coverage` (itself equal
 to the official OpenCV ``draw``): mean l2 (MSE), mean absolute error, largest pixel error, worst stroke. It also reports our renderer
 against the official one. With ``--actor`` and ``--image`` it runs the released actor on one image with each renderer (a smoke run of the
-rollout and of the producer skeleton, not a result): l2 loss after 5 / 25 / 100 strokes of the global stage.
+rollout and of the producer skeleton, not a result): l2 loss after 5 / 25 / 100 / 500 / 1700 / 2000 / 4250 strokes.
 """
 
 from __future__ import annotations
@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> dict[str, object]:
                 f"l2_after_{k}_strokes": float(
                     (painting.canvas(k).to(dev) - target).square().mean()
                 )
-                for k in (0, 5, 25, 100, 500, 1700)
+                for k in (0, 5, 25, 100, 500, 1700, 2000, 4250)
             }
             smoke[name]["n_total"] = painting.n_total  # type: ignore[index]
         report["released_actor_smoke"] = smoke

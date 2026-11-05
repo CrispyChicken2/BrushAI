@@ -9,8 +9,8 @@ the repository). The copy used here lives outside git in `data/raw/l2p_official/
 | Item | Licence | Verdict |
 |------|---------|---------|
 | Official code (`LICENSE`, MIT, 2019 Zhewei Huang) | MIT | The architectures were re-implemented from it with attribution in the docstrings (`brushstroke/baselines/l2p/`); no file is vendored in git. |
-| Released weights `renderer.pkl`, `actor.pkl` (CelebA) | **No licence statement.** README links Google Drive and a Baidu mirror | **Local reference only**: fetched, pinned by SHA-256, never committed, never redistributed, never trained on or fine-tuned. Running the released actor as a reference for the agent check of T-030 is accepted on that basis (comparison, not derivative); the verdict is recorded in the data card. |
-| Pinned SHA-256 | `renderer.pkl` `34639d4a...a5ca8e`, `actor.pkl` `75e908a4...eab9` | Full values in the handoff (`.handoff/028-code.md`). |
+| Released weights `renderer.pkl`, `actor.pkl` (CelebA) | **No licence statement.** README links Google Drive and a Baidu mirror | **Local reference only**: fetched, pinned by SHA-256, never committed, never redistributed, never trained on or fine-tuned. Running the released actor as a reference for the agent check of T-030 is accepted on that basis (comparison, not derivative); the verdict is repeated in the T-029 data card. |
+| Pins (SHA-256) | `renderer.pkl` `34639d4ab4f30807fb056bf4b71de0c3f434d6cbe8600cf97b6af3a855a5ca8e`; `actor.pkl` `75e908a42d4c90ad092892a9183bd467453696d8e2202b9640f9a5b4a488eab9` | Sources (official README): Google Drive id `1-7dVdjCIZIxh8hHJnGTK-RA1-jL1tor4` (renderer.pkl) and `1a3vpKgjCVXHON4P7wodqhCgCMPgg1KeR` (actor.pkl), Baidu mirror `https://pan.baidu.com/s/1GELBQCeYojPOBZIwGOKNmA` (code `aq8n`). |
 
 ## 2. Specification (paper and official code)
 
@@ -29,7 +29,7 @@ passes through the renderer).
 
 **Inference** (`baseline/test.py`, `--divide 4`, `--max_step 40`): global stage of `max_step` steps on the whole image resized to 128 x 128, then the image is cut
 in `divide x divide` patches (resized to 128), each painted for `max_step` steps in a batch of 16 patches, patches are pasted back with a seam smoothing
-(`smooth`), all in OpenCV BGR order. With `divide != 1` the step count is halved (`test.py` line 122-123): 20 global steps, then 20 steps on each of the 16 patches, 5 strokes per step: 20 x 5 + 16 x 20 x 5 = **1700 strokes** counted by the protocol at 512 x 512 (as implemented in `rollout.py`). The paper does not describe the high-resolution procedure; it exists
+(`smooth`), all in OpenCV BGR order. With `divide != 1` the step count is halved per stage (`test.py` lines 122-123). Two settings exist: the `test.py` default `--max_step 40` gives 20 global steps then 20 steps on each of the 16 patches, 5 strokes per step: 20 x 5 + 16 x 20 x 5 = **1,700 strokes** at 512 x 512; the command documented in the official README, `test.py --max_step=100 --actor=actor.pkl --renderer=renderer.pkl --img=image/test.png --divide=4`, gives 50 x 5 + 16 x 50 x 5 = **4,250 strokes**. **Decision (review round 1): the default of `RolloutConfig` is `max_step = 100`, the README command.** With 40 the protocol grid would stop at 1,500 and AUC@2000 (P2, the headline endpoint), the 1,750 and 2,000 checkpoints and tau_2000 would be unreachable ("n/a (max n = 1700)", `evaluation.md` 3.3 and 7); with 100 the budget 2,000 is reached and the producer is cut at the budget (measured 0.63 s and 1.16 GB per 512 px image). The 40-step variant stays available as `RolloutConfig(max_step=40)`. The paper does not describe the high-resolution procedure; it exists
 only in the code.
 
 ## 3. Reported results and what is checkable
@@ -56,10 +56,10 @@ Training the actor (DDPG + WGAN-GP critic) is T-029; the critic and discriminato
 1. The renderer is trained **from a fresh initialization** (the official script resumes from `renderer.pkl`); the official weights are only a comparison.
 2. The ground truth is a GPU rasterizer equal to the cv2 `draw` rather than cv2 itself (same schedule, same loss).
 3. We follow the code, not the paper figure, for the number of FC layers (4) and the meaning of z (radius) and w (transparency).
-4. **Official `test.py` parity was not run**: executing the downloaded script was refused by the sandbox classifier and not worked around. Parity is evidenced
-   instead by strict loading of both released networks, by the rasterizer equality with `draw`, and by a released-actor smoke run. It remains a stated limitation; the
-   reimplemented rollout follows `test.py` line by line (including the BGR order and the in-place seam smoothing).
-5. Stroke counting follows the protocol (every stroke of every patch), not the paper's per-image budgets.
+4. **The official `test.py` itself was not executed** (running the downloaded script was refused by the sandbox classifier and not worked around). Parity is established
+   by a line-by-line transcription of `test.py` instead: `tests/test_l2p.py::test_rollout_matches_a_transcription_of_the_official_test_script` (skipped without the official weights) shows that on CPU with float inputs every global-stage stroke canvas and every divided-step canvas equal the transcription (max difference below 1e-6; the reviewer's probe at divide 4, max_step 40 gave exactly 0.0). On CUDA the closed loop drifts after about 15 strokes through kernel-level float noise (final l2 4.98e-4 vs 5.12e-4), and ours is deterministic run to run.
+5. `test.py` resizes the 8-bit image (quantized target) and saves 8-bit frames; ours resizes and keeps floats. With 8-bit inputs the trajectory changes from about stroke 5 (closed loop) and the final l2 is 4.95e-4 against 4.98e-4: no systematic effect, listed for completeness.
+6. Stroke counting follows the protocol (every stroke of every patch), not the paper's per-image budgets.
 
 ## 6. Results
 

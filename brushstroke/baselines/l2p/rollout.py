@@ -36,9 +36,14 @@ WIDTH = 128
 
 @dataclass
 class RolloutConfig:
-    """``configs/l2p/inference.yaml``: the official ``test.py`` defaults."""
+    """Inference settings (to move to YAML when T-030 registers the producer).
 
-    max_step: int = 40  # steps of the episode; halved per stage when the image is divided
+    ``max_step = 100`` is the command documented in the official README (``test.py --max_step=100 --divide=4``): 50 steps per stage,
+    ``50 x 5 + 16 x 50 x 5 = 4,250`` strokes at ``divide = 4``, so the 2,000-stroke budget of the protocol is reachable. The
+    ``test.py`` default of 40 gives only 1,700 strokes (``docs/design/learning_to_paint.md`` section 2).
+    """
+
+    max_step: int = 100  # steps of the episode; halved per stage when the image is divided
     divide: int = 4  # patches per side of the divided stage (1 = no divided stage)
     bundle: int = 5  # strokes per step (the actor outputs 5 x 13 numbers)
     smooth: bool = True  # official seam smoothing of the stitched canvas
@@ -112,7 +117,7 @@ class Painting:
         stage2_strokes: torch.Tensor,
     ) -> None:
         self.cfg, self.out_size = cfg, out_size
-        self.stage1 = stage1  # canvases (3, 128, 128) after 0, 1, ... strokes of the global stage
+        self.stage1 = stage1  # canvases (3, 128, 128) after 0, 1, ... strokes of the global stage (all kept on the CPU)
         self.before = before  # per divided step: (d * d, 3, 128, 128) at the start of the step
         self.after = (
             after  # per divided step: (d * d, bundle, 3, 128, 128) after each stroke of the bundle
@@ -165,13 +170,13 @@ def rollout(
     coord = coord_channels(WIDTH, dev)
     img = _resize(target, WIDTH)[None]
     canvas = torch.zeros(1, 3, WIDTH, WIDTH, device=dev)
-    stage1 = [canvas[0]]
+    stage1 = [canvas[0].cpu()]
     strokes1 = []
     for i in range(steps):
         step = torch.full((1, 1, WIDTH, WIDTH), i / steps, device=dev)
         actions = actor(torch.cat([canvas, img, step, coord], 1))
         canvas, res = decode(actions, canvas, renderer, bundle)
-        stage1.extend(c[0] for c in res)
+        stage1.extend(c[0].cpu() for c in res)
         strokes1.append(actions.reshape(bundle, 13))
     before: list[torch.Tensor] = []
     after: list[torch.Tensor] = []
@@ -189,9 +194,9 @@ def rollout(
         for i in range(steps):
             step = torch.full((d * d, 1, WIDTH, WIDTH), i / steps, device=dev)
             actions = actor(torch.cat([canv, patch_img, step, coord_p], 1))
-            before.append(canv)
+            before.append(canv.cpu())
             canv, res = decode(actions, canv, renderer, bundle)
-            after.append(torch.stack(res, 1))
+            after.append(torch.stack(res, 1).cpu())
             strokes2.append(actions.reshape(d * d * bundle, 13))
     empty = torch.zeros(0, 13, device=dev)
     return Painting(
