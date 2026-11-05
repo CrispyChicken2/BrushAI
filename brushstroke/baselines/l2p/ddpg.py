@@ -472,6 +472,49 @@ def validate(agent: DDPG, env: PaintEnv, ids: np.ndarray, cfg: DDPGConfig) -> di
     }
 
 
+@torch.no_grad()
+def evaluate_actor(
+    actor: nn.Module,
+    renderer: nn.Module,
+    images: np.ndarray,
+    ids: np.ndarray,
+    max_step: int = 40,
+    batch: int = 96,
+    bgr: bool = True,
+) -> dict[str, float]:
+    """Mean l2 (per-pixel MSE in [0, 1]) of the canvas after ``max_step`` steps (5 strokes each) of an eval-mode ``actor`` on 128 x 128 images.
+
+    The canvas is re-quantized to 8 bits after each step as in the training environment; ``bgr`` is the channel order the actor expects
+    (the released actor and ours are trained on BGR). Returns the mean l2 after 1, 5, 20 steps and at the end, and of the blank canvas.
+    """
+    dev = next(actor.parameters()).device
+    env = PaintEnv(images, batch, max_step, dev, bgr)
+    coord = coord_channels(WIDTH, dev)
+    marks = {1, 5, 20, max_step}
+    sums = {f"l2_step{m}": 0.0 for m in sorted(marks)}
+    blank = 0.0
+    for a in range(0, len(ids), batch):
+        env.reset(ids[a : a + batch])
+        n = env.gt.shape[0]
+        blank += float(env.dist().sum())
+        for t in range(max_step):
+            x = torch.cat(
+                [
+                    env.canvas.float() / 255,
+                    env.gt.float() / 255,
+                    torch.full((n, 1, WIDTH, WIDTH), t / max_step, device=dev),
+                    coord.expand(n, 2, WIDTH, WIDTH),
+                ],
+                1,
+            )
+            env.step(actor(x), renderer)
+            if t + 1 in marks:
+                sums[f"l2_step{t + 1}"] += float(env.dist().sum())
+    out = {k: v / len(ids) for k, v in sums.items()}
+    out["l2_blank"] = blank / len(ids)
+    return out
+
+
 def save_actor(agent: DDPG, path: Path) -> None:
     """The actor state dict in the format of the released ``actor.pkl`` (loadable by :func:`~.actor.load_actor`)."""
     torch.save({k: v.detach().cpu() for k, v in agent.actor.state_dict().items()}, path)

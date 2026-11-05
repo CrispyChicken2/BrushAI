@@ -16,9 +16,7 @@ import argparse
 import hashlib
 import json
 import random
-import threading
 import time
-import urllib.error
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -35,41 +33,6 @@ CHUNK = 1000  # candidates per resumable chunk
 SUMMARY = Path("docs/experiments/data/l2p/trainset_summary.json")
 
 
-class RateLimiter:
-    """At most ``rate`` calls per second over all threads, adaptive: a 403 of the Met's firewall pauses every thread for ``cool`` seconds
-    (doubling on repeated blocks) and lowers the rate; a long run of successes raises it again, up to ``cap``."""
-
-    def __init__(self, rate: float, floor: float = 1.0, cap: float | None = None) -> None:
-        self.rate, self.floor, self.cap = rate, floor, cap or rate
-        self.cool, self.until, self.next, self.ok_run = 60.0, 0.0, 0.0, 0
-        self.lock = threading.Lock()
-
-    def wait(self) -> None:
-        with self.lock:
-            now = time.monotonic()
-            start = max(self.next, now, self.until)
-            self.next = start + 1.0 / self.rate
-        if start > now:
-            time.sleep(start - now)
-
-    def blocked(self) -> None:
-        with self.lock:
-            now = time.monotonic()
-            if now >= self.until:  # the first thread to see the block sets the pause
-                self.until = now + self.cool
-                self.rate = max(self.floor, self.rate * 0.7)
-                self.cool = min(self.cool * 2, 900.0)
-                self.ok_run = 0
-                print(f"403: pause {self.until - now:.0f} s, rate {self.rate:.2f}/s", flush=True)
-
-    def success(self) -> None:
-        with self.lock:
-            self.ok_run += 1
-            if self.ok_run % 300 == 0:
-                self.rate = min(self.cap, self.rate * 1.15)
-                self.cool = max(60.0, self.cool / 2)
-
-
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -80,7 +43,7 @@ def sha256_file(path: Path) -> str:
 
 def candidates(cfg: ts.TrainsetConfig) -> tuple[list[dict[str, Any]], set[int], set[str]]:
     root = Path(cfg.root)
-    csv_path = root / "MetObjects.csv"
+    csv_path = root / cfg.csv_name
     if not csv_path.exists():
         raise SystemExit(f"{csv_path} missing: download {cfg.csv_url}")
     if cfg.csv_sha256 and sha256_file(csv_path) != cfg.csv_sha256:
@@ -94,7 +57,7 @@ def cmd_plan(cfg: ts.TrainsetConfig) -> None:
     print(
         json.dumps(
             {
-                "csv_sha256": sha256_file(Path(cfg.root) / "MetObjects.csv"),
+                "csv_sha256": sha256_file(Path(cfg.root) / cfg.csv_name),
                 "eval_met_objects": len(ids),
                 "eval_artists": len(artists),
                 "candidates": len(order),
@@ -105,44 +68,14 @@ def cmd_plan(cfg: ts.TrainsetConfig) -> None:
     )
 
 
-def fetch_one(
-    http: Http, limiter: RateLimiter, cand: dict[str, Any], artists: set[str]
-) -> dict[str, Any]:
-    """Fetch the record and the image of one candidate: a dict with ``ok`` and either the pixels or the rejection reason."""
+def fetch_one(http: Http, cand: dict[str, Any], artists: set[str]) -> dict[str, Any]:
+    """Download and prepare the image of one candidate: a dict with ``ok`` and either the pixels or the rejection reason."""
     out: dict[str, Any] = {"id": cand["id"], "stratum": cand["stratum"], "ok": False}
-    rec = None
-    for _ in range(40):  # a 403 is the firewall, not a verdict on the object: wait and retry
-        limiter.wait()
-        try:
-            rec = json.loads(http.get(f"{ts.MET}/objects/{cand['id']}", retries=1))
-            limiter.success()
-            break
-        except urllib.error.HTTPError as err:
-            if err.code in (403, 429):
-                limiter.blocked()
-                continue
-            out["reason"] = f"api:{err.code}"
-            return out
-        except Exception as err:  # noqa: BLE001
-            out["reason"] = f"api:{type(err).__name__}"
-            return out
-    if rec is None:
-        raise RuntimeError(
-            "the Met API keeps answering 403; rerun later (the chunks done are kept)"
-        )
-    if not rec.get("isPublicDomain"):
-        out["reason"] = "not_public_domain"
-        return out
-    url = rec.get("primaryImageSmall") or ""
-    if not url:
-        out["reason"] = "no_image"
-        return out
-    names = set(ts.artist_names(str(rec.get("artistDisplayName") or "")))
-    if names & artists:
+    if set(cand["artists"]) & artists:
         out["reason"] = "eval_artist"
         return out
     try:
-        data = http.get(url, retries=3)
+        data = http.get(cand["url"], retries=3)
     except Exception as err:  # noqa: BLE001
         out["reason"] = f"image:{type(err).__name__}"
         return out
@@ -155,12 +88,7 @@ def fetch_one(
         pixels=arr,
         pixel_sha256=ts.pixel_sha256(arr),
         file_sha256=hashlib.sha256(data).hexdigest(),
-        url=url,
-        title=str(rec.get("title") or "")[:200],
-        artist=str(rec.get("artistDisplayName") or "")[:200],
-        date=str(rec.get("objectDate") or ""),
-        classification=str(rec.get("classification") or ""),
-        department=str(rec.get("department") or ""),
+        **{k: cand[k] for k in ("url", "title", "artist", "date", "classification", "department")},
     )
     return out
 
@@ -170,7 +98,7 @@ def cmd_fetch(cfg: ts.TrainsetConfig) -> None:
     root = Path(cfg.root)
     chunks = root / "chunks"
     chunks.mkdir(parents=True, exist_ok=True)
-    http, limiter = Http(pause=0.0, timeout=20.0), RateLimiter(cfg.api_per_second)
+    http = Http(pause=0.0, timeout=20.0)
     accepted = sum(int(json.loads(p.read_text())["accepted"]) for p in chunks.glob("chunk_*.json"))
     t0 = time.time()
     for k in range(0, len(order), CHUNK):
@@ -180,9 +108,7 @@ def cmd_fetch(cfg: ts.TrainsetConfig) -> None:
         if (chunks / f"{name}.json").exists():
             continue
         with ThreadPoolExecutor(cfg.threads) as pool:
-            results = list(
-                pool.map(lambda c: fetch_one(http, limiter, c, artists), order[k : k + CHUNK])
-            )
+            results = list(pool.map(lambda c: fetch_one(http, c, artists), order[k : k + CHUNK]))
         good = [r for r in results if r["ok"]]
         np.savez(
             chunks / f"{name}.npz",

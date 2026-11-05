@@ -1,0 +1,28 @@
+{
+ "csv_sha256": "73c4bc4381e0a09ce9f199fda52568c92d9088337f1464fc4b3fead461410fbc",
+ "n_images": 99992,
+ "n_train": 97992,
+ "n_val": 2000,
+ "per_stratum": {
+  "painting": 3050,
+  "photograph": 11160,
+  "drawing": 14274,
+  "other_flat": 584,
+  "print": 27834,
+  "object": 43090
+ },
+ "rejections": {
+  "aspect": 3268,
+  "image": 1659,
+  "small": 3400,
+  "flat": 38
+ },
+ "near_duplicates_dropped": 8,
+ "eval_images_hashed": 100,
+ "manifest_sha256": "38372850f1c8cf97745fe2e956d8da19471112cdd5e7d3c29957f14e99c2f1a0",
+ "pixel_mean": [
+  0.6569450065186817,
+  0.6123759974207672,
+  0.5570193443940397
+ ]
+}

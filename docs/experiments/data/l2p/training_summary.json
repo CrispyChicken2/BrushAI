@@ -1,0 +1,52 @@
+{
+ "runs": [
+  {
+   "run": "dbg",
+   "episodes": 1500,
+   "hours": 1.3553523215982648,
+   "seconds_per_episode": 3.2972950887680055,
+   "hours_for_full_run": 45.795765121777855,
+   "peak_vram_gb": 4.227468967437744,
+   "train_l2_last20_logs": 0.014287874428555369,
+   "val_l2_last": 0.024243567138910294,
+   "val_l2_best": 0.0147643331438303,
+   "val_l2_final_2000": 0.02376173809170723,
+   "val_l2_blank": 0.21402335166931152,
+   "final_q": 6.721790675640106,
+   "final_value_loss": 1.302978569328785
+  }
+ ],
+ "cost": [
+  {
+   "run": "cost_fp32",
+   "episodes": 100,
+   "hours": 0.061396666036711796,
+   "seconds_per_episode": 2.052825427055359,
+   "hours_for_full_run": 28.51146426465776,
+   "peak_vram_gb": 4.231619358062744,
+   "train_l2_last20_logs": 0.24712876081466675,
+   "val_l2_last": 0.18102996051311493,
+   "val_l2_best": 0.18102996051311493,
+   "val_l2_final_2000": null,
+   "val_l2_blank": 0.40758275985717773,
+   "final_q": 32.632383308410645,
+   "final_value_loss": 10.994808928966522
+  },
+  {
+   "run": "cost_bf16",
+   "episodes": 100,
+   "hours": 0.04803718070189158,
+   "seconds_per_episode": 1.6912297189235688,
+   "hours_for_full_run": 23.489301651716232,
+   "peak_vram_gb": 3.672973155975342,
+   "train_l2_last20_logs": 0.23246140033006668,
+   "val_l2_last": 0.18919143080711365,
+   "val_l2_best": 0.18919143080711365,
+   "val_l2_final_2000": null,
+   "val_l2_blank": 0.40758275985717773,
+   "final_q": 35.5073102760315,
+   "final_value_loss": 25.78449417591095
+  }
+ ],
+ "released_comparison": null
+}

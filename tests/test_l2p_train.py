@@ -78,6 +78,7 @@ def test_crop_resize_rejections_and_output() -> None:
     assert arr is not None and arr.shape == (128, 128, 3) and arr.dtype == np.uint8 and why == ""
     assert ts.crop_resize(png(200, 200))[1] == "small"
     assert ts.crop_resize(png(900, 300))[1] == "aspect"
+    assert ts.crop_resize(png(520, 300))[0] is not None  # 1.73: kept
     assert ts.crop_resize(png(300, 300, noise=False))[1] == "flat"
     assert ts.crop_resize(b"not an image")[1] == "undecodable"
 

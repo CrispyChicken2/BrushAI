@@ -1,0 +1,103 @@
+note: evaluation objects and artists excluded from the training subset (docs/design/evaluation.md
+  8.2)
+eval_met_object_ids:
+- 11241
+- 11718
+- 13102
+- 48980
+- 54196
+- 54224
+- 54318
+- 54675
+- 54923
+- 72416
+- 74670
+- 261324
+- 261532
+- 263532
+- 268532
+- 268534
+- 283187
+- 285608
+- 285903
+- 286569
+- 435862
+- 435880
+- 435993
+- 436025
+- 436183
+- 436253
+- 436262
+- 436496
+- 436616
+- 436642
+- 436782
+- 436824
+- 436830
+- 436971
+- 437179
+- 437211
+- 437386
+- 437897
+- 437921
+- 437990
+- 438545
+- 439977
+- 485551
+- 488126
+- 488147
+- 488903
+- 695496
+- 701989
+- 748947
+eval_artists:
+- abraham de vries
+- amedeo modigliani
+- anthony van dyck
+- antonio joli
+- bartholomeus van der helst
+- ben benn
+- brady & co.
+- charles willson peale
+- claude déruet
+- emile van marcke
+- francescuccio ghissi (francesco di cecco ghissi)
+- frans hals
+- giovanni battista piazzetta
+- gustave courbet
+- hill and adamson
+- ishikawa kazan
+- jan gossart (called mabuse)
+- jan victors
+- jean alaux
+- jean-charles cazin
+- john wesley jarvis
+- joshua johnson
+- kubo shunman
+- louis-désiré blanquart-évrard
+- marcus gheeraerts the younger
+- netherlandish (antwerp) painters
+- o. louis guglielmi
+- patrick nasmyth
+- paul cézanne
+- philips koninck
+- pierre-louis pierson
+- rembrandt (rembrandt van rijn)
+- richard cosway
+- roger fenton
+- samuel lovett waldo
+- sir godfrey kneller
+- totoya hokkei
+- umberto boccioni
+- watanabe seitei
+- watanabe shikō 渡辺始興
+near_duplicates_dropped:
+  31927: met_13102
+  62350: met_13102
+  112525: met_13102
+  119260: met_13102
+  119817: met_13102
+  658460: met_285608
+  856582: met_13102
+  856589: met_13102
+hash_distance: 6
