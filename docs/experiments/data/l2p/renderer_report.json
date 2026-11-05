@@ -1,0 +1,44 @@
+{
+ "strokes": 1000,
+ "seed": 777,
+ "ours_vs_analytic": {
+  "mse": 0.0005274846334941685,
+  "mae": 0.004540693946182728,
+  "max_abs": 0.9831898212432861,
+  "worst_stroke_mse": 0.0032027941197156906
+ },
+ "official_vs_analytic": {
+  "mse": 0.0006091083632782102,
+  "mae": 0.004899651277810335,
+  "max_abs": 0.9894201755523682,
+  "worst_stroke_mse": 0.004937437828630209
+ },
+ "ours_vs_official": {
+  "mse": 0.0003680915688164532,
+  "max_abs": 0.8599197864532471
+ },
+ "released_actor_smoke": {
+  "official_renderer": {
+   "l2_after_0_strokes": 0.18368098139762878,
+   "l2_after_5_strokes": 0.022539367899298668,
+   "l2_after_25_strokes": 0.007589859422296286,
+   "l2_after_100_strokes": 0.0029322903137654066,
+   "l2_after_500_strokes": 0.001131291501224041,
+   "l2_after_1700_strokes": 0.0005790445138700306,
+   "l2_after_2000_strokes": 0.0005412775790318847,
+   "l2_after_4250_strokes": 0.0004039471969008446,
+   "n_total": 4250
+  },
+  "our_renderer": {
+   "l2_after_0_strokes": 0.18368098139762878,
+   "l2_after_5_strokes": 0.02311469241976738,
+   "l2_after_25_strokes": 0.0070898509584367275,
+   "l2_after_100_strokes": 0.003017089096829295,
+   "l2_after_500_strokes": 0.0011786359827965498,
+   "l2_after_1700_strokes": 0.0005978015251457691,
+   "l2_after_2000_strokes": 0.0005479647079482675,
+   "l2_after_4250_strokes": 0.00041020382195711136,
+   "n_total": 4250
+  }
+ }
+}
