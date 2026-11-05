@@ -1,0 +1,17 @@
+# Training subset of Learning to Paint (T-029): Met Open Access (CC0), disjoint from the evaluation set.
+# Rules: docs/design/evaluation.md 8.2; built by scripts/build_l2p_trainset.py, stored outside git in root.
+csv_url: https://media.githubusercontent.com/media/metmuseum/openaccess/master/MetObjects.csv
+csv_sha256: 7adc37e41923f9f8179e8ed30d9312e6148da54c4468f373c162afc89d5cd0fe
+target: 100000
+seed: 29
+shard_size: 1000
+api_per_second: 4.0
+threads: 6
+hash_distance: 6
+val_images: 2000
+eval_manifest: configs/eval/eval_set.yaml
+eval_prepared: data/raw/eval/prepared
+root: data/raw/l2p_met
+ids_file: configs/l2p/trainset_ids.txt
+excluded_file: configs/l2p/trainset_excluded.yaml
+strata_cap: {}
