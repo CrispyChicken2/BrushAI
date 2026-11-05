@@ -43,6 +43,7 @@ extend-exclude = [".venv"]
 "tests/test_renderer_bbox.py" = ["E501"]  # long comments
 "brushstroke/baselines/l2p/*.py" = ["E501"]  # long docstring lines (official code citations)
 "tests/test_l2p.py" = ["E501"]  # long comments
+"scripts/l2p_renderer_report.py" = ["E501"]  # long docstring lines
 "brushstroke/eval/metrics.py" = ["E501"]  # long docstring lines (protocol references)
 "brushstroke/eval/stats.py" = ["E501"]  # long docstring lines (protocol references)
 "brushstroke/eval/producers.py" = ["E501"]  # long docstring lines (protocol references)

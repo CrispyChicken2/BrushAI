@@ -2,6 +2,11 @@
 
 All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest first.
 
+## [T-028] Learning to Paint: study note, Bezier rasterizer, neural renderer
+
+- `brushstroke/baselines/l2p/` (`bezier`, `renderer`, `actor`, `rollout`, `producer`): GPU analytic Bezier rasterizer equal to the official cv2 `draw`, the official FCN renderer trained from scratch on synthetic strokes (official schedule), the released-actor architecture (strict load), global + divided inference with exact prefix canvases (1700 strokes at 512 px), `L2PProducer` skeleton (not registered in the protocol yet). `scripts/train_l2p_renderer.py`, `scripts/l2p_renderer_report.py`, `configs/l2p/renderer.yaml`, `tests/test_l2p.py`.
+- Measured: renderer MSE vs analytic 5.27e-4 (official weights 6.09e-4); tolerance fixed in `docs/design/learning_to_paint.md`, met. Study note with licence verdict (code MIT; released weights: local reference only). `docs/experiments/l2p_renderer.md`.
+
 ## [T-027] Renderer bounding-box path
 
 - `render.bbox` (default off): each chunk is rasterized and composited only inside the union box of its strokes (`rasterize.stroke_boxes`, `rasterize_window`, `pipeline._composite_chunk_bbox`); dense chunks fall back to the full path (`bbox_max_fraction`). Equivalence tests (forward, gradients, borders, rotations, outside strokes, determinism): `tests/test_renderer_bbox.py`. Design note: `docs/design/renderer.md`.
