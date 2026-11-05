@@ -1,0 +1,30 @@
+# Learning to Paint agent (T-029): the official train.py defaults (model-based DDPG, WGAN-GP reward) on the Met CC0 subset.
+# One run = one training seed; override with `seed=1 output_dir=outputs/l2p_train/seed1`.
+seed: 0
+episodes: 50000           # official train_times 2,000,000 env steps / max_step 40
+max_step: 40
+env_batch: 96
+batch_size: 96
+rmsize: 800               # replay of rmsize * max_step transitions
+warmup: 400               # env steps without update
+discount: 0.7737809375    # 0.95 ** 5
+tau: 0.001
+episode_train_times: 10
+stage_episodes: [10000, 20000]
+critic_lrs: [3.0e-4, 1.0e-4, 3.0e-5]
+actor_lrs: [1.0e-3, 3.0e-4, 1.0e-4]
+gan_lr: 3.0e-4
+gan_betas: [0.5, 0.999]
+gan_lambda: 10.0
+gan_tau: 0.001
+amp: none                 # "bfloat16": autocast of the actor / critic forward passes (measured, off: docs/experiments/l2p_training.md)
+renderer: outputs/l2p_renderer/renderer.pt
+trainset: data/raw/l2p_met
+bgr: true
+validate_every: 100
+validate_images: 480
+log_every: 50
+checkpoint_every: 500
+output_dir: outputs/l2p_train/seed0
+device: auto
+max_episodes_this_run: 0
