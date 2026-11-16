@@ -24,7 +24,7 @@ fp32 (`amp: none`, the default: the 17 % saving did not justify an unvalidated p
 
 ## Result
 
-Held-out Met validation images (2,000, never trained on, disjoint by object and artist from the evaluation set), 128 px, 40 steps of 5 strokes, our renderer, l2 = mean squared pixel error:
+Held-out Met validation images (2,000, never trained on, disjoint by object from the evaluation set and, except for 27 objects of evaluation artists in the training part, by artist: `evaluation.md`, amendment of 2026-11-16), 128 px, 40 steps of 5 strokes, our renderer, l2 = mean squared pixel error:
 
 | actor | after 1 step | 5 | 20 | 40 steps | blank canvas |
 |---|---|---|---|---|---|
@@ -37,27 +37,26 @@ Our three agents reach the l2 of the released actor (0.0052 to 0.0056 against 0.
 recipe is reproduced, not a benchmark claim (different data, our renderer; no LPIPS is published for the released model). The full table, the
 per-run time and the cost runs are in [`l2p_training_tables.md`](l2p_training_tables.md); curves in [`l2p_training.png`](l2p_training.png).
 
-Training l2 falls from 0.23 (episode 50) to 0.015 (1,000), 0.008 (10,000) and 0.0055 (30,000 to 50,000); validation l2 (480 images, every 100 episodes)
-ends at 0.0039, 0.0041 and 0.0042 (seeds 0, 1, 2), the learning-rate drops at episodes 10,000 and 20,000 give the visible steps. The debug run (9,000 images, 1,500 episodes) already reached 0.0238.
+Training l2 falls from 0.23 (episode 50) to 0.015 (1,000), 0.008 (10,000) and 0.0055 (30,000 to 50,000). **The validation result is the 2,000-image figure of the table above (0.0052 / 0.0055 / 0.0056).** The curve in the figure and the "val l2 (480)" column use the first 480 held-out images in file order, which is **not a random sample**: the file follows the fetch order, by stratum, so these 480 are 222 photographs, 201 drawings, 57 paintings and no object or print (68 % of the training data). They are easier (seed 0: 0.0039 on them against 0.0056 on the other 1,520), which is why 0.0039 to 0.0042 sits below the 2,000-image figure. Read the curve for its shape (the learning-rate drops at episodes 10,000 and 20,000 give the visible steps), not its level. Later runs take a seeded random subset (`validate_sample: random`). The debug run (9,000 images, 1,500 episodes) already reached 0.0238.
 
 ## Checkpoint rule
 
 **The final checkpoint (episode 50,000) is the agent**, the rule decided in `evaluation.md` before any run. It is never chosen by test-set
-results; the validation curve (held-out Met images only) is a diagnostic. The best validation checkpoint of each run is the last or near-last
-(seed 0: 50,000; seed 1: 49,600; seed 2: 48,000), so the rule costs nothing. `actor.pt` is loadable by `load_actor`.
+results; the validation curve (held-out Met images only) is a diagnostic. On the 480-image curve (biased subset, see above) the best checkpoint of each run is the last or near-last
+(seed 0: 50,000; seed 1: 49,600; seed 2: 48,000) and the differences are within the noise of single samples; the rule is not based on it. `actor.pt` is loadable by `load_actor`.
 
 ## Surprises, investigated
 
 1. **Huge discriminator values at the start** (episode 50: `gan_fake` about -700 to -800, gradient penalty 145 to 178). Cause: the WGAN-GP critic is
    unbounded and the first 400 environment steps only fill the replay; the values fall to a few units by episode 1,000 (penalty 6 to 8, 3.5 at the end). No non-finite value in any run (0 of 3 x 1,000 log rows).
 2. **Isolated spikes of the validation l2** (2 to 6 times the neighbouring value for one 100-episode sample, e.g. seed 2: episodes 1,400 (5.7 x), 2,500 (3.4 x), 38,600 (2.4 x); 45,600 to 45,700 stayed 1.8 x up for two samples), always back to the trend within 100 to 200 episodes. Not NaNs; the training l2 does not show them. Probable
-   cause: the batch-norm statistics shared with the target networks (as in the official code) and the non-stationary GAN reward make single policy
-   snapshots worse in eval mode. Not fixed (official behaviour); this is why the final checkpoint rule matters: the 50,000 point is smooth for all three seeds.
+   cause (not isolated by an experiment): the batch-norm running statistics, which in our runs also absorb the target actor's forward passes (the sharing deviation below), and the non-stationary GAN reward make single policy
+   snapshots worse in eval mode. Not fixed; this is why the final checkpoint rule matters: the 50,000 point is smooth for all three seeds.
 3. **Q and critic loss**: Q rises to about 7 (episode 1,000) and settles at 3.4 to 3.7; critic loss settles at 0.006 to 0.013 (seed 2 is the noisiest). Consistent with the official logs' orders of magnitude.
 4. **First cost measurement 3.8 s per episode**: cold page cache of the 4.9 GB image array (and a concurrent download); the warm figure is 2.05 s. Page-cache warm-up is an input of the cost, not of the algorithm.
 
 ## Deviations from the paper and the official run
 
 Listed in `docs/design/learning_to_paint.md` section 7: training data (Met CC0, 98k instead of CelebA/ImageNet 200k), the composition of the Met
-subset (not the 40/30/30 of `evaluation.md` 8.2: only 3,050 usable Met paintings), the aspect rule 1:2 to 2:1, our GPU replay layout (the replay is not
-checkpointed and is refilled on resume; no run was resumed here), BGR training images as in the official code, and the use of our renderer.
+subset (not the 40/30/30 of `evaluation.md` 8.2: only 3,050 usable Met paintings), 27 training objects by evaluation artists, the aspect rule 1:2 to 2:1, **the target actor sharing the batch-norm running statistics of the online actor** (the official `DDPG.__init__` calls `hard_update`, which shares the buffers, and then `.to(device)`, which separates them on the GPU: officially the sharing is gone before training; ours stays, `share_bn_buffers: true`, `false` = official; the results match the released actor), our GPU replay layout (the replay is not
+checkpointed and is refilled on resume; no run was resumed here), BGR training images as in the official code, and the use of our renderer. The three runs used `validate_sample: first` and `share_bn_buffers: true` (config keys added afterwards, same behaviour).

@@ -101,7 +101,7 @@ def figure(runs: list[Path]) -> None:
     fig, ax = plt.subplots(2, 3, figsize=(14, 7), constrained_layout=True)
     panels = [
         ("train_l2", "training l2 (final canvas, 96 images)", True),
-        ("val_l2", "validation l2 (held-out Met images)", True),
+        ("val_l2", "validation l2 (first 480 held-out images: biased subset)", True),
         ("q", "mean Q + r of the policy batch", False),
         ("value_loss", "critic loss", True),
         ("gan_penalty", "WGAN-GP gradient penalty", False),
@@ -134,7 +134,7 @@ def tables(
     lines += [
         "## Training runs",
         "",
-        "| run | episodes | hours | s / episode | full run (h) | peak VRAM (GB) | train l2 (last 20 logs) | val l2 (480 imgs, last) | val l2 (2000 imgs, final) | blank l2 |",
+        "| run | episodes | hours | s / episode | full run (h) | peak VRAM (GB) | train l2 (last 20 logs) | val l2 (first 480 held-out, not random, last) | val l2 (2000 imgs, final) | blank l2 |",
         "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for s in summaries:

@@ -2,7 +2,7 @@
 
 ## Training runs
 
-| run | episodes | hours | s / episode | full run (h) | peak VRAM (GB) | train l2 (last 20 logs) | val l2 (480 imgs, last) | val l2 (2000 imgs, final) | blank l2 |
+| run | episodes | hours | s / episode | full run (h) | peak VRAM (GB) | train l2 (last 20 logs) | val l2 (first 480 held-out, not random, last) | val l2 (2000 imgs, final) | blank l2 |
 |---|---|---|---|---|---|---|---|---|---|
 | seed0 | 50000 | 27.73 | 1.996 | 27.7 | 4.23 | 0.005196 | 0.003888 | 0.005217 | 0.4205 |
 | seed1 | 50000 | 28.66 | 2.063 | 28.7 | 4.23 | 0.005552 | 0.004071 | 0.005493 | 0.4205 |

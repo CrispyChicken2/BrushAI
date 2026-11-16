@@ -4,7 +4,7 @@ All notable changes, one entry per ticket (`[T-NNN]`, GitHub Issue #NNN). Newest
 
 ## [T-029] Learning to Paint: DDPG agent training on a CC0 Met subset
 
-- `brushstroke/baselines/l2p/trainset.py`, `scripts/build_l2p_trainset.py`: 99,992-image Met CC0 subset at 128 px, disjoint from the evaluation set (object, artist, dHash), checksums and manifest (data outside git). `brushstroke/baselines/l2p/ddpg.py`, `scripts/train_l2p.py`, `configs/l2p/`: model-based DDPG with WGAN-GP reward (official recipe), GPU replay, resumable, optional bf16.
+- `brushstroke/baselines/l2p/trainset.py`, `scripts/build_l2p_trainset.py`: 99,992-image Met CC0 subset at 128 px, disjoint from the evaluation set by object, dHash and artist (27 objects of evaluation artists were found in review and are acknowledged, not retrained: `evaluation.md` amendment), checksums and manifest (data outside git). `brushstroke/baselines/l2p/ddpg.py`, `scripts/train_l2p.py`, `configs/l2p/`: model-based DDPG with WGAN-GP reward (official recipe), GPU replay, resumable, optional bf16.
 - 3 training seeds (27.7 to 28.7 h each, 4.23 GB; cost 28.5 h < 48 h rule): 40-step l2 on 2,000 held-out Met images 0.0052 / 0.0055 / 0.0056 against 0.0053 for the released actor. `docs/experiments/l2p_training.md`, `scripts/l2p_training_report.py`. Composition amendment in `docs/design/evaluation.md`.
 
 ## [T-028] Learning to Paint: study note, Bezier rasterizer, neural renderer

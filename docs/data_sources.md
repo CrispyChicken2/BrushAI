@@ -280,9 +280,9 @@ Committed: `configs/l2p/trainset.yaml`, `configs/l2p/trainset_ids.txt` (object i
 
 ```
 python -m scripts.build_l2p_trainset plan | fetch | verify    # candidate plan, resumable download (1,000-image chunks), trim + dHash + checksums
-python -m scripts.build_l2p_trainset check                    # disjointness and checksums, no download
+python -m scripts.build_l2p_trainset check                    # disjointness (27 acknowledged artist leaks) and checksums, no download
 ```
 
 Rules: centre square crop, Pillow box filter, short side >= 256 px, aspect 1:2 to 2:1, grey std >= 6. **Disjoint from the evaluation set** by object id and by
-artist (every work of an artist with an evaluation image is excluded) and, at verification, by perceptual hash (dHash within 6 bits of any of the 100 evaluation images, mirrors included: 8 images dropped).
+artist (every work of an artist sharing a name, ULAN or Wikidata URL with an evaluation Met image is excluded; the trained subset still holds 27 such objects, listed in `configs/l2p/trainset_known_leaks.yaml`, see the 2026-11-16 amendment of `evaluation.md`) and, at verification, by perceptual hash (dHash within 6 bits of any of the 100 evaluation images, mirrors included: 8 images dropped).
 2,000 images are held out for the training curves (`is_val`). Composition: painting 3,050, photograph 11,160, drawing 14,274, other flat 584, print 27,834, object 43,090 (see the amendment in `docs/design/evaluation.md`).
