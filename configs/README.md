@@ -37,4 +37,6 @@ SHA-256 of the files and of the prepared pixels, and the dev flag), `sdxl_prompt
 `eval/protocol.yaml` holds the constants of the evaluation protocol (T-026): the 15-checkpoint grid, the budgets, the AUC and SW-LPIPS settings, the
 bootstrap, the producers of the harness (`scripts/eval_run.py`) and the strokes-to-target thresholds `tau` (provisional until the Learning to Paint producer is registered, T-030).
 
+`l2p/train.yaml`, `l2p/trainset.yaml` (+ `trainset_ids.txt`, `trainset_excluded.yaml`): DDPG training of the Learning to Paint agent and the Met CC0 training subset (T-029), read by `scripts/train_l2p.py` and `scripts/build_l2p_trainset.py`.
+
 `l2p/renderer.yaml`: training of the Learning to Paint neural renderer (official schedule; T-028), read by `scripts/train_l2p_renderer.py`.

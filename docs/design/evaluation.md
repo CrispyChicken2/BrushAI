@@ -487,3 +487,15 @@ Affected runs: none. `docs/experiments/eval_harness_smoke.md` is the dev smoke r
 
 Affected runs: none (dev smoke only; its report is regenerated with the warm-up excluded).
 
+
+### 2026-11-16 (T-029, before any method run on the test set): training subset of the Learning to Paint agent
+
+Realization of 8.2; no test-set number exists, so none of this is *post hoc*.
+
+1. **Composition.** The 40 / 30 / 30 (paintings / photographs / drawings and prints) is not reachable: after excluding every evaluation object and artist, only 3,050 Met paintings with a usable image remain. The subset has 99,992 images: painting 3,050, photograph 11,160, drawing 14,274, other flat 584, print 27,834, object 43,090. It is built in that order of scarcity; nothing is oversampled.
+2. **Size.** 99,992 (97,992 training, 2,000 held out for curves), the "about 100,000" of 8.2.
+3. **Aspect rule 1:2 to 2:1** for the training images (the evaluation set keeps 3:4 to 4:3), which the strict rule would have cut to a third of the pool.
+4. **Source.** The Met's Hugging Face CSV export (CC0) instead of the API; same objects and licence field.
+5. **Disjointness** verified by `python -m scripts.build_l2p_trainset check`: object ids, artists, pixel checksums, and dHash (within 6 bits, mirrors included; 8 near-duplicates removed).
+
+Affected runs: none. The agents of T-029 (3 seeds, final checkpoint) were trained after this amendment was decided.
