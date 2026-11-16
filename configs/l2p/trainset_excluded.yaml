@@ -1,5 +1,6 @@
-note: evaluation objects and artists excluded from the training subset (docs/design/evaluation.md
-  8.2)
+note: 'evaluation objects and artist keys (n: normalized name, u: ULAN / Wikidata
+  URL) excluded from a build of the training subset (docs/design/evaluation.md 8.2);
+  the trained subset still holds the objects of trainset_known_leaks.yaml'
 eval_met_object_ids:
 - 11241
 - 11718
@@ -51,46 +52,131 @@ eval_met_object_ids:
 - 701989
 - 748947
 eval_artists:
-- abraham de vries
-- amedeo modigliani
-- anthony van dyck
-- antonio joli
-- bartholomeus van der helst
-- ben benn
-- brady & co.
-- charles willson peale
-- claude déruet
-- emile van marcke
-- francescuccio ghissi (francesco di cecco ghissi)
-- frans hals
-- giovanni battista piazzetta
-- gustave courbet
-- hill and adamson
-- ishikawa kazan
-- jan gossart (called mabuse)
-- jan victors
-- jean alaux
-- jean-charles cazin
-- john wesley jarvis
-- joshua johnson
-- kubo shunman
-- louis-désiré blanquart-évrard
-- marcus gheeraerts the younger
-- netherlandish (antwerp) painters
-- o. louis guglielmi
-- patrick nasmyth
-- paul cézanne
-- philips koninck
-- pierre-louis pierson
-- rembrandt (rembrandt van rijn)
-- richard cosway
-- roger fenton
-- samuel lovett waldo
-- sir godfrey kneller
-- totoya hokkei
-- umberto boccioni
-- watanabe seitei
-- watanabe shikō 渡辺始興
+- n:abraham de vries
+- n:amedeo modigliani
+- n:anthony van dyck
+- n:antonio joli
+- n:bartholomeus van der helst
+- n:ben benn
+- n:brady & co.
+- n:called mabuse
+- n:charles willson peale
+- n:claude déruet
+- n:david octavius hill
+- n:emile van marcke
+- n:francesco di cecco ghissi
+- n:francescuccio ghissi
+- n:frans hals
+- n:giovanni battista piazzetta
+- n:gustave courbet
+- n:hill and adamson
+- n:ishikawa kazan
+- n:jan gossart
+- n:jan victors
+- n:jean alaux
+- n:jean-charles cazin
+- n:john wesley jarvis
+- n:joshua johnson
+- n:kubo shunman
+- n:louis-désiré blanquart-évrard
+- n:marcus gheeraerts the younger
+- n:netherlandish painters
+- n:o. louis guglielmi
+- n:patrick nasmyth
+- n:paul cézanne
+- n:philips koninck
+- n:pierre-louis pierson
+- n:rembrandt
+- n:rembrandt van rijn
+- n:richard cosway
+- n:robert adamson
+- n:roger fenton
+- n:samuel lovett waldo
+- n:sir godfrey kneller
+- n:totoya hokkei
+- n:umberto boccioni
+- n:watanabe seitei
+- n:watanabe shikō
+- n:william jewett
+- u:http://vocab.getty.edu/page/ulan/500000351
+- u:http://vocab.getty.edu/page/ulan/500002204
+- u:http://vocab.getty.edu/page/ulan/500003532
+- u:http://vocab.getty.edu/page/ulan/500003558
+- u:http://vocab.getty.edu/page/ulan/500004793
+- u:http://vocab.getty.edu/page/ulan/500005033
+- u:http://vocab.getty.edu/page/ulan/500005182
+- u:http://vocab.getty.edu/page/ulan/500005417
+- u:http://vocab.getty.edu/page/ulan/500007951
+- u:http://vocab.getty.edu/page/ulan/500008614
+- u:http://vocab.getty.edu/page/ulan/500009048
+- u:http://vocab.getty.edu/page/ulan/500009353
+- u:http://vocab.getty.edu/page/ulan/500010587
+- u:http://vocab.getty.edu/page/ulan/500010927
+- u:http://vocab.getty.edu/page/ulan/500011051
+- u:http://vocab.getty.edu/page/ulan/500012624
+- u:http://vocab.getty.edu/page/ulan/500013883
+- u:http://vocab.getty.edu/page/ulan/500015875
+- u:http://vocab.getty.edu/page/ulan/500017914
+- u:http://vocab.getty.edu/page/ulan/500018163
+- u:http://vocab.getty.edu/page/ulan/500019476
+- u:http://vocab.getty.edu/page/ulan/500026386
+- u:http://vocab.getty.edu/page/ulan/500026509
+- u:http://vocab.getty.edu/page/ulan/500027794
+- u:http://vocab.getty.edu/page/ulan/500028548
+- u:http://vocab.getty.edu/page/ulan/500031488
+- u:http://vocab.getty.edu/page/ulan/500032756
+- u:http://vocab.getty.edu/page/ulan/500038228
+- u:http://vocab.getty.edu/page/ulan/500041217
+- u:http://vocab.getty.edu/page/ulan/500115190
+- u:http://vocab.getty.edu/page/ulan/500115195
+- u:http://vocab.getty.edu/page/ulan/500115280
+- u:http://vocab.getty.edu/page/ulan/500115454
+- u:http://vocab.getty.edu/page/ulan/500115795
+- u:http://vocab.getty.edu/page/ulan/500121295
+- u:http://vocab.getty.edu/page/ulan/500121340
+- u:http://vocab.getty.edu/page/ulan/500121370
+- u:http://vocab.getty.edu/page/ulan/500123390
+- u:http://vocab.getty.edu/page/ulan/500327126
+- u:https://www.wikidata.org/wiki/Q11562189
+- u:https://www.wikidata.org/wiki/Q120993
+- u:https://www.wikidata.org/wiki/Q1232255
+- u:https://www.wikidata.org/wiki/Q1357477
+- u:https://www.wikidata.org/wiki/Q13583490
+- u:https://www.wikidata.org/wiki/Q150679
+- u:https://www.wikidata.org/wiki/Q152797
+- u:https://www.wikidata.org/wiki/Q166379
+- u:https://www.wikidata.org/wiki/Q167654
+- u:https://www.wikidata.org/wiki/Q2036288
+- u:https://www.wikidata.org/wiki/Q21994030
+- u:https://www.wikidata.org/wiki/Q2404265
+- u:https://www.wikidata.org/wiki/Q2539929
+- u:https://www.wikidata.org/wiki/Q2778951
+- u:https://www.wikidata.org/wiki/Q28069015
+- u:https://www.wikidata.org/wiki/Q2821872
+- u:https://www.wikidata.org/wiki/Q282670
+- u:https://www.wikidata.org/wiki/Q3081147
+- u:https://www.wikidata.org/wiki/Q3182713
+- u:https://www.wikidata.org/wiki/Q3200184
+- u:https://www.wikidata.org/wiki/Q3383295
+- u:https://www.wikidata.org/wiki/Q34618
+- u:https://www.wikidata.org/wiki/Q346952
+- u:https://www.wikidata.org/wiki/Q35548
+- u:https://www.wikidata.org/wiki/Q355563
+- u:https://www.wikidata.org/wiki/Q3566605
+- u:https://www.wikidata.org/wiki/Q3678920
+- u:https://www.wikidata.org/wiki/Q380704
+- u:https://www.wikidata.org/wiki/Q390073
+- u:https://www.wikidata.org/wiki/Q454945
+- u:https://www.wikidata.org/wiki/Q456697
+- u:https://www.wikidata.org/wiki/Q509636
+- u:https://www.wikidata.org/wiki/Q52154484
+- u:https://www.wikidata.org/wiki/Q5598
+- u:https://www.wikidata.org/wiki/Q5837162
+- u:https://www.wikidata.org/wiki/Q65317
+- u:https://www.wikidata.org/wiki/Q7147317
+- u:https://www.wikidata.org/wiki/Q722792
+- u:https://www.wikidata.org/wiki/Q742379
+- u:https://www.wikidata.org/wiki/Q958068
 near_duplicates_dropped:
   31927: met_13102
   62350: met_13102

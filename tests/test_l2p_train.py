@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import io
 import json
 from pathlib import Path
@@ -24,6 +25,7 @@ from brushstroke.baselines.l2p.ddpg import (
     soft_update,
     stage,
     train_agent,
+    unshare_buffers,
 )
 from brushstroke.baselines.l2p.renderer import FCN
 
@@ -202,6 +204,11 @@ def test_training_runs_logs_saves_a_loadable_actor_and_resumes(tmp_path: Path) -
     train_agent(more, log=False)
     last = (tmp_path / "run" / "history.jsonl").read_text().splitlines()[-1]
     assert json.loads(last)["episode"] == 4
+    secs = [
+        json.loads(x)["seconds"]
+        for x in (tmp_path / "run" / "history.jsonl").read_text().splitlines()
+    ]
+    assert secs == sorted(secs)  # one cumulative clock across the resume
 
 
 @pytest.mark.slow
@@ -220,3 +227,69 @@ def test_update_changes_the_actor_and_keeps_targets_slow(tmp_path: Path) -> None
     assert all(np.isfinite(v) for v in out.values())
     assert not torch.equal(agent.actor.fc.weight, before)
     assert float((agent.actor_target.fc.weight - tgt).abs().max()) < 1e-2  # tau = 0.001
+
+
+HEADER = "Object ID,Is Public Domain,Artist Display Name,Artist ULAN URL,Artist Wikidata URL,primaryImageSmall"
+
+
+def met_csv(path: Path, rows: list[tuple[int, str, str, str]]) -> Path:
+    lines = [HEADER] + [f'{i},True,"{n}",{u},{w},http://x/{i}.jpg' for i, n, u, w in rows]
+    with gzip.open(path, "wt", encoding="utf-8") as f:
+        f.write(chr(10).join(lines) + chr(10))
+    return path
+
+
+def test_artist_keys_match_the_variants_the_met_uses() -> None:
+    a = ts.artist_keys("Rembrandt", "http://vocab.getty.edu/page/ulan/500011051", "")
+    b = ts.artist_keys("Rembrandt (Rembrandt van Rijn)")
+    assert a & ts.artist_keys("Rembrandt")  # same name
+    assert "n:rembrandt van rijn" in b and "n:rembrandt" in b
+    assert ts.artist_keys("Totoya Hokkei 魚屋北渓") == {"n:totoya hokkei"}
+    assert ts.artist_keys("David Octavius Hill|Robert Adamson|Hill and Adamson") >= {
+        "n:david octavius hill",
+        "n:hill and adamson",
+    }
+    # anonymous: no name, and the shared "Unknown" URL is not an identity
+    assert (
+        ts.artist_keys("Unknown", "http://vocab.getty.edu/page/ulan/500125274", "(not assigned)")
+        == set()
+    )
+    assert ts.artist_keys("Netherlandish (Antwerp) Painters") == {"n:netherlandish painters"}
+
+
+def test_check_fails_on_an_artist_of_the_evaluation_set_known_only_by_url(tmp_path: Path) -> None:
+    import importlib
+
+    build = importlib.import_module("scripts.build_l2p_trainset")
+    ulan = "http://vocab.getty.edu/page/ulan/500011051"
+    csv_path = met_csv(
+        tmp_path / "m.csv.gz",
+        [
+            (1, "Rembrandt (Rembrandt van Rijn)", ulan, ""),  # the evaluation object
+            (2, "Rembrandt", ulan, ""),  # other spelling, same ULAN
+            (3, "Someone Else", "", ""),
+        ],
+    )
+    manifest = tmp_path / "eval.yaml"
+    manifest.write_text(
+        "images:\n- {id: met_1, source: met, author: Hill and Adamson}\n", encoding="utf-8"
+    )
+    ids, keys = ts.exclusions(manifest, csv_path)
+    assert ids == {1} and f"u:{ulan}" in keys
+    rows = [{"id": 2, "artist": "Rembrandt"}, {"id": 3, "artist": "Someone Else"}]
+    with pytest.raises(AssertionError, match="evaluation artist"):
+        build.check(rows, ids, keys, csv_path)
+    known = tmp_path / "known.yaml"
+    known.write_text("ids: [2]\n", encoding="utf-8")
+    assert build.check(rows, ids, keys, csv_path, str(known)) == [2]
+    with pytest.raises(AssertionError, match="evaluation object"):
+        build.check([{"id": 1, "artist": "x"}], ids, keys, csv_path)
+
+
+def test_unshare_buffers_gives_the_target_its_own_statistics() -> None:
+    a, b = Actor(), Actor()
+    hard_update(b, a)
+    assert b.bn1.running_mean is a.bn1.running_mean
+    unshare_buffers(b)
+    assert b.bn1.running_mean is not a.bn1.running_mean
+    assert torch.equal(b.bn1.running_mean, a.bn1.running_mean)

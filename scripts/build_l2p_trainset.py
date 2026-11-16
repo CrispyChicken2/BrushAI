@@ -48,7 +48,7 @@ def candidates(cfg: ts.TrainsetConfig) -> tuple[list[dict[str, Any]], set[int], 
         raise SystemExit(f"{csv_path} missing: download {cfg.csv_url}")
     if cfg.csv_sha256 and sha256_file(csv_path) != cfg.csv_sha256:
         raise SystemExit(f"{csv_path}: SHA-256 differs from the pinned one")
-    ids, artists = ts.exclusions(Path(cfg.eval_manifest))
+    ids, artists = ts.exclusions(Path(cfg.eval_manifest), csv_path)
     return ts.plan(list(ts.read_candidates(csv_path)), cfg, ids, artists), ids, artists
 
 
@@ -149,7 +149,7 @@ def load_chunks(cfg: ts.TrainsetConfig) -> tuple[list[dict[str, Any]], np.ndarra
 
 
 def cmd_verify(cfg: ts.TrainsetConfig) -> None:
-    ids, artists = ts.exclusions(Path(cfg.eval_manifest))
+    ids, artists = ts.exclusions(Path(cfg.eval_manifest), Path(cfg.root) / cfg.csv_name)
     rows, pixels, rejected = load_chunks(cfg)
     rows, pixels = (
         rows[: cfg.target],
@@ -164,7 +164,7 @@ def cmd_verify(cfg: ts.TrainsetConfig) -> None:
     dups = ts.near_duplicates(hashes, reference, cfg.hash_distance)
     keep = [i for i, r in enumerate(rows) if r["id"] not in dups]
     rows, pixels = [rows[i] for i in keep], pixels[keep]
-    check(rows, ids, artists)
+    check(rows, ids, artists, Path(cfg.root) / cfg.csv_name, cfg.known_leaks_file)
     rng = random.Random(cfg.seed)
     val = set(rng.sample(sorted(r["id"] for r in rows), cfg.val_images))
     split = np.array([r["id"] in val for r in rows])
@@ -217,20 +217,37 @@ def cmd_verify(cfg: ts.TrainsetConfig) -> None:
     print(json.dumps(summary, indent=1))
 
 
-def check(rows: list[dict[str, Any]], ids: set[int], artists: set[str]) -> None:
-    """Disjointness: no evaluation object, no object of an evaluation artist, no duplicate id."""
+def check(
+    rows: list[dict[str, Any]],
+    ids: set[int],
+    artists: set[str],
+    csv_path: Path,
+    known_leaks_file: str = "",
+) -> list[int]:
+    """Disjointness: no evaluation object, no object of an evaluation artist (any shared name or ULAN / Wikidata URL), no duplicate id.
+
+    Objects of an evaluation artist listed in ``known_leaks_file`` (the subset the T-029 agents were trained on, see the amendment of
+    ``docs/design/evaluation.md``) are tolerated and returned; any other one fails the check.
+    """
     seen = [r["id"] for r in rows]
     assert len(seen) == len(set(seen)), "duplicate object ids"
     assert not (set(seen) & ids), "an evaluation object is in the training subset"
-    bad = [r["id"] for r in rows if set(ts.artist_names(r["artist"])) & artists]
-    assert not bad, f"{len(bad)} objects of an evaluation artist: {bad[:5]}"
+    index = ts.artist_index(csv_path, set(seen))
+    leaks = sorted(i for i in seen if index.get(i, set()) & artists)
+    known: set[int] = set()
+    if known_leaks_file and Path(known_leaks_file).exists():
+        known = set(yaml.safe_load(Path(known_leaks_file).read_text(encoding="utf-8"))["ids"])
+    bad = [i for i in leaks if i not in known]
+    assert not bad, f"{len(bad)} objects of an evaluation artist: {bad[:10]}"
+    return leaks
 
 
 def cmd_check(cfg: ts.TrainsetConfig) -> None:
-    ids, artists = ts.exclusions(Path(cfg.eval_manifest))
     root = Path(cfg.root)
+    ids, artists = ts.exclusions(Path(cfg.eval_manifest), root / cfg.csv_name)
     rows = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-    check(rows, ids, artists)
+    leaks = check(rows, ids, artists, root / cfg.csv_name, cfg.known_leaks_file)
+    print(f"{len(leaks)} acknowledged objects of an evaluation artist ({cfg.known_leaks_file})")
     pixels = np.load(root / "images.npy", mmap_mode="r")
     bad = [
         r["id"]

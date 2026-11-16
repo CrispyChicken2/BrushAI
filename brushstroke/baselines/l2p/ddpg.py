@@ -15,8 +15,11 @@ renderer. What the official code does, and what is kept here:
 * *Updates*: after every episode, ``episode_train_times`` (10) updates of batch ``batch_size`` (96): one discriminator step, one critic
   step, one actor step (loss ``-(Q + r)`` through the renderer), soft update of the three target networks (``tau = 0.001``). Adam, learning
   rates by episode stage. No exploration noise (``noise_factor = 0``): the official default.
-* *Target networks* share the BatchNorm buffers of the online actor (``hard_update`` copies the dict of buffers, not the values) and
-  stay in train mode during the updates: kept, so the target actor's forward also updates the shared running statistics.
+* *Target networks*: the official ``DDPG.__init__`` calls ``hard_update`` (which shares the BatchNorm buffer tensors) and then
+  ``choose_device()``, whose ``.to(device)`` on each module re-assigns its buffers: on the GPU the sharing is gone before training starts
+  and the target actor keeps its own running statistics. Here the networks are built on the device first, so the sharing stays: the target
+  actor's forward passes (train mode) also update the online running statistics. The three T-029 agents were trained that way
+  (``share_bn_buffers: true``, a documented deviation); ``share_bn_buffers=false`` gives the official behaviour.
 * *Replay*: a ring of ``rmsize * max_step`` transitions (32,000), uniform sampling. The official buffer stores two 7-channel states per
   transition (7.3 GB of host memory); here it stores each canvas once on the GPU (the previous canvas of a transition is the canvas
   of the previous step, a blank canvas at the start of an episode) and the target once per episode (1.6 GB). Same content, same sampling.
@@ -149,6 +152,12 @@ def share_buffers(target: nn.Module, source: nn.Module) -> None:
         m1._buffers = m2._buffers.copy()  # noqa: SLF001
 
 
+def unshare_buffers(net: nn.Module) -> None:
+    """Give every module its own copy of its buffers (what ``.to(device)`` does to a ``hard_update``d target in the official code)."""
+    for m in net.modules():
+        m._buffers = {k: (v.clone() if v is not None else None) for k, v in m._buffers.items()}  # noqa: SLF001
+
+
 def hard_update(target: nn.Module, source: nn.Module) -> None:
     with torch.no_grad():
         for t, s in zip(target.parameters(), source.parameters(), strict=True):
@@ -197,7 +206,9 @@ class DDPGConfig:
         True  # the environment feeds BGR images (the released actor and our producer convention)
     )
     validate_every: int = 100  # episodes
-    validate_images: int = 480  # held-out images (official: 5 episodes of 96)
+    validate_images: int = 480  # held-out images for the curve (official: 5 episodes of 96)
+    validate_sample: str = "random"  # "random": seeded random subset of the held-out images; "first": the first ones in file order (the T-029 runs: biased towards photographs and drawings, see docs/experiments/l2p_training.md)
+    share_bn_buffers: bool = True  # target actor shares the BatchNorm statistics of the online actor (what T-029 trained); False = official GPU behaviour
     log_every: int = 50  # episodes
     checkpoint_every: int = 500  # episodes
     output_dir: str = "outputs/l2p_train/run0"
@@ -315,6 +326,8 @@ class DDPG:
 
     def targets(self) -> None:
         hard_update(self.actor_target, self.actor)
+        if not self.cfg.share_bn_buffers:
+            unshare_buffers(self.actor_target)
         hard_update(self.critic_target, self.critic)
         hard_update(self.D_target, self.D)
 
@@ -450,9 +463,10 @@ class DDPG:
             getattr(self, name).load_state_dict(state[name])
         for name in ("actor_opt", "critic_opt", "D_opt"):
             getattr(self, name).load_state_dict(state[name])
-        share_buffers(
-            self.actor_target, self.actor
-        )  # loading breaks the sharing of the BatchNorm buffers
+        if self.cfg.share_bn_buffers:
+            share_buffers(
+                self.actor_target, self.actor
+            )  # loading breaks the sharing of the BatchNorm buffers
 
 
 @torch.no_grad()
@@ -534,6 +548,13 @@ def train_agent(cfg: DDPGConfig, log: bool = True) -> Path:
     images = np.load(root / "images.npy", mmap_mode="r")
     is_val = np.load(root / "is_val.npy")
     train_ids, val_ids = np.flatnonzero(~is_val), np.flatnonzero(is_val)
+    curve_ids = val_ids[: cfg.validate_images]
+    if cfg.validate_sample == "random":
+        curve_ids = np.sort(
+            np.random.default_rng(cfg.seed + 1).choice(
+                val_ids, min(cfg.validate_images, len(val_ids)), replace=False
+            )
+        )
     renderer = load_renderer(cfg.renderer, device)
     agent = DDPG(cfg, renderer, device)
     env = PaintEnv(images, cfg.env_batch, cfg.max_step, device, cfg.bgr)
@@ -541,12 +562,15 @@ def train_agent(cfg: DDPGConfig, log: bool = True) -> Path:
     replay = Replay(cfg.rmsize * cfg.max_step, cfg.env_batch, cfg.max_step, device)
     rng = np.random.default_rng(cfg.seed)
     gen = torch.Generator(device=device).manual_seed(cfg.seed)
-    episode, refill_until = 0, 0
+    episode, refill_until, spent = 0, 0, 0.0
     last = out / "last.pt"
     if last.exists():
         ck = torch.load(last, map_location=device, weights_only=True)
         agent.load_state(ck["agent"])
         episode = int(ck["episode"])
+        spent = float(
+            ck.get("seconds", 0.0)
+        )  # cumulative wall time, so a resumed run keeps one clock
         rng.bit_generator.state = ck["numpy_rng"]
         gen.manual_seed(cfg.seed * 7919 + episode)
         refill_until = (
@@ -554,7 +578,7 @@ def train_agent(cfg: DDPGConfig, log: bool = True) -> Path:
         )  # the replay is not saved: refilled before updating
     (out / "config.json").write_text(json.dumps(asdict(cfg), default=str), encoding="utf-8")
     history = out / "history.jsonl"
-    t0 = time.time()
+    t0 = time.time() - spent
     acc: dict[str, float] = {}
     n_acc = 0
     stop = (
@@ -594,7 +618,7 @@ def train_agent(cfg: DDPGConfig, log: bool = True) -> Path:
                 rec["peak_vram_gb"] = torch.cuda.max_memory_allocated() / 2**30
             if episode % cfg.validate_every == 0 or episode == stop:
                 agent.actor.eval()
-                rec.update(validate(agent, val_env, val_ids[: cfg.validate_images], cfg))
+                rec.update(validate(agent, val_env, curve_ids, cfg))
                 agent.actor.train()
             acc, n_acc = {}, 0
             with history.open("a", encoding="utf-8") as fh:
@@ -603,7 +627,12 @@ def train_agent(cfg: DDPGConfig, log: bool = True) -> Path:
                 print(rec, flush=True)
         if episode % cfg.checkpoint_every == 0 or episode == stop:
             torch.save(
-                {"agent": agent.state(), "episode": episode, "numpy_rng": rng.bit_generator.state},
+                {
+                    "agent": agent.state(),
+                    "episode": episode,
+                    "numpy_rng": rng.bit_generator.state,
+                    "seconds": time.time() - t0,
+                },
                 last,
             )
             save_actor(agent, out / "actor.pt")

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import random
 from collections.abc import Callable
 from pathlib import Path
@@ -419,11 +420,14 @@ def test_no_text_file_of_the_repository_holds_a_control_character() -> None:
     suffixes = {".py", ".md", ".yaml", ".yml", ".json", ".toml", ".txt", ".cfg"}
     skip = {".venv", "outputs", "data", ".git", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
     bad = []
-    for path in Path(".").rglob("*"):
-        if not path.is_file() or path.suffix not in suffixes or set(path.parts) & skip:
-            continue
-        if any(b < 32 and b not in (9, 10, 12, 13) for b in path.read_bytes()):
-            bad.append(str(path))
+    for root, dirs, files in os.walk("."):
+        dirs[:] = [d for d in dirs if d not in skip]  # pruned, not filtered after the walk
+        for name in files:
+            path = Path(root) / name
+            if path.suffix not in suffixes:
+                continue
+            if any(b < 32 and b not in (9, 10, 12, 13) for b in path.read_bytes()):
+                bad.append(str(path))
     assert bad == []
 
 

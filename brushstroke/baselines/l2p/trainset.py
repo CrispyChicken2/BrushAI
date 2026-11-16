@@ -19,6 +19,7 @@ import gzip
 import hashlib
 import io
 import random
+import re
 from collections import Counter
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
@@ -78,6 +79,7 @@ class TrainsetConfig:
     csv_name: str = "metadata_images.csv.gz"
     ids_file: str = "configs/l2p/trainset_ids.txt"
     excluded_file: str = "configs/l2p/trainset_excluded.yaml"
+    known_leaks_file: str = "configs/l2p/trainset_known_leaks.yaml"  # objects of an evaluation artist that the T-029 agents saw (acknowledged, not tolerated in a new build)
     strata_cap: dict[str, int] = field(default_factory=dict)  # optional per-stratum cap
 
 
@@ -107,7 +109,13 @@ def read_candidates(csv_path: Path) -> Iterator[dict[str, Any]]:
             yield {
                 "id": int(row["Object ID"]),
                 "stratum": stratum(row["Classification"], row["Department"]),
-                "artists": artist_names(row["Artist Display Name"]),
+                "artists": sorted(
+                    artist_keys(
+                        row["Artist Display Name"],
+                        row["Artist ULAN URL"],
+                        row["Artist Wikidata URL"],
+                    )
+                ),
                 "artist": row["Artist Display Name"][:200],
                 "number": row["Object Number"],
                 "url": row["primaryImageSmall"],
@@ -116,6 +124,9 @@ def read_candidates(csv_path: Path) -> Iterator[dict[str, Any]]:
                 "classification": row["Classification"],
                 "department": row["Department"],
             }
+
+
+ANONYMOUS = ("unknown", "anonymous", "artist unknown", "unidentified artist", "(not assigned)")
 
 
 def artist_names(display: str) -> list[str]:
@@ -128,16 +139,76 @@ def artist_names(display: str) -> list[str]:
     return out
 
 
-def exclusions(eval_manifest: Path) -> tuple[set[int], set[str]]:
-    """Object ids and artist names of the Met images of the evaluation manifest (every dev and test image)."""
+GENERIC_URLS = (  # Getty / Wikidata entities that stand for "unknown artist", not for a person
+    "http://vocab.getty.edu/page/ulan/500125274",
+    "https://www.wikidata.org/wiki/Q24238356",
+)
+
+
+def name_variants(name: str) -> set[str]:
+    """Normalized variants of one artist name: non-Latin suffix stripped (``Totoya Hokkei 魚屋北渓``), and ``Rembrandt (Rembrandt van Rijn)`` gives both ``rembrandt`` and ``rembrandt van rijn``."""
+    latin = re.sub(r"[^\x00-\u024f]", "", name)
+    out = set()
+    inner = [
+        v for v in re.findall(r"\((.*?)\)", latin) if len(v.split()) >= 2
+    ]  # a full name, not a place
+    for variant in [re.sub(r"\(.*?\)", " ", latin), *inner]:
+        n = " ".join(variant.lower().split())
+        if n and n not in ANONYMOUS:
+            out.add(n)
+    return out
+
+
+def artist_keys(display: str, ulan: str = "", wikidata: str = "") -> set[str]:
+    """Identity keys of the artists of a Met object: ``n:<normalized name>`` for every ``|`` name and variant, ``u:<url>`` for every ULAN / Wikidata URL (``(not assigned)`` ignored)."""
+    keys = {f"n:{v}" for part in display.split("|") for v in name_variants(part)}
+    for url in (
+        (*ulan.split("|"), *wikidata.split("|")) if keys else ()
+    ):  # no name: anonymous, the URL is a shared "Unknown" entity
+        url = url.strip()
+        if url.startswith("http") and url not in GENERIC_URLS:
+            keys.add(f"u:{url}")
+    return keys
+
+
+def exclusions(eval_manifest: Path, csv_path: Path | None = None) -> tuple[set[int], set[str]]:
+    """Object ids and artist keys of the Met images of the evaluation manifest (every dev and test image).
+
+    The keys come from the manifest ``author`` and, when ``csv_path`` is given, from the Met rows of those objects (every ``|`` name, ULAN and
+    Wikidata URL): the Met writes one artist in several ways (``Rembrandt`` / ``Rembrandt (Rembrandt van Rijn)``, a kanji suffix, a co-credit).
+    """
     data = yaml.safe_load(eval_manifest.read_text(encoding="utf-8"))
     ids: set[int] = set()
-    artists: set[str] = set()
+    keys: set[str] = set()
     for im in data["images"]:
         if im.get("source") == "met":
             ids.add(int(str(im["id"]).split("_")[1]))
-            artists.update(artist_names(str(im.get("author") or "")))
-    return ids, artists
+            keys |= artist_keys(str(im.get("author") or ""))
+    if csv_path is not None:
+        csv.field_size_limit(10**9)
+        with gzip.open(csv_path, "rt", encoding="utf-8-sig", newline="") as f:
+            for row in csv.DictReader(f):
+                if int(row["Object ID"]) in ids:
+                    keys |= artist_keys(
+                        row["Artist Display Name"],
+                        row["Artist ULAN URL"],
+                        row["Artist Wikidata URL"],
+                    )
+    return ids, keys
+
+
+def artist_index(csv_path: Path, ids: set[int]) -> dict[int, set[str]]:
+    """Artist keys of the given Met objects, read from the CSV."""
+    csv.field_size_limit(10**9)
+    out: dict[int, set[str]] = {}
+    with gzip.open(csv_path, "rt", encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            oid = int(row["Object ID"])
+            if oid in ids:
+                out[oid] = artist_keys(
+                    row["Artist Display Name"], row["Artist ULAN URL"], row["Artist Wikidata URL"]
+                )
+    return out
 
 
 def plan(

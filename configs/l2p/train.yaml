@@ -23,6 +23,8 @@ trainset: data/raw/l2p_met
 bgr: true
 validate_every: 100
 validate_images: 480
+validate_sample: random   # seeded random subset of the held-out images; the three T-029 runs used `first` (biased, see l2p_training.md)
+share_bn_buffers: true    # target actor shares the BatchNorm statistics of the actor (what T-029 trained); false = official GPU behaviour
 log_every: 50
 checkpoint_every: 500
 output_dir: outputs/l2p_train/seed0
