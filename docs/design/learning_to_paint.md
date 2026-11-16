@@ -64,3 +64,24 @@ Training the actor (DDPG + WGAN-GP critic) is T-029; the critic and discriminato
 ## 6. Results
 
 See `docs/experiments/l2p_renderer.md`: ours vs analytic 5.27e-4 MSE (official weights 6.09e-4), ours vs official 3.68e-4; tolerance met.
+
+## 7. Agent training (T-029)
+
+**Recipe** (`brushstroke/baselines/l2p/ddpg.py`, `configs/l2p/train.yaml`; official `train.py` defaults of commit 615c070): model-based DDPG, actor ResNet-18 (BN), critic
+`ResNet_wobn(3+9, 18, 1)` (weight norm, TReLU, 12 input channels: canvas before and after, target, (t+1)/max_step, 2 coordinate channels), WGAN-GP discriminator on
+(target, canvas) with lambda 10, reward = D(target, canvas after) - D(target, canvas before); discount 0.95^5, tau 0.001, 96 environments, batch 96, 40 steps per episode,
+50,000 episodes (2,000,000 steps), 10 updates per episode, learning rates by stage (critic 3e-4 / 1e-4 / 3e-5, actor 1e-3 / 3e-4 / 1e-4 at episodes 10,000 and 20,000), Adam,
+replay 800 x 40 transitions, 400 warm-up steps, no exploration noise, target networks share the batch-norm buffers of the online ones, canvas re-quantized to uint8 each step, horizontal-flip augmentation.
+**Data**: the Met CC0 subset of `docs/data_sources.md`. **Checkpoint rule**: the final checkpoint. **Cost and results**: `docs/experiments/l2p_training.md` (3 seeds, 28 h each).
+
+**Deviations from the official run:**
+1. Training images are Met CC0 (97,992 at 128 px) instead of CelebA / ImageNet (licence), see `evaluation.md` 8.2 and its amendment.
+2. The subset is built from the Met's Hugging Face export, not the Met API (the API blocks bursts with HTTP 403).
+3. Aspect rule 1:2 to 2:1 for training (the evaluation set keeps 3:4 to 4:3): the narrow rule rejected two thirds of the paintings and photographs.
+4. Composition: the Met has only 3,050 usable paintings after exclusions, so the 40/30/30 split is not reachable; the subset is dominated by objects and prints.
+5. The replay buffer stores every canvas once on the GPU (ring of 333 steps x 96) with one target per episode; the previous canvas is the previous slot. Same transitions, 1.6 GB. It is not checkpointed: after a resume it is refilled with fresh episodes (no run needed a resume).
+6. Images are fed as BGR, as in the official code (`actor.pt` and `actor.pkl` therefore share the channel convention; `L2PProducer` flips accordingly).
+7. The renderer is ours (T-028), not `renderer.pkl`.
+   **BatchNorm buffers**: the official `DDPG.__init__` runs `hard_update` (shares the buffer tensors of target and online actor) and then `choose_device()` (`.to(device)` per module), which re-assigns the buffers: on the GPU the target actor keeps its own statistics. Ours builds on the device first, so the sharing stays and the online running statistics also absorb the target's train-mode forward passes. The T-029 agents were trained that way (`share_bn_buffers: true`, still the default; `false` reproduces the official behaviour).
+   **Artists**: 27 training objects are by evaluation artists (`configs/l2p/trainset_known_leaks.yaml`, `evaluation.md` amendment 2026-11-16); not retrained. **Validation curve**: first 480 held-out images, a stratum-biased subset; the validation figure is the 2,000-image one.
+8. Optional bf16 autocast (`amp: bfloat16`) exists and was measured (23.5 h per run) but not used.

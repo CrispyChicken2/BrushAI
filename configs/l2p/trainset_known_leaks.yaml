@@ -1,0 +1,248 @@
+note: 'Objects of an evaluation artist (shared name or ULAN/Wikidata URL) that the
+  three T-029 agents were trained on: the first build matched the manifest author
+  strings only. Amendment 2026-11-18 in docs/design/evaluation.md. A new build excludes
+  them (python -m scripts.build_l2p_trainset plan).'
+ids:
+- 54559
+- 78625
+- 78626
+- 363805
+- 363806
+- 363807
+- 363808
+- 363809
+- 437213
+- 437403
+- 437404
+- 437406
+- 437407
+- 437408
+- 437409
+- 437410
+- 437411
+- 437412
+- 437413
+- 437414
+- 437416
+- 437418
+- 437419
+- 437420
+- 437421
+- 438379
+- 857953
+objects:
+  54559:
+    artist: Kubo Shunman 窪俊満
+    title: ''
+    stratum: print
+    matched:
+    - n:kubo shunman
+    - u:http://vocab.getty.edu/page/ulan/500121370
+    - u:https://www.wikidata.org/wiki/Q3200184
+  78625:
+    artist: Totoya Hokkei 魚屋北渓
+    title: ''
+    stratum: object
+    matched:
+    - n:totoya hokkei
+    - u:http://vocab.getty.edu/page/ulan/500327126
+    - u:https://www.wikidata.org/wiki/Q52154484
+  78626:
+    artist: Totoya Hokkei 魚屋北渓
+    title: 狂歌東関駅路鈴|Kyōka Poems as Chimes along the Tōkaidō (Kyōka tokan ekiro no suzu
+      狂歌東関駅路鈴)
+    stratum: object
+    matched:
+    - n:totoya hokkei
+    - u:http://vocab.getty.edu/page/ulan/500327126
+    - u:https://www.wikidata.org/wiki/Q52154484
+  363805:
+    artist: David Octavius Hill
+    title: View of a river with a promenade
+    stratum: drawing
+    matched:
+    - n:david octavius hill
+    - u:http://vocab.getty.edu/page/ulan/500019476
+    - u:https://www.wikidata.org/wiki/Q722792
+  363806:
+    artist: David Octavius Hill
+    title: View of a lake or river with a sailboat
+    stratum: drawing
+    matched:
+    - n:david octavius hill
+    - u:http://vocab.getty.edu/page/ulan/500019476
+    - u:https://www.wikidata.org/wiki/Q722792
+  363807:
+    artist: David Octavius Hill
+    title: View of a Waterfall (recto); Landscape Study (verso)
+    stratum: drawing
+    matched:
+    - n:david octavius hill
+    - u:http://vocab.getty.edu/page/ulan/500019476
+    - u:https://www.wikidata.org/wiki/Q722792
+  363808:
+    artist: David Octavius Hill
+    title: View of Fingal's Cave
+    stratum: drawing
+    matched:
+    - n:david octavius hill
+    - u:http://vocab.getty.edu/page/ulan/500019476
+    - u:https://www.wikidata.org/wiki/Q722792
+  363809:
+    artist: David Octavius Hill
+    title: View of the Thames with Figures in Foreground
+    stratum: drawing
+    matched:
+    - n:david octavius hill
+    - u:http://vocab.getty.edu/page/ulan/500019476
+    - u:https://www.wikidata.org/wiki/Q722792
+  437213:
+    artist: Netherlandish (Antwerp Mannerist) Painters
+    title: The Last Supper
+    stratum: painting
+    matched:
+    - n:netherlandish painters
+  437403:
+    artist: Rembrandt
+    title: Christ and the Woman of Samaria
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437404:
+    artist: Rembrandt
+    title: Head of Christ
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437406:
+    artist: Rembrandt
+    title: Portrait of a Man ("The Auctioneer")
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437407:
+    artist: Rembrandt
+    title: Christ with a Staff
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437408:
+    artist: Rembrandt
+    title: Man in a Beret
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437409:
+    artist: Rembrandt
+    title: Portrait of a Woman
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437410:
+    artist: Rembrandt
+    title: Portrait of a Man with a Breastplate and Plumed Hat
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437411:
+    artist: Rembrandt
+    title: Man with a Steel Gorget
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437412:
+    artist: Rembrandt
+    title: Old Woman Cutting Her Nails
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437413:
+    artist: Rembrandt
+    title: Man in a Red Cloak
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437414:
+    artist: Rembrandt
+    title: Pilate Washing His Hands
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437416:
+    artist: Rembrandt
+    title: Man in Armor (Mars?)
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437418:
+    artist: Rembrandt
+    title: Man with a Beard
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437419:
+    artist: Rembrandt
+    title: Rembrandt (1606–1669) as a Young Man
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437420:
+    artist: Rembrandt
+    title: Rembrandt's Son Titus (1641–1668)
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  437421:
+    artist: Rembrandt
+    title: Study Head of an Old Man
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  438379:
+    artist: Rembrandt
+    title: Young Woman with a Red Necklace
+    stratum: painting
+    matched:
+    - n:rembrandt
+    - u:http://vocab.getty.edu/page/ulan/500011051
+    - u:https://www.wikidata.org/wiki/Q5598
+  857953:
+    artist: Watanabe Seitei 渡辺省亭
+    title: '渡辺省亭筆 「七美人之図」|Seven Beauties of the Bamboo Grove '
+    stratum: painting
+    matched:
+    - n:watanabe seitei
+    - u:http://vocab.getty.edu/page/ulan/500123390
+    - u:https://www.wikidata.org/wiki/Q3566605

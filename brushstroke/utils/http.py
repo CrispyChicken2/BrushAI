@@ -17,9 +17,10 @@ USER_AGENT = "BrushStrokeResearch/0.1 (https://github.com/CrispyChicken2/BrushAI
 class Http:
     """Polite HTTP with retries (the Met API answers 403 when it is called too fast)."""
 
-    def __init__(self, insecure: bool = False, pause: float = 0.15) -> None:
+    def __init__(self, insecure: bool = False, pause: float = 0.15, timeout: float = 60.0) -> None:
         self.ctx = ssl._create_unverified_context() if insecure else None  # noqa: S323
         self.pause = pause
+        self.timeout = timeout
 
     def get(self, url: str, retries: int = 6) -> bytes:
         url = urllib.parse.quote(
@@ -30,7 +31,7 @@ class Http:
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
                 with urllib.request.urlopen(  # noqa: S310
-                    req, context=self.ctx, timeout=60
+                    req, context=self.ctx, timeout=self.timeout
                 ) as resp:
                     return resp.read()  # type: ignore[no-any-return]
             except urllib.error.HTTPError as err:

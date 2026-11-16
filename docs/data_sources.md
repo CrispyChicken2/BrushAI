@@ -268,3 +268,21 @@ are not representative of modern photography; the paintings are mostly European;
 | `sdxl_29` | sdxl / sdxl_object | a charcoal and oil sketch of a horse running in a field | Stable Diffusion XL base 1.0 (own genera |  |  |
 
 <!-- END EVALSET -->
+
+## Learning to Paint training subset (T-029, M3)
+
+99,992 Met Open Access images (CC0, `isPublicDomain = true`) at 128 x 128, used only to train the Learning to Paint agent
+(`docs/experiments/l2p_training.md`). The pool is the Met's own Hugging Face export `metmuseum/openaccess` (revision c65f8d6,
+`source/metadata_images.csv.gz`, CC0, SHA-256 pinned in `configs/l2p/trainset.yaml`), which carries `primaryImageSmall`; no call to the rate-limited
+Met API is made. Images come from `images.metmuseum.org` and are **never committed** (`data/raw/l2p_met/`: `images.npy` 4.9 GB, `is_val.npy`, `object_ids.npy`, `manifest.json`).
+Committed: `configs/l2p/trainset.yaml`, `configs/l2p/trainset_ids.txt` (object ids), `configs/l2p/trainset_excluded.yaml`, `docs/experiments/data/l2p/trainset_summary.json`
+(counts, rejections, digest `38372850f1c8cf97745fe2e956d8da19471112cdd5e7d3c29957f14e99c2f1a0` over the sorted `id:pixel_sha256` lines).
+
+```
+python -m scripts.build_l2p_trainset plan | fetch | verify    # candidate plan, resumable download (1,000-image chunks), trim + dHash + checksums
+python -m scripts.build_l2p_trainset check                    # disjointness (27 acknowledged artist leaks) and checksums, no download
+```
+
+Rules: centre square crop, Pillow box filter, short side >= 256 px, aspect 1:2 to 2:1, grey std >= 6. **Disjoint from the evaluation set** by object id and by
+artist (every work of an artist sharing a name, ULAN or Wikidata URL with an evaluation Met image is excluded; the trained subset still holds 27 such objects, listed in `configs/l2p/trainset_known_leaks.yaml`, see the 2026-11-16 amendment of `evaluation.md`) and, at verification, by perceptual hash (dHash within 6 bits of any of the 100 evaluation images, mirrors included: 8 images dropped).
+2,000 images are held out for the training curves (`is_val`). Composition: painting 3,050, photograph 11,160, drawing 14,274, other flat 584, print 27,834, object 43,090 (see the amendment in `docs/design/evaluation.md`).
