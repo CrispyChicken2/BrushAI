@@ -7,8 +7,8 @@ allocation, painterly stroke ordering and an "anytime quality" metric.
 **Status: M1 reviewed (gate, T-008); M2 reviewed (T-018, [docs/plan/M2_retro.md](docs/plan/M2_retro.md)); M3 (evaluation harness and baseline
 numbers) is under way: the evaluation protocol is fixed in advance in [docs/design/evaluation.md](docs/design/evaluation.md), its plan
 is [docs/plan/M3.md](docs/plan/M3.md), the 100-image evaluation set is curated and audited (see [Evaluation set](#evaluation-set-m3)), the evaluation saliency maps are computed (T-025), and the evaluation harness is built and smoke-tested on the dev split (T-026). The renderer has an opt-in bounding-box path
-(T-027, `render.bbox`, off by default: 1.95x faster end to end on the optimization baseline, a different sequence; every result so far was produced with it off). Learning to Paint (T-028) is studied and its neural renderer is trained
-(the actor and the harness registration are not done yet).
+(T-027, `render.bbox`, off by default: 1.95x faster end to end on the optimization baseline, a different sequence; every result so far was produced with it off). Learning to Paint (T-028) is studied, its neural renderer is trained, and three agents are trained on a CC0 subset of the Met
+(T-029: their 40-step l2 is within 6 % of the released actor; the producer is not registered in the protocol yet, T-030).
 No method has been run on the test split yet.** Three of the four M1 success criteria are met; the LPIPS < 0.25 criterion of the plan is
 not met and a revised target is used (plan: [docs/plan/M1.md](docs/plan/M1.md); retrospective and criterion table:
 [docs/plan/M1_retro.md](docs/plan/M1_retro.md)). M2 (Paint Transformer reimplementation) is reviewed at its gate, and the closing decision is the chef's: the study note is
@@ -129,7 +129,8 @@ brushstroke/          Python package
   generation/         text/image front-ends (M5)
   eval/               image metrics: L1, PSNR, SSIM, LPIPS-VGG / LPIPS-Alex (T-007); evaluation harness (M3)
   baselines/optim/    baseline (a): optimization-only stroke decomposition (T-005)
-  baselines/l2p/      Learning to Paint (T-028): analytic Bezier rasterizer, neural renderer, actor and rollout, harness producer skeleton
+  baselines/l2p/      Learning to Paint (T-028): analytic Bezier rasterizer, neural renderer, actor and rollout, harness producer skeleton;
+                      DDPG agent training with the WGAN-GP reward (T-029)
   strokes.py          StrokeSequence: ordered strokes + metadata, save/load (T-004)
   utils/              config (YAML + dot-overrides), seeding, device/VRAM helpers, image I/O
 configs/              YAML run configurations (every hyperparameter lives here)
@@ -486,12 +487,23 @@ Bezier rasterizer (equal to the official cv2 `draw`, max difference 1.2e-7), its
 the official `test.py`: `RolloutConfig` defaults to `max_step = 100` (the official README command, 4,250 strokes at 512 px), so the
 2,000-stroke budget is reachable. The rollout is checked against a line-by-line transcription of `test.py` on CPU (the official script
 itself was not run). The released weights are a local reference only (no licence statement; never committed); the official code and
-weights are not fetched by a script, the copy is placed by hand in `data/raw/l2p_official/`. The actor and the critic are not trained
-(T-029), and the producer is not registered in the protocol (T-030). Report: [docs/experiments/l2p_renderer.md](docs/experiments/l2p_renderer.md),
+weights are not fetched by a script, the copy is placed by hand in `data/raw/l2p_official/`. The agent is trained in the next paragraph,
+and the producer is not registered in the protocol (T-030). Report: [docs/experiments/l2p_renderer.md](docs/experiments/l2p_renderer.md),
 written from the JSON in [docs/experiments/data/l2p/renderer_report.json](docs/experiments/data/l2p/renderer_report.json), which
 `python -m scripts.l2p_renderer_report --weights outputs/l2p_renderer/renderer.pt --official data/raw/l2p_official/renderer.pkl
 --actor data/raw/l2p_official/actor.pkl --image data/raw/l2p_official/image/lisa.png --out docs/experiments/data/l2p/renderer_report.json`
 writes.
+
+**Learning to Paint agent (T-029).** The agent is trained with the official recipe (model-based DDPG with the WGAN-GP reward,
+50,000 episodes of 40 steps with 96 paintings in parallel, final checkpoint) on 97,992 Met Open Access CC0 images at 128 px
+(`python -m scripts.build_l2p_trainset`). The subset is disjoint from the evaluation set by object, perceptual hash and artist,
+except for 27 objects of evaluation artists that were found in review and acknowledged, not retrained (amendment of 2026-11-16 in
+[docs/design/evaluation.md](docs/design/evaluation.md)). Three training seeds ran in fp32, 27.7 to 28.7 h each on one RTX 5070
+(4.23 GB). On 2,000 held-out Met images the 40-step l2 is 0.0052, 0.0055 and 0.0056, against 0.0053 for the released actor. This is a
+check that the recipe is reproduced, not a benchmark: different data, our renderer, and no LPIPS is published for the released model.
+The agents are not in git (`outputs/l2p_train/`); the report and its histories are: [docs/experiments/l2p_training.md](docs/experiments/l2p_training.md),
+[docs/experiments/l2p_training_tables.md](docs/experiments/l2p_training_tables.md). Its command reads the run directories in `outputs/`,
+so it regenerates from this checkout only if those are kept.
 
 ## License
 
@@ -506,6 +518,7 @@ Code: MIT (see [LICENSE](LICENSE)). Third-party components are not redistributed
 | ffmpeg (external executable, not bundled) | MP4/WebM/GIF export | LGPL/GPL depending on the build you install |
 | VGG16 and AlexNet ImageNet weights | LPIPS backbones, downloaded at run time into the torch cache | torchvision pretrained weights (trained on ImageNet; subject to the ImageNet terms of use) |
 | evaluation and demo images | experiments and demos | public domain / NASA, per image in [docs/data_sources.md](docs/data_sources.md) |
+| Met Open Access images (CC0), Learning to Paint training subset | training the agent (T-029) | CC0 1.0; per image in [docs/data_sources.md](docs/data_sources.md), never committed |
 | Learning to Paint (official code, Huang et al. 2019) | architectures re-implemented, reference actor and renderer | code MIT (not vendored; attribution in the docstrings). The released weights state no licence: local reference only, never committed or redistributed |
 | Paint Transformer official code (Apache-2.0) and pretrained weights (no license stated) | study only, a reference point outside git; the code is not vendored | Apache-2.0; weights are never redistributed (see [docs/data_sources.md](docs/data_sources.md)) |
 

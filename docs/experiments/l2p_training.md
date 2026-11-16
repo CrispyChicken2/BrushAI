@@ -2,7 +2,7 @@
 
 Three DDPG training runs (training seeds 0, 1, 2) of the Learning to Paint agent on the Met Open Access CC0 subset (99,992 images at 128 px,
 97,992 for training and 2,000 held out for the curves), with the official recipe (`brushstroke/baselines/l2p/ddpg.py`, `configs/l2p/train.yaml`):
-2,000,000 environment steps (50,000 episodes of 40 steps x 96 paintings, 10 updates per episode), WGAN-GP reward, our neural renderer
+50,000 episodes of 40 steps each, with 96 paintings in parallel at every step (the counter `env_steps` adds 40 per episode, so 2,000,000 at the end, as the official `train_times`), 10 updates per episode, WGAN-GP reward, our neural renderer
 (`outputs/l2p_renderer/renderer.pt`, T-028). Commands:
 
 ```
@@ -11,16 +11,18 @@ PYTHONPATH=. .venv/Scripts/python -m scripts.l2p_training_report --runs outputs/
     --cost outputs/l2p_train/cost_fp32 outputs/l2p_train/cost_bf16 --released data/raw/l2p_official/actor.pkl
 ```
 
-The second command regenerates, from the stored logs (`docs/experiments/data/l2p/history_*.jsonl`) and the weights, everything below:
-[`l2p_training_tables.md`](l2p_training_tables.md), [`l2p_training.png`](l2p_training.png), `data/l2p/training_summary.json`. Weights
-(`actor.pt`, `last.pt`) stay outside git in `outputs/l2p_train/seedK/`.
+The second command regenerates everything below: [`l2p_training_tables.md`](l2p_training_tables.md), [`l2p_training.png`](l2p_training.png),
+`docs/experiments/data/l2p/training_summary.json` and a copy of each history. It reads the run directories in `outputs/l2p_train/` (`history.jsonl`,
+`final_validation.json`, `actor.pt` for the 2,000-image figure) and the renderer weights, none of which are in git (weights, `last.pt`, and the
+run directories stay outside git). **The committed histories in `docs/experiments/data/l2p/history_*.jsonl` are the stored logs, but without `outputs/`
+the tables cannot be regenerated from the repository alone** (the same situation as the T-023 report).
 
 ## 48-hour rule (`evaluation.md` section 6)
 
 One run was measured first (100 episodes on the real subset, warm page cache): **fp32 2.053 s per episode = 28.5 h per run, 4.23 GB peak VRAM;
 bf16 autocast 1.691 s = 23.5 h, 3.67 GB.** Both are far below 48 GPU-hours per run, so the rule gives **3 training seeds**. All three ran in
 fp32 (`amp: none`, the default: the 17 % saving did not justify an unvalidated precision change in a GAN-reward recipe). Measured full runs:
-27.7 h, 28.7 h and 28.2 h on one RTX 5070 (12 GB), one after the other (about 84.6 h in total), peak VRAM 4.23 GB. `channels_last` was tried and was slower (0.226 vs 0.158 s per update).
+27.7 h, 28.7 h and 28.2 h on one RTX 5070 (12 GB), one after the other (about 84.6 h in total), peak VRAM 4.23 GB. `channels_last` was tried and was slower (0.226 vs 0.158 s per update; from the run notes, not stored in the logs).
 
 ## Result
 
@@ -37,7 +39,7 @@ Our three agents reach the l2 of the released actor (0.0052 to 0.0056 against 0.
 recipe is reproduced, not a benchmark claim (different data, our renderer; no LPIPS is published for the released model). The full table, the
 per-run time and the cost runs are in [`l2p_training_tables.md`](l2p_training_tables.md); curves in [`l2p_training.png`](l2p_training.png).
 
-Training l2 falls from 0.23 (episode 50) to 0.015 (1,000), 0.008 (10,000) and 0.0055 (30,000 to 50,000). **The validation result is the 2,000-image figure of the table above (0.0052 / 0.0055 / 0.0056).** The curve in the figure and the "val l2 (480)" column use the first 480 held-out images in file order, which is **not a random sample**: the file follows the fetch order, by stratum, so these 480 are 222 photographs, 201 drawings, 57 paintings and no object or print (68 % of the training data). They are easier (seed 0: 0.0039 on them against 0.0056 on the other 1,520), which is why 0.0039 to 0.0042 sits below the 2,000-image figure. Read the curve for its shape (the learning-rate drops at episodes 10,000 and 20,000 give the visible steps), not its level. Later runs take a seeded random subset (`validate_sample: random`). The debug run (9,000 images, 1,500 episodes) already reached 0.0238.
+Training l2 falls from 0.23 (episode 50) to 0.015 (1,000), 0.008 (10,000) and 0.0055 to 0.0061 (30,000 to 50,000; seed 2 ends highest). **The validation result is the 2,000-image figure of the table above (0.0052 / 0.0055 / 0.0056).** The curve in the figure and the "val l2 (480)" column use the first 480 held-out images in file order, which is **not a random sample**: the file follows the fetch order, by stratum, so these 480 are 222 photographs, 201 drawings, 57 paintings and no object or print. They are easier (seed 0: 0.0039 on them against 0.0056 on the other 1,520), which is why 0.0039 to 0.0042 sits below the 2,000-image figure. Read the curve for its shape (the learning-rate drops at episodes 10,000 and 20,000 give the visible steps), not its level. Later runs take a seeded random subset (`validate_sample: random`). The debug run (9,000 images, 1,500 episodes) ended at validation l2 0.0242 (its last point; `history_dbg.jsonl`).
 
 ## Checkpoint rule
 
@@ -49,7 +51,7 @@ results; the validation curve (held-out Met images only) is a diagnostic. On the
 
 1. **Huge discriminator values at the start** (episode 50: `gan_fake` about -700 to -800, gradient penalty 145 to 178). Cause: the WGAN-GP critic is
    unbounded and the first 400 environment steps only fill the replay; the values fall to a few units by episode 1,000 (penalty 6 to 8, 3.5 at the end). No non-finite value in any run (0 of 3 x 1,000 log rows).
-2. **Isolated spikes of the validation l2** (2 to 6 times the neighbouring value for one 100-episode sample, e.g. seed 2: episodes 1,400 (5.7 x), 2,500 (3.4 x), 38,600 (2.4 x); 45,600 to 45,700 stayed 1.8 x up for two samples), always back to the trend within 100 to 200 episodes. Not NaNs; the training l2 does not show them. Probable
+2. **Isolated spikes of the validation l2** (2 to 6 times the neighbouring value for one 100-episode sample, e.g. seed 2: episodes 1,400 (5.2 x), 2,500 (3.3 x), 38,600 (2.4 x), each against the median of the three samples on either side; 45,600 and 45,700 stayed 1.8 x up for two samples), always back to the trend within 100 to 200 episodes. Not NaNs; the training l2 does not show them. Probable
    cause (not isolated by an experiment): the batch-norm running statistics, which in our runs also absorb the target actor's forward passes (the sharing deviation below), and the non-stationary GAN reward make single policy
    snapshots worse in eval mode. Not fixed; this is why the final checkpoint rule matters: the 50,000 point is smooth for all three seeds.
 3. **Q and critic loss**: Q rises to about 7 (episode 1,000) and settles at 3.4 to 3.7; critic loss settles at 0.006 to 0.013 (seed 2 is the noisiest). Consistent with the official logs' orders of magnitude.

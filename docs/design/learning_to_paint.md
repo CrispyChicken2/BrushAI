@@ -70,8 +70,8 @@ See `docs/experiments/l2p_renderer.md`: ours vs analytic 5.27e-4 MSE (official w
 **Recipe** (`brushstroke/baselines/l2p/ddpg.py`, `configs/l2p/train.yaml`; official `train.py` defaults of commit 615c070): model-based DDPG, actor ResNet-18 (BN), critic
 `ResNet_wobn(3+9, 18, 1)` (weight norm, TReLU, 12 input channels: canvas before and after, target, (t+1)/max_step, 2 coordinate channels), WGAN-GP discriminator on
 (target, canvas) with lambda 10, reward = D(target, canvas after) - D(target, canvas before); discount 0.95^5, tau 0.001, 96 environments, batch 96, 40 steps per episode,
-50,000 episodes (2,000,000 steps), 10 updates per episode, learning rates by stage (critic 3e-4 / 1e-4 / 3e-5, actor 1e-3 / 3e-4 / 1e-4 at episodes 10,000 and 20,000), Adam,
-replay 800 x 40 transitions, 400 warm-up steps, no exploration noise, target networks share the batch-norm buffers of the online ones, canvas re-quantized to uint8 each step, horizontal-flip augmentation.
+50,000 episodes of 40 steps (`env_steps` = 40 per episode, 2,000,000 in total, as the official `train_times`), 10 updates per episode, learning rates by stage (critic 3e-4 / 1e-4 / 3e-5, actor 1e-3 / 3e-4 / 1e-4 at episodes 10,000 and 20,000), Adam,
+replay 800 x 40 transitions, 400 warm-up steps, no exploration noise, target networks share the batch-norm buffers of the online ones (a deviation from the official GPU run, item 7), canvas re-quantized to uint8 each step, horizontal-flip augmentation.
 **Data**: the Met CC0 subset of `docs/data_sources.md`. **Checkpoint rule**: the final checkpoint. **Cost and results**: `docs/experiments/l2p_training.md` (3 seeds, 28 h each).
 
 **Deviations from the official run:**
